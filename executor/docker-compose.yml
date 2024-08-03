@@ -1,0 +1,8 @@
+version: "3.8"
+
+services:
+  javascript-service:
+    build:
+      context: ./environments/javascript
+      dockerfile: Dockerfile
+    image: javascript-service

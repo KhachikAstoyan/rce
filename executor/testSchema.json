@@ -1,0 +1,22 @@
+{
+  "problem_id": "stringConcat",
+  "tests": [
+    {
+      "isPublic": true,
+      "inputs": {
+        "a": {
+          "type": "string",
+          "value": "hello"
+        },
+        "b": {
+          "type": "string",
+          "value": "world"
+        }
+      },
+      "expected": {
+        "type": "string",
+        "value": "hello world"
+      }
+    }
+  ]
+}
