@@ -33,7 +33,7 @@ func LoadConfig() Config {
 
 	err := godotenv.Load()
 	if err != nil {
-		log.Fatal("Error loading .env file")
+		log.Println("Failed to read .env file")
 	}
 
 	if err := envconfig.Process("", &config); err != nil {

@@ -1,4 +1,4 @@
-import { useRef, useState } from "react";
+import { useState } from "react";
 import { Button } from "@/components/shadcn/button";
 import { AdminLayout } from "./layout/AdminLayout";
 import { Input } from "@/components/shadcn/input";
@@ -36,8 +36,6 @@ import "@mdxeditor/editor/style.css";
 import { problemDifficultyOptions } from "@/lib/constants/problems";
 import { problemService } from "../services/problems";
 import { toast } from "sonner";
-import { editor } from "monaco-editor";
-import { OnMount } from "@monaco-editor/react";
 
 const simpleSandpackConfig: SandpackConfig = {
   defaultPreset: "react",
@@ -59,11 +57,6 @@ export const Dashboard = () => {
   const [description, setDescription] = useState("");
   const [difficulty, setDifficulty] = useState("");
   const [name, setName] = useState("");
-  const codeEditorRef = useRef<editor.IStandaloneCodeEditor>();
-  const handleCodeEditorMount: OnMount = (editor) => {
-    codeEditorRef.current = editor;
-    editor.focus();
-  };
 
   const handleSubmit = async () => {
     try {
