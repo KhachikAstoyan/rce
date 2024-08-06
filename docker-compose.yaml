@@ -7,20 +7,33 @@ services:
   api:
     build: ./api
     image: toyrce:api
+    restart: always
     env_file:
       - ./api/.env
+    environment:
+      - DB_HOST=host.docker.internal
     ports:
       - "8082:8082"
     depends_on:
       - db
+    healthcheck:
+      test: ["CMD-SHELL", "lsof", "-ti:8084"]
+      interval: 1m30s
+      timeout: 30s
+      retries: 5
+      start_period: 30s
   db:
     image: postgres:latest
     ports:
-      - "9090:5432"
+      - "8084:5432"
     environment:
-      POSTGRES_USER: postgres
       POSTGRES_PASSWORD: postgres
       POSTGRES_DB: quandry
+      POSTGRES_USER: postgres
     restart: always
     healthcheck:
       test: ["CMD-SHELL", "pg_isready -U $$POSTGRES_USER -d $$POSTGRES_DB"]
+      interval: 1m30s
+      timeout: 30s
+      retries: 5
+      start_period: 30s

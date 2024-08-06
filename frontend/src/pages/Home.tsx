@@ -14,7 +14,7 @@ export const Home = () => {
     queryFn: problemService.getProblems,
   });
 
-  if (isLoading || !data) {
+  if (isLoading) {
     return <div>Loading...</div>;
   }
 
@@ -22,12 +22,14 @@ export const Home = () => {
     return <div>Error</div>;
   }
 
+  const problems = data || [];
+
   return (
     <DefaultLayout>
       <Container>
         <h1>Problems</h1>
         <DataGrid
-          data={data}
+          data={problems}
           columns={[
             {
               accessorKey: "solved",

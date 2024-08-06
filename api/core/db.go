@@ -3,6 +3,7 @@ package core
 import (
 	"fmt"
 	"log"
+	"net"
 	"net/url"
 	"os"
 	"time"
@@ -24,6 +25,8 @@ func ConnectDB(conf *Config) *gorm.DB {
 			Colorful:                  true,        // Disable color
 		},
 	)
+
+	raw_connect(conf.DB.Host, []string{conf.DB.Port})
 
 	dsn := url.URL{
 		User:     url.UserPassword(conf.DB.Username, conf.DB.Password),
@@ -53,4 +56,18 @@ func ConnectDB(conf *Config) *gorm.DB {
 	)
 
 	return conn
+}
+
+func raw_connect(host string, ports []string) {
+	for _, port := range ports {
+		timeout := time.Second
+		conn, err := net.DialTimeout("tcp", net.JoinHostPort(host, port), timeout)
+		if err != nil {
+			fmt.Println("Connecting error:", err)
+		}
+		if conn != nil {
+			defer conn.Close()
+			fmt.Println("Opened", net.JoinHostPort(host, port))
+		}
+	}
 }

@@ -172,13 +172,18 @@ func (s *AuthService) AssignRoleToUser(userId, roleName string) error {
 	var role models.Role
 
 	if err := db.Where(models.User{ID: userId}).First(&user).Error; err != nil {
-		println("HERE")
-		println(err.Error())
 		return err
 	}
 
 	if err := db.Where("name = ?", roleName).First(&role).Error; err != nil {
-		return err
+
+		role := models.Role{
+			Name: roleName,
+		}
+
+		if err := db.Create(&role).Error; err != nil {
+			return err
+		}
 	}
 
 	return db.Model(&user).Association("Roles").Append(&role)
