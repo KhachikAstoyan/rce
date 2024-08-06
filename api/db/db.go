@@ -1,4 +1,4 @@
-package core
+package db
 
 import (
 	"fmt"
@@ -8,13 +8,14 @@ import (
 	"os"
 	"time"
 
+	"github.com/KhachikAstoyan/toy-rce-api/core"
 	"github.com/KhachikAstoyan/toy-rce-api/models"
 	"gorm.io/driver/postgres"
 	"gorm.io/gorm"
 	"gorm.io/gorm/logger"
 )
 
-func ConnectDB(conf *Config) *gorm.DB {
+func ConnectDB(conf *core.Config) *gorm.DB {
 	newLogger := logger.New(
 		log.New(os.Stdout, "\r\n", log.LstdFlags), // io writer
 		logger.Config{

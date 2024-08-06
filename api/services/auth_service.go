@@ -181,6 +181,8 @@ func (s *AuthService) AssignRoleToUser(userId, roleName string) error {
 			Name: roleName,
 		}
 
+		// create the user role in case it doesn't already exist
+		// or there was some error or something
 		if err := db.Create(&role).Error; err != nil {
 			return err
 		}

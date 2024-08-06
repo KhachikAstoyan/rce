@@ -5,11 +5,12 @@ import (
 
 	"github.com/KhachikAstoyan/toy-rce-api/apis"
 	"github.com/KhachikAstoyan/toy-rce-api/core"
+	"github.com/KhachikAstoyan/toy-rce-api/db"
 )
 
 func main() {
 	config := core.LoadConfig()
-	db := core.ConnectDB(&config)
+	db := db.ConnectDB(&config)
 
 	app := core.App{
 		DB:     db,

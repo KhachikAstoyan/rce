@@ -6,9 +6,9 @@ import (
 )
 
 type CreateProblemDto struct {
-	Name        string `json:"name"`
-	Description string `json:"description"`
-	Difficulty  string `json:"difficulty"`
+	Name        string `json:"name" validate:"required"`
+	Description string `json:"description" validate:"required"`
+	Difficulty  string `json:"difficulty" validate:"required"`
 }
 
 type ProblemResponse struct {
@@ -18,6 +18,6 @@ type ProblemResponse struct {
 }
 
 type CreateTestDto struct {
-	Language string `json:"language"`
-	TestCode string `json:"testCode"`
+	Language string `json:"language" validate:"required"`
+	TestCode string `json:"testCode" validate:"required"`
 }
