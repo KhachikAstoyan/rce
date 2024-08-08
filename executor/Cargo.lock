@@ -27,6 +27,31 @@ dependencies = [
 ]
 
 [[package]]
+name = "amqp_serde"
+version = "0.4.1"
+source = "registry+https://github.com/rust-lang/crates.io-index"
+checksum = "787581044ca08ad61cdb3a4e21afba087fb8cdba3bb3e23ce69a7d091808014d"
+dependencies = [
+ "bytes",
+ "serde",
+ "serde_bytes_ng",
+]
+
+[[package]]
+name = "amqprs"
+version = "1.7.0"
+source = "registry+https://github.com/rust-lang/crates.io-index"
+checksum = "d4173302f657e24f1b914edc992549077ec7f4971599e1aea42a01b17eb6e079"
+dependencies = [
+ "amqp_serde",
+ "async-trait",
+ "bytes",
+ "serde",
+ "serde_bytes",
+ "tokio",
+]
+
+[[package]]
 name = "android-tzdata"
 version = "0.1.1"
 source = "registry+https://github.com/rust-lang/crates.io-index"
@@ -276,6 +301,7 @@ dependencies = [
 name = "executor"
 version = "0.1.0"
 dependencies = [
+ "amqprs",
  "axum",
  "junit-parser",
  "log",
@@ -1239,6 +1265,24 @@ dependencies = [
  "chrono",
  "serde",
  "serde_json",
+]
+
+[[package]]
+name = "serde_bytes"
+version = "0.11.15"
+source = "registry+https://github.com/rust-lang/crates.io-index"
+checksum = "387cc504cb06bb40a96c8e04e951fe01854cf6bc921053c954e4a606d9675c6a"
+dependencies = [
+ "serde",
+]
+
+[[package]]
+name = "serde_bytes_ng"
+version = "0.1.2"
+source = "registry+https://github.com/rust-lang/crates.io-index"
+checksum = "bdb0ebce8684e2253f964e8b6ce51f0ccc6666bbb448fb4a6788088bda6544b6"
+dependencies = [
+ "serde",
 ]
 
 [[package]]
