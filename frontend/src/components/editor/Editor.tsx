@@ -34,7 +34,7 @@ export const Editor: React.FC<Props> = ({ problem }) => {
   });
 
   useEffect(() => {
-    if (submissionStatus?.status === "completed") {
+    if (submissionStatus) {
       setShouldFetchStatus(false);
       toast.success("Code execution completed");
     }
@@ -89,10 +89,12 @@ export const Editor: React.FC<Props> = ({ problem }) => {
               <Panel defaultSize={50}>
                 {isLoading && <div>Loading...</div>}
                 {submissionStatus && (
-                  <div>
+                  <ScrollArea className="max-w-full h-full">
                     <h2>Submission Status</h2>
-                    <pre>{JSON.stringify(submissionStatus, null, 2)}</pre>
-                  </div>
+                    <pre>
+                      {JSON.stringify(submissionStatus?.results, null, 2)}
+                    </pre>
+                  </ScrollArea>
                 )}
               </Panel>
             </PanelGroup>

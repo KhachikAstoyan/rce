@@ -33,6 +33,36 @@ interface TestSuiteResult {
   }[];
 }
 
+function parseValue(input: Value): any {
+  switch (input.type) {
+    case "string":
+      return input.value;
+    case "number":
+      return Number(input.value);
+    case "boolean":
+      return input.value === "true";
+    case "array":
+      return JSON.parse(input.value);
+    default:
+      throw new Error("Unknown type");
+  }
+}
+
+function compareValues(expected: Value, received: any): boolean {
+  switch (expected.type) {
+    case "string":
+      return received === expected.value;
+    case "number":
+      return received === Number(expected.value);
+    case "boolean":
+      return received === (expected.value === "true");
+    case "array":
+      return JSON.stringify(received) === expected.value;
+    default:
+      throw new Error("Unknown type");
+  }
+}
+
 function run() {
   const testSuiteResult: TestSuiteResult = {
     success: true,
@@ -52,14 +82,14 @@ function run() {
       const inputs = Object.values(test.inputs);
       const expected = test.expected.value;
 
-      const result = solution(...inputs.map((a) => a.value));
+      const result = solution(...inputs.map((a) => parseValue(a)));
 
       const testResult = {
-        success: result === expected,
+        success: compareValues(test.expected, result),
         assertionResults: [
           {
             expected,
-            received: result,
+            received: JSON.stringify(result) || "null",
           },
         ],
       };

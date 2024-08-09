@@ -75,12 +75,14 @@ func (api *submissionsApi) status(c echo.Context) error {
 		return echo.NewHTTPError(http.StatusNotFound, "submission not foudn")
 	}
 
+	fmt.Println("submissionID")
+	fmt.Println(submission.ID)
+
 	if submission.Status == "pending" || submission.Status == "" {
-		return c.JSON(http.StatusProcessing, dtos.PendingSubmissionResponse{
-			Status: "pending",
-		})
+		return c.NoContent(http.StatusNoContent)
 	}
 
+	fmt.Println("RETURNING")
 	return c.JSON(http.StatusOK, submission)
 }
 
@@ -100,7 +102,7 @@ func (api *submissionsApi) create(c echo.Context) error {
 		return echo.NewHTTPError(http.StatusNotFound, "problem not found")
 	}
 
-	if err := db.Where("language = ?", p.Language).First(&test).Error; err != nil {
+	if err := db.Where("language = ? AND problem_id = ?", p.Language, p.ProblemID).First(&test).Error; err != nil {
 		return echo.NewHTTPError(http.StatusNotFound, "language not supported")
 	}
 
