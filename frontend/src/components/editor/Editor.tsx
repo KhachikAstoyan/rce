@@ -5,13 +5,14 @@ import Markdown from "react-markdown";
 import { ScrollArea } from "@/components/shadcn/scroll-area";
 import { OnMount } from "@monaco-editor/react";
 import { editor } from "monaco-editor";
-import { useCallback, useRef } from "react";
+import { useCallback, useEffect, useRef, useState } from "react";
 import { CodeEditor } from "./CodeEditor";
 import { Prose } from "@/components/common/Prose";
 import { ResizeHandle } from "./ResizeHandle";
 import { toast } from "sonner";
 import { Button } from "@/components/shadcn/button";
 import { problemService } from "../../services/problems";
+import { useQuery } from "@tanstack/react-query";
 
 interface Props {
   problem: Problem;
@@ -23,6 +24,21 @@ export const Editor: React.FC<Props> = ({ problem }) => {
     codeEditorRef.current = editor;
     editor.focus();
   };
+  const [submissionId, setSubmissionId] = useState<string | null>(null);
+  const [shouldFetchStatus, setShouldFetchStatus] = useState(false);
+  const { data: submissionStatus, isLoading } = useQuery({
+    queryKey: ["submission", submissionId],
+    queryFn: () => problemService.getSubmissionStatus(submissionId!),
+    enabled: shouldFetchStatus,
+    refetchInterval: 1000,
+  });
+
+  useEffect(() => {
+    if (submissionStatus?.status === "completed") {
+      setShouldFetchStatus(false);
+      toast.success("Code execution completed");
+    }
+  }, [submissionStatus]);
 
   const runCode = useCallback(async () => {
     try {
@@ -37,6 +53,8 @@ export const Editor: React.FC<Props> = ({ problem }) => {
         code,
       );
 
+      setSubmissionId(res.data.id);
+      setShouldFetchStatus(true);
       toast.success("Code submission created");
       console.log(res);
     } catch (error) {
@@ -68,7 +86,15 @@ export const Editor: React.FC<Props> = ({ problem }) => {
                 </div>
               </Panel>
               <ResizeHandle direction="vertical" />
-              <Panel defaultSize={50}>Here should be the test results</Panel>
+              <Panel defaultSize={50}>
+                {isLoading && <div>Loading...</div>}
+                {submissionStatus && (
+                  <div>
+                    <h2>Submission Status</h2>
+                    <pre>{JSON.stringify(submissionStatus, null, 2)}</pre>
+                  </div>
+                )}
+              </Panel>
             </PanelGroup>
           </Panel>
         </PanelGroup>

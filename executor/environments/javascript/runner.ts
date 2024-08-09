@@ -21,6 +21,7 @@ interface TestSuite {
 
 interface TestSuiteResult {
   success: boolean;
+  message: string;
   passed: number;
   failed: number;
   testResults: {
@@ -33,44 +34,56 @@ interface TestSuiteResult {
 }
 
 function run() {
-  const args = process.argv.slice(2);
-  const testsPath = args[0];
-  const testSuite = JSON.parse(fs.readFileSync(testsPath, "utf8")) as TestSuite;
   const testSuiteResult: TestSuiteResult = {
     success: true,
+    message: "",
     passed: 0,
     failed: 0,
     testResults: [],
   };
+  try {
+    const args = process.argv.slice(2);
+    const testsPath = args[0];
+    const testSuite = JSON.parse(
+      fs.readFileSync(testsPath, "utf8")
+    ) as TestSuite;
 
-  testSuite.tests.forEach((test) => {
-    const inputs = Object.values(test.inputs);
-    const expected = test.expected.value;
+    testSuite.tests.forEach((test) => {
+      const inputs = Object.values(test.inputs);
+      const expected = test.expected.value;
 
-    const result = solution(...inputs.map((a) => a.value));
+      const result = solution(...inputs.map((a) => a.value));
 
-    const testResult = {
-      success: result === expected,
-      assertionResults: [
-        {
-          expected,
-          received: result,
-        },
-      ],
-    };
+      const testResult = {
+        success: result === expected,
+        assertionResults: [
+          {
+            expected,
+            received: result,
+          },
+        ],
+      };
 
-    if (testResult.success) {
-      testSuiteResult.passed++;
+      if (testResult.success) {
+        testSuiteResult.passed++;
+      } else {
+        testSuiteResult.failed++;
+      }
+
+      testSuiteResult.testResults.push(testResult);
+    });
+
+    testSuiteResult.success = testSuiteResult.failed === 0;
+  } catch (error) {
+    testSuiteResult.success = false;
+    if (error instanceof Error) {
+      testSuiteResult.message = error.message;
     } else {
-      testSuiteResult.failed++;
+      testSuiteResult.message = "Unknown error";
     }
-
-    testSuiteResult.testResults.push(testResult);
-  });
-
-  testSuiteResult.success = testSuiteResult.failed === 0;
-
-  fs.writeFileSync("test-results.json", JSON.stringify(testSuiteResult));
+  } finally {
+    fs.writeFileSync("test-results.json", JSON.stringify(testSuiteResult));
+  }
 }
 
 run();

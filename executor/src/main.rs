@@ -62,6 +62,7 @@ async fn main() {
                         continue;
                     }
                 };
+                let submission_id = data.submission_id.clone();
 
                 info!("Parsed the message body");
                 println!("Parsed the message body, starting code execution");
@@ -70,10 +71,11 @@ async fn main() {
                         .await;
 
                 match execution_result {
-                    Ok(result) => {
+                    Ok(mut result) => {
+                        result.submission_id = Some(submission_id.clone());
                         let json = match serde_json::to_string(&result) {
                             Ok(str) => str,
-                            Err(_) => SubmissionResult::error_json(),
+                            Err(_) => SubmissionResult::error_json(submission_id),
                         };
 
                         // TODO: improve error handling
@@ -84,7 +86,7 @@ async fn main() {
                     Err(_) => {
                         exchange
                             .publish(Publish::new(
-                                SubmissionResult::error_json().as_bytes(),
+                                SubmissionResult::error_json(submission_id).as_bytes(),
                                 "submission_results",
                             ))
                             .unwrap();

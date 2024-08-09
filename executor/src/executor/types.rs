@@ -8,19 +8,25 @@ use crate::language::Language;
 #[serde(rename_all = "camelCase")]
 pub struct SubmissionResult {
     pub success: bool,
+    pub submission_id: Option<String>,
+    pub message: String,
     pub passed: u32,
     pub failed: u32,
     pub test_results: Vec<TestResult>,
 }
 
 impl SubmissionResult {
-    pub fn error_json() -> String {
-        r#"{
+    pub fn error_json(submission_id: String) -> String {
+        format!(
+            r#"{{ // Add curly braces here
             "success": false,
+            "submission_id": {},
             "passed": 0,
             "failed": 0,
             "testResults": []
-        }"#
+        }}"#, // Add closing curly braces here
+            submission_id
+        )
         .to_string()
     }
 }

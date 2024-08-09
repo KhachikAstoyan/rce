@@ -1,6 +1,8 @@
 package apis
 
 import (
+	"encoding/json"
+	"fmt"
 	"log"
 	"net/http"
 
@@ -11,28 +13,43 @@ import (
 	"github.com/KhachikAstoyan/toy-rce-api/queue"
 	"github.com/KhachikAstoyan/toy-rce-api/services"
 	"github.com/KhachikAstoyan/toy-rce-api/services/executor"
+	"github.com/KhachikAstoyan/toy-rce-api/types"
 	"github.com/labstack/echo/v4"
 	amqp "github.com/rabbitmq/amqp091-go"
 )
 
 func bindSubmissionsApi(app *core.App, group *echo.Group) {
-	api := submissionsApi{app}
+	submissionService := services.InitSubmissionService(app)
 	authService := services.InitAuthService(app)
 	authorize := middleware.CreateAuthMiddleware(authService)
+
+	api := submissionsApi{app, submissionService}
 
 	subGroup := group.Group("/submissions")
 
 	subGroup.POST("", api.create, authorize())
 	subGroup.GET("/:id", api.status, authorize())
-	subGroup.POST("/:id", api.postSubmissionResult, authorize("write:submission"))
 	subGroup.DELETE("/:id", api.delete, authorize("write:submission"))
 
 	// listen to submission results
 
 	go func() {
 		err := queue.ConsumeQueue(queue.SubmissionResultsQueue, func(delivery amqp.Delivery) error {
+			payload := string(delivery.Body)
 			log.Println("Got a message boss")
-			log.Println(string(delivery.Body))
+			log.Println(payload)
+
+			var submissionResult types.SubmissionResult
+			if err := json.Unmarshal(delivery.Body, &submissionResult); err != nil {
+				return err
+			}
+
+			err := submissionService.SaveSubmissionResults(&submissionResult)
+
+			if err != nil {
+				return err
+			}
+
 			return nil
 		})
 
@@ -43,16 +60,18 @@ func bindSubmissionsApi(app *core.App, group *echo.Group) {
 }
 
 type submissionsApi struct {
-	app *core.App
+	app     *core.App
+	service *services.SubmissionService
 }
 
 func (api *submissionsApi) status(c echo.Context) error {
+	fmt.Println("YOU GOT THIS BABY")
 	db := api.app.DB
 
 	id := c.Param("id")
 	var submission models.Submission
 
-	if err := db.Where("id = ?", id).First(&submission).Error; err != nil {
+	if err := db.Select("id, created_at, updated_at, status, problem_id, user_id, solution, language, results").Where("id = ?", id).First(&submission).Error; err != nil {
 		return echo.NewHTTPError(http.StatusNotFound, "submission not foudn")
 	}
 
@@ -86,7 +105,7 @@ func (api *submissionsApi) create(c echo.Context) error {
 	}
 
 	submission := models.Submission{
-		Problem:  problem,
+		Problem:  &problem,
 		Solution: p.Solution,
 		Language: p.Language,
 		UserID:   c.Get("userId").(string),
@@ -106,37 +125,6 @@ func (api *submissionsApi) create(c echo.Context) error {
 	return c.JSON(http.StatusAccepted, dtos.CreateSubmissionResponse{
 		ID: submission.ID,
 	})
-}
-
-func (api *submissionsApi) postSubmissionResult(c echo.Context) error {
-	db := api.app.DB
-
-	id := c.Param("id")
-	p := new(dtos.PostSubmissionResultsDto)
-
-	if err := c.Bind(p); err != nil || id == "" {
-		return echo.NewHTTPError(http.StatusBadRequest, "couldn't parse request body")
-	}
-
-	var submission models.Submission
-
-	if err := db.Where("id = ?", id).First(&submission).Error; err != nil {
-		return echo.NewHTTPError(http.StatusNotFound, "submission not found")
-	}
-
-	submission.Results = p.Results
-
-	if p.Results.Success {
-		submission.Status = "completed"
-	} else {
-		submission.Status = "failed"
-	}
-
-	if err := db.Save(&submission).Error; err != nil {
-		return echo.NewHTTPError(http.StatusInternalServerError, "error saving submission results")
-	}
-
-	return c.NoContent(http.StatusOK)
 }
 
 func (api *submissionsApi) delete(c echo.Context) error {

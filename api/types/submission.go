@@ -7,10 +7,12 @@ import (
 )
 
 type SubmissionResult struct {
-	Success     bool         `json:"success"`
-	Passed      uint32       `json:"passed"`
-	Failed      uint32       `json:"failed"`
-	TestResults []TestResult `json:"testResults"`
+	SubmissionId string       `json:"submissionId"`
+	Success      bool         `json:"success"`
+	Message      string       `json:"message"`
+	Passed       uint32       `json:"passed"`
+	Failed       uint32       `json:"failed"`
+	TestResults  []TestResult `json:"testResults"`
 }
 
 type TestResult struct {

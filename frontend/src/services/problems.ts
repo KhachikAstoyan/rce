@@ -27,7 +27,7 @@ const createSubmission = async (
   language: Language,
   code: string,
 ) => {
-  const response = await api.post("/submissions", {
+  const response = await api.post<{ id: string }>("/submissions", {
     solution: code,
     language,
     problemId,
@@ -36,9 +36,15 @@ const createSubmission = async (
   return response;
 };
 
+const getSubmissionStatus = async (submissionId: string) => {
+  const response = await api.get(`/submissions/${submissionId}`);
+  return response.data;
+};
+
 export const problemService = {
   getProblems,
   createProblem,
+  getSubmissionStatus,
   getProblemDetails,
   createSubmission,
 };
