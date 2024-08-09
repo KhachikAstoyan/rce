@@ -1,5 +1,5 @@
 import { api } from "@/lib/api";
-import { Problem } from "@/lib/types";
+import { Language, Problem } from "@/lib/types";
 
 const getProblems = async () => {
   const response = await api.get<Problem[]>("/problems");
@@ -22,8 +22,23 @@ const getProblemDetails = async (id: string) => {
   return response.data;
 };
 
+const createSubmission = async (
+  problemId: string,
+  language: Language,
+  code: string,
+) => {
+  const response = await api.post("/submissions", {
+    solution: code,
+    language,
+    problemId,
+  });
+
+  return response;
+};
+
 export const problemService = {
   getProblems,
   createProblem,
   getProblemDetails,
+  createSubmission,
 };

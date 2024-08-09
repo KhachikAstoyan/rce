@@ -4,17 +4,39 @@ use serde::{Deserialize, Serialize};
 
 use crate::language::Language;
 
+#[derive(Serialize, Deserialize, Debug, Clone)]
+#[serde(rename_all = "camelCase")]
+pub struct SubmissionResult {
+    pub success: bool,
+    pub passed: u32,
+    pub failed: u32,
+    pub test_results: Vec<TestResult>,
+}
+
+impl SubmissionResult {
+    pub fn error_json() -> String {
+        r#"{
+            "success": false,
+            "passed": 0,
+            "failed": 0,
+            "testResults": []
+        }"#
+        .to_string()
+    }
+}
+
 #[derive(Deserialize)]
 #[serde(rename_all = "camelCase")]
-pub struct ExecuteRequestBody {
+pub struct ExecuteRequestPayload {
     pub submission_id: String,
     pub language: Language,
     pub solution: String,
-    pub tests: Tests,
+    pub tests: TestSuite,
 }
 
 #[derive(Serialize, Deserialize, Debug)]
-pub struct Tests {
+#[serde(rename_all = "camelCase")]
+pub struct TestSuite {
     pub problem_id: String,
     pub tests: Vec<Test>,
 }
@@ -37,23 +59,14 @@ pub struct ExecutionResultPayload {
     pub results: SubmissionResult,
 }
 
-#[derive(Serialize, Debug, Clone)]
-#[serde(rename_all = "camelCase")]
-pub struct SubmissionResult {
-    pub success: bool,
-    pub passed: u32,
-    pub failed: u32,
-    pub test_results: Vec<TestResult>,
-}
-
-#[derive(Serialize, Debug, Clone)]
+#[derive(Serialize, Deserialize, Debug, Clone)]
 #[serde(rename_all = "camelCase")]
 pub struct TestResult {
     pub success: bool,
     pub assertion_results: Vec<AssertionResult>,
 }
 
-#[derive(Serialize, Debug, Clone)]
+#[derive(Serialize, Deserialize, Debug, Clone)]
 #[serde(rename_all = "camelCase")]
 pub struct AssertionResult {
     pub expected: String,

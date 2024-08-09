@@ -1,18 +1,21 @@
 package executor
 
 import (
+	"fmt"
+
 	"github.com/KhachikAstoyan/toy-rce-api/models"
 	"github.com/KhachikAstoyan/toy-rce-api/queue"
+	"github.com/KhachikAstoyan/toy-rce-api/types"
 	"github.com/KhachikAstoyan/toy-rce-api/utils"
 )
 
 const DEV_EXECUTOR_JS string = "http://localhost:8000"
 
 type TestSubmissionPayload struct {
-	SubmissionID string `json:"submissionId" validate:"required"`
-	Language     string `json:"language" validate:"required"`
-	Solution     string `json:"solution" validate:"required"`
-	Tests        string `json:"testCode" validate:"required"`
+	SubmissionID string           `json:"submissionId" validate:"required"`
+	Language     string           `json:"language" validate:"required"`
+	Solution     string           `json:"solution" validate:"required"`
+	Tests        *types.TestSuite `json:"tests" validate:"required"`
 }
 
 func TestSubmissionDev(submission *models.Submission, test *models.Test) error {
@@ -20,7 +23,7 @@ func TestSubmissionDev(submission *models.Submission, test *models.Test) error {
 		SubmissionID: submission.ID,
 		Language:     submission.Language,
 		Solution:     submission.Solution,
-		Tests:        test.TestCode,
+		Tests:        test.TestSuite,
 	}
 
 	err := utils.ValidateStruct(payload)
@@ -30,6 +33,7 @@ func TestSubmissionDev(submission *models.Submission, test *models.Test) error {
 	}
 
 	err = queue.SendMessage(queue.SubmissionsQueue, payload)
+	fmt.Println("Sent to queue")
 
 	if err != nil {
 		return err

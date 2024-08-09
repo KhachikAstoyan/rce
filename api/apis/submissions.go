@@ -1,15 +1,18 @@
 package apis
 
 import (
+	"log"
 	"net/http"
 
 	"github.com/KhachikAstoyan/toy-rce-api/core"
 	"github.com/KhachikAstoyan/toy-rce-api/dtos"
 	"github.com/KhachikAstoyan/toy-rce-api/middleware"
 	"github.com/KhachikAstoyan/toy-rce-api/models"
+	"github.com/KhachikAstoyan/toy-rce-api/queue"
 	"github.com/KhachikAstoyan/toy-rce-api/services"
 	"github.com/KhachikAstoyan/toy-rce-api/services/executor"
 	"github.com/labstack/echo/v4"
+	amqp "github.com/rabbitmq/amqp091-go"
 )
 
 func bindSubmissionsApi(app *core.App, group *echo.Group) {
@@ -24,6 +27,19 @@ func bindSubmissionsApi(app *core.App, group *echo.Group) {
 	subGroup.POST("/:id", api.postSubmissionResult, authorize("write:submission"))
 	subGroup.DELETE("/:id", api.delete, authorize("write:submission"))
 
+	// listen to submission results
+
+	go func() {
+		err := queue.ConsumeQueue(queue.SubmissionResultsQueue, func(delivery amqp.Delivery) error {
+			log.Println("Got a message boss")
+			log.Println(string(delivery.Body))
+			return nil
+		})
+
+		if err != nil {
+			log.Fatal(err)
+		}
+	}()
 }
 
 type submissionsApi struct {

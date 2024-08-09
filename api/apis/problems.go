@@ -27,6 +27,8 @@ func bindProblemsApi(app *core.App, group *echo.Group) {
 	subGroup.GET("/:id/submissions", api.listSubmissions, authorize())
 	subGroup.GET("/:id/tests", api.getTests, authorize("read:test"))
 	subGroup.POST("/:id/tests", api.addTest, authorize("write:test"))
+	// TODO: create another controller for this
+	subGroup.DELETE("/tests/:id", api.deleteTest, authorize("write:test"))
 }
 
 type problemsApi struct {
@@ -116,6 +118,8 @@ func (api *problemsApi) addTest(c echo.Context) error {
 		return echo.NewHTTPError(http.StatusBadRequest, "couldn't parse request body")
 	}
 
+	c.Logger().Print(t)
+
 	if err := api.service.AddTestToProblem(id, t); err != nil {
 		return err
 	}
@@ -127,6 +131,16 @@ func (api *problemsApi) delete(c echo.Context) error {
 	id := c.Param("id")
 
 	if err := api.service.DeleteProblem(id); err != nil {
+		return err
+	}
+
+	return c.NoContent(http.StatusOK)
+}
+
+func (api *problemsApi) deleteTest(c echo.Context) error {
+	id := c.Param("id")
+
+	if err := api.service.DeleteTestSuite(id); err != nil {
 		return err
 	}
 

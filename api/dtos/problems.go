@@ -2,6 +2,7 @@ package dtos
 
 import (
 	"github.com/KhachikAstoyan/toy-rce-api/models"
+	"github.com/KhachikAstoyan/toy-rce-api/types"
 	"github.com/lib/pq"
 )
 
@@ -18,6 +19,6 @@ type ProblemResponse struct {
 }
 
 type CreateTestDto struct {
-	Language string `json:"language" validate:"required"`
-	TestCode string `json:"testCode" validate:"required"`
+	Language string          `json:"language" validate:"required"`
+	Tests    types.TestSuite `json:"tests" validate:"required"`
 }

@@ -20,5 +20,6 @@ cat $USER_CODE_FILE >> temp.js
 echo "" >> temp.js
 cat $TEMPLATE_FILE >> temp.js
 
-cat temp.js
 node temp.js $TEST_DATA_FILE
+
+cat test-results.json

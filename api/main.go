@@ -14,6 +14,14 @@ func main() {
 	db := db.ConnectDB(&config)
 	_, err := queue.GetMQConnection(&config)
 
+	defer queue.CloseConnection()
+
+	if err != nil {
+		log.Fatal(err)
+	}
+
+	err = queue.InitializeQueues()
+
 	if err != nil {
 		log.Fatal(err)
 	}

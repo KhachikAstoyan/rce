@@ -34,21 +34,21 @@ func (s *ProblemService) GetProblems(page, pageSize int, userId interface{}) ([]
 	var problems []dtos.ProblemResponse
 	// result := db.Scopes(utils.Paginate(&c)).Omit("Tests").Find(&problems)
 	query := `
-		SELECT 
+		SELECT
 			p.*,
 			ARRAY_AGG(DISTINCT t.language) FILTER (WHERE t.language IS NOT NULL AND t.language != '') as supported_languages,
 			EXISTS (
-				SELECT 1 
-				FROM submissions s 
-				WHERE s.problem_id = p.id 
-				AND s.user_id = $1 
+				SELECT 1
+				FROM submissions s
+				WHERE s.problem_id = p.id
+				AND s.user_id = $1
 				AND s.status = 'completed'
 			) as solved
-		FROM 
+		FROM
 			problems p
-		LEFT JOIN 
+		LEFT JOIN
 			tests t ON t.problem_id = p.id
-		GROUP BY 
+		GROUP BY
 			p.id
 		ORDER BY created_at DESC
 	`
@@ -172,8 +172,8 @@ func (s *ProblemService) AddTestToProblem(id string, t *dtos.CreateTestDto) erro
 	}
 
 	problem.Tests = append(problem.Tests, models.Test{
-		Language: t.Language,
-		TestCode: t.TestCode,
+		Language:  t.Language,
+		TestSuite: &t.Tests,
 	})
 
 	if err := db.Save(&problem).Error; err != nil {
@@ -198,6 +198,21 @@ func (s *ProblemService) DeleteProblem(id string) error {
 
 	if result.Error != nil {
 		return echo.NewHTTPError(http.StatusInternalServerError, "error deleting the problem")
+	}
+
+	return nil
+}
+
+func (s *ProblemService) DeleteTestSuite(id string) error {
+	db := s.app.DB
+
+	var testSuite models.Test
+	if err := db.Where("id = ?", id).First(&testSuite).Error; err != nil {
+		return echo.NewHTTPError(http.StatusNotFound, "test not found")
+	}
+
+	if err := db.Delete(&testSuite).Error; err != nil {
+		return echo.NewHTTPError(http.StatusInternalServerError, "something went wrong")
 	}
 
 	return nil

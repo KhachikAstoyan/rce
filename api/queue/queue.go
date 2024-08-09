@@ -6,12 +6,13 @@ import (
 	"sync"
 
 	"github.com/KhachikAstoyan/toy-rce-api/core"
-	ampq "github.com/rabbitmq/amqp091-go"
+	"github.com/labstack/gommon/log"
+	amqp "github.com/rabbitmq/amqp091-go"
 )
 
 type RabbitMQConnection struct {
-	conn    *ampq.Connection
-	channel *ampq.Channel
+	conn    *amqp.Connection
+	channel *amqp.Channel
 }
 
 var (
@@ -21,8 +22,14 @@ var (
 )
 
 const (
-	SubmissionsQueue = "submissions"
+	SubmissionsQueue       = "submissions"
+	SubmissionResultsQueue = "submission_results"
 )
+
+func CloseConnection() {
+	mqConn.channel.Close()
+	mqConn.conn.Close()
+}
 
 func GetMQConnection(config *core.Config) (*RabbitMQConnection, error) {
 	var connErr error
@@ -37,7 +44,7 @@ func GetMQConnection(config *core.Config) (*RabbitMQConnection, error) {
 			config.Queue.Port,
 		)
 
-		conn, err := ampq.Dial(url)
+		conn, err := amqp.Dial(url)
 
 		if err != nil {
 			connErr = err
@@ -64,15 +71,9 @@ func GetMQConnection(config *core.Config) (*RabbitMQConnection, error) {
 	return mqConn, nil
 }
 
-func SendMessage(queueName string, message interface{}) error {
-	conn, err := GetMQConnection(mqConfig)
-
-	if err != nil {
-		return err
-	}
-
-	_, err = conn.channel.QueueDeclare(
-		queueName,
+func InitializeQueues() error {
+	_, err := mqConn.channel.QueueDeclare(
+		SubmissionsQueue,
 		true,
 		false,
 		false,
@@ -84,13 +85,36 @@ func SendMessage(queueName string, message interface{}) error {
 		return err
 	}
 
+	_, err = mqConn.channel.QueueDeclare(
+		SubmissionResultsQueue,
+		true,
+		false,
+		false,
+		false,
+		nil,
+	)
+
+	if err != nil {
+		return err
+	}
+
+	return nil
+}
+
+func SendMessage(queueName string, message interface{}) error {
+	conn, err := GetMQConnection(mqConfig)
+
+	if err != nil {
+		return err
+	}
+
 	messageBytes, err := json.Marshal(message)
 
 	if err != nil {
 		return err
 	}
 
-	err = conn.channel.Publish("", queueName, true, false, ampq.Publishing{
+	err = conn.channel.Publish("", queueName, true, false, amqp.Publishing{
 		ContentType: "application/json",
 		Body:        messageBytes,
 	})
@@ -98,6 +122,42 @@ func SendMessage(queueName string, message interface{}) error {
 	if err != nil {
 		return err
 	}
+
+	return nil
+}
+
+type MessageHandlerFunc func(delivery amqp.Delivery) error
+
+func ConsumeQueue(queueName string, messageHandler MessageHandlerFunc) error {
+	msgs, err := mqConn.channel.Consume(
+		queueName,
+		"submissionResultsConsumer",
+		true,
+		false,
+		false,
+		false,
+		nil,
+	)
+
+	if err != nil {
+		return err
+	}
+
+	forever := make(chan bool)
+
+	go func() {
+		for d := range msgs {
+			err := messageHandler(d)
+
+			if err != nil {
+				fmt.Println("Oops, something went wrong")
+				fmt.Println(err.Error())
+			}
+		}
+	}()
+
+	log.Printf("[*] Waiting for messages")
+	<-forever
 
 	return nil
 }

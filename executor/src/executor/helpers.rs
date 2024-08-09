@@ -1,13 +1,13 @@
 use crate::executor::types::SubmissionResult;
 use crate::language::Language;
 use log::info;
-use std::str;
 use std::sync::Arc;
+use std::{error, str};
 use std::{io, path::PathBuf, process::Output, time::Duration};
 use tokio::time::timeout;
 use tokio::{fs, process::Command};
 
-use super::types::Tests;
+use super::types::TestSuite;
 
 const INPUTS_DIR: &str = "/app/inputs";
 const SUBMISSIONS_DIR: &str = "/app/submissions";
@@ -15,8 +15,8 @@ const SUBMISSIONS_DIR: &str = "/app/submissions";
 pub async fn test_solution(
     lang: Language,
     code: String,
-    tests: Tests,
-) -> Result<SubmissionResult, io::Error> {
+    tests: TestSuite,
+) -> Result<SubmissionResult, Box<dyn error::Error>> {
     info!("Testing solution {:?}", tests.problem_id);
 
     let json = serde_json::to_string(&tests)?;
@@ -25,12 +25,13 @@ pub async fn test_solution(
     info!("Formed paths for host and container");
 
     let container_output = run_docker_container(Arc::clone(&paths), &lang).await?;
+    let stdout = str::from_utf8(&container_output.stdout).unwrap_or_default();
 
     info!("Finished running docker container");
     info!(
         target: "docker:stdout",
         "{:?}",
-        str::from_utf8(&container_output.stdout).unwrap_or_default()
+        stdout
     );
     info!(
         target: "docker:stderr",
@@ -38,12 +39,9 @@ pub async fn test_solution(
         str::from_utf8(&container_output.stderr).unwrap_or_default()
     );
 
-    return Ok(SubmissionResult {
-        failed: 3,
-        passed: 0,
-        success: false,
-        test_results: vec![],
-    });
+    let submission_results: SubmissionResult = serde_json::from_str(&stdout)?;
+
+    return Ok(submission_results);
 }
 
 async fn run_docker_container(paths: Arc<FilePaths>, lang: &Language) -> Result<Output, io::Error> {

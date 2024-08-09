@@ -25,3 +25,7 @@ export interface Problem {
   supportedLanguages: string[];
   solved: boolean;
 }
+
+export enum Language {
+  JavaScript = "javascript",
+}

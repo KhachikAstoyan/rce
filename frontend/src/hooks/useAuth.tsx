@@ -3,7 +3,7 @@ import { useAtom } from "jotai";
 import { useCallback, useEffect } from "react";
 import { authService } from "@/services/auth";
 
-export function useAuth() {
+export function useAuth(fetchProfile: boolean = false) {
   const [auth, setAuth] = useAtom(authAtom);
   const isLoggedIn = auth.user !== null;
 
@@ -27,10 +27,12 @@ export function useAuth() {
           history.replaceState({}, document.title, window.location.pathname);
         });
       }
-      
-      getUserProfile();
+
+      if (fetchProfile) {
+        getUserProfile();
+      }
     }
-  }, []);
+  }, [auth.user, fetchProfile, getUserProfile]);
 
   const logOut = useCallback(async () => {
     try {

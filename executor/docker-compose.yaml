@@ -1,0 +1,8 @@
+version: "3.8"
+
+services:
+  javascript:
+    build:
+      context: ./environments/javascript
+      dockerfile: Dockerfile
+    image: toyrce:javascript

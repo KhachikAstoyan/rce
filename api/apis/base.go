@@ -22,9 +22,9 @@ func InitApi(app *core.App) (*echo.Echo, error) {
 	api.Use(customMiddleware.ExtractTokenMiddleware(services.InitAuthService(app)))
 
 	bindProblemsApi(app, api)
-	bindSubmissionsApi(app, api)
 	bindAuthApi(app, api)
 	bindUsersApi(app, api)
+	bindSubmissionsApi(app, api)
 
 	return e, nil
 }

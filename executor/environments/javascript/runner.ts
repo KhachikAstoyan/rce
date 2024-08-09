@@ -19,14 +19,58 @@ interface TestSuite {
   }[];
 }
 
+interface TestSuiteResult {
+  success: boolean;
+  passed: number;
+  failed: number;
+  testResults: {
+    success: boolean;
+    assertionResults: {
+      expected: any;
+      received: any;
+    }[];
+  }[];
+}
+
 function run() {
   const args = process.argv.slice(2);
   const testsPath = args[0];
-  const inputs = JSON.parse(fs.readFileSync(testsPath, "utf8")) as TestSuite;
+  const testSuite = JSON.parse(fs.readFileSync(testsPath, "utf8")) as TestSuite;
+  const testSuiteResult: TestSuiteResult = {
+    success: true,
+    passed: 0,
+    failed: 0,
+    testResults: [],
+  };
 
-  const result = solution(...Object.values(inputs).map((a) => a.value));
+  testSuite.tests.forEach((test) => {
+    const inputs = Object.values(test.inputs);
+    const expected = test.expected.value;
 
-  console.log(JSON.stringify({ result }));
+    const result = solution(...inputs.map((a) => a.value));
+
+    const testResult = {
+      success: result === expected,
+      assertionResults: [
+        {
+          expected,
+          received: result,
+        },
+      ],
+    };
+
+    if (testResult.success) {
+      testSuiteResult.passed++;
+    } else {
+      testSuiteResult.failed++;
+    }
+
+    testSuiteResult.testResults.push(testResult);
+  });
+
+  testSuiteResult.success = testSuiteResult.failed === 0;
+
+  fs.writeFileSync("test-results.json", JSON.stringify(testSuiteResult));
 }
 
 run();

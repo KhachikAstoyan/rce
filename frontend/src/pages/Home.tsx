@@ -9,17 +9,13 @@ import { ProblemStatus } from "@/components/problem/ProblemStatus";
 import { DefaultLayout } from "@/layouts/DefaultLayout";
 
 export const Home = () => {
-  const { data, isLoading, isError } = useQuery({
+  const { data, isLoading } = useQuery({
     queryKey: ["problems"],
     queryFn: problemService.getProblems,
   });
 
   if (isLoading) {
     return <div>Loading...</div>;
-  }
-
-  if (isError) {
-    return <div>Error</div>;
   }
 
   const problems = data || [];
