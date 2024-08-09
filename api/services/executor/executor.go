@@ -1,58 +1,58 @@
 package executor
 
 import (
-	"bytes"
-	"encoding/json"
-	"net/http"
-
 	"github.com/KhachikAstoyan/toy-rce-api/models"
+	"github.com/KhachikAstoyan/toy-rce-api/queue"
+	"github.com/KhachikAstoyan/toy-rce-api/utils"
 )
 
 const DEV_EXECUTOR_JS string = "http://localhost:8000"
 
-type TestSubmissionAttributes struct {
-	SubmissionID string `json:"submissionId"`
-	Language     string `json:"language"`
-	Solution     string `json:"solution"`
-	TestCode     string `json:"testCode"`
-}
-
 type TestSubmissionPayload struct {
-	Attributes TestSubmissionAttributes `json:"attributes"`
+	SubmissionID string `json:"submissionId" validate:"required"`
+	Language     string `json:"language" validate:"required"`
+	Solution     string `json:"solution" validate:"required"`
+	Tests        string `json:"testCode" validate:"required"`
 }
 
-func TestSubmissionDev(submission *models.Submission, test *models.Test) (*http.Response, error) {
+func TestSubmissionDev(submission *models.Submission, test *models.Test) error {
 	payload := TestSubmissionPayload{
-		Attributes: TestSubmissionAttributes{
-			SubmissionID: submission.ID,
-			Language:     submission.Language,
-			Solution:     submission.Solution,
-			TestCode:     test.TestCode,
-		},
+		SubmissionID: submission.ID,
+		Language:     submission.Language,
+		Solution:     submission.Solution,
+		Tests:        test.TestCode,
 	}
 
-	jsonPayload, err := json.Marshal(payload)
+	err := utils.ValidateStruct(payload)
 
 	if err != nil {
-		return nil, err
+		return err
 	}
 
-	req, err := http.NewRequest("POST", DEV_EXECUTOR_JS, bytes.NewBuffer(jsonPayload))
+	err = queue.SendMessage(queue.SubmissionsQueue, payload)
 
 	if err != nil {
-		return nil, err
+		return err
 	}
 
-	req.Header.Set("Content-Type", "application/json")
+	return nil
 
-	client := &http.Client{}
-	resp, err := client.Do(req)
+	// req, err := http.NewRequest("POST", DEV_EXECUTOR_JS, bytes.NewBuffer(jsonPayload))
 
-	if err != nil {
-		return nil, err
-	}
+	// if err != nil {
+	// 	return nil, err
+	// }
 
-	defer resp.Body.Close()
+	// req.Header.Set("Content-Type", "application/json")
 
-	return resp, nil
+	// client := &http.Client{}
+	// resp, err := client.Do(req)
+
+	// if err != nil {
+	// 	return nil, err
+	// }
+
+	// defer resp.Body.Close()
+
+	// return resp, nil
 }

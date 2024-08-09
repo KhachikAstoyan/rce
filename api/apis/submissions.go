@@ -81,9 +81,9 @@ func (api *submissionsApi) create(c echo.Context) error {
 		return echo.NewHTTPError(http.StatusInternalServerError, "couldn't create submission")
 	}
 
-	resp, err := executor.TestSubmissionDev(&submission, &test)
+	err := executor.TestSubmissionDev(&submission, &test)
 
-	if err != nil || resp.StatusCode >= 400 {
+	if err != nil {
 		return echo.NewHTTPError(http.StatusServiceUnavailable, "code execution failed")
 	}
 

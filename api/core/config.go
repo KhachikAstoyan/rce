@@ -15,6 +15,12 @@ type Config struct {
 		Name     string `envconfig:"DB_NAME" required:"true"`
 		Port     string `envconfig:"DB_PORT" required:"true"`
 	}
+	Queue struct {
+		Host     string `envconfig:"QUEUE_HOST" required:"true"`
+		Port     string `envconfig:"QUEUE_PORT" required:"true"`
+		User     string `envconfig:"QUEUE_USER" required:"true"`
+		Password string `envconfig:"QUEUE_PASSWORD" required:"true"`
+	}
 	ServerURL      string `envconfig:"SERVER_URL"`
 	Domain         string `envConfig:"SERVER_DOMAIN"`
 	ClientURL      string `envconfig:"CLIENT_URL" required:"true"`
