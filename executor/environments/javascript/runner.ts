@@ -3,7 +3,7 @@
 import fs from "fs";
 
 declare global {
-  function solution(...args: any[]): any;
+  function solution(args: Record<string, Value>): any;
 }
 
 interface Value {
@@ -79,10 +79,13 @@ function run() {
     ) as TestSuite;
 
     testSuite.tests.forEach((test) => {
-      const inputs = Object.values(test.inputs);
       const expected = test.expected.value;
 
-      const result = solution(...inputs.map((a) => parseValue(a)));
+      Object.entries(test.inputs).map(([key, value]) => {
+        test.inputs[key] = parseValue(value);
+      });
+
+      const result = solution(test.inputs);
 
       const testResult = {
         success: compareValues(test.expected, result),

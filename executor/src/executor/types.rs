@@ -24,7 +24,7 @@ impl SubmissionResult {
             "passed": 0,
             "failed": 0,
             "testResults": []
-        }}"#, // Add closing curly braces here
+        }}"#,
             submission_id
         )
         .to_string()
@@ -37,6 +37,7 @@ pub struct ExecuteRequestPayload {
     pub submission_id: String,
     pub language: Language,
     pub solution: String,
+    pub skeleton: String,
     pub tests: TestSuite,
 }
 
