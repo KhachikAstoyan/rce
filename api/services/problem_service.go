@@ -171,9 +171,14 @@ func (s *ProblemService) AddTestToProblem(id string, t *dtos.CreateTestDto) erro
 		return echo.NewHTTPError(http.StatusNotFound, "problem not found")
 	}
 
+	if err := utils.ValidateStruct(t); err != nil {
+		return echo.NewHTTPError(http.StatusUnprocessableEntity, err.Error())
+	}
+
 	problem.Tests = append(problem.Tests, models.Test{
 		Language:  t.Language,
 		TestSuite: &t.Tests,
+		Skeleton:  t.Skeleton,
 	})
 
 	if err := db.Save(&problem).Error; err != nil {

@@ -29,3 +29,19 @@ export interface Problem {
 export enum Language {
   JavaScript = "javascript",
 }
+
+export interface ITestSuite {
+  problemId: string;
+  tests: ITestCase[];
+}
+
+export interface ITestCase {
+  isPublic: boolean;
+  inputs: Record<string, IValue>;
+  expected: IValue;
+}
+
+interface IValue {
+  type: string;
+  value: string;
+}

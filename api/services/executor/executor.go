@@ -16,19 +16,24 @@ type TestSubmissionPayload struct {
 	Language     string           `json:"language" validate:"required"`
 	Solution     string           `json:"solution" validate:"required"`
 	Tests        *types.TestSuite `json:"tests" validate:"required"`
+	Skeleton     string           `json:"skeleton" validate:"required"`
 }
 
 func TestSubmissionDev(submission *models.Submission, test *models.Test) error {
+	test.TestSuite.ProblemId = submission.ProblemID
 	payload := TestSubmissionPayload{
 		SubmissionID: submission.ID,
 		Language:     submission.Language,
 		Solution:     submission.Solution,
 		Tests:        test.TestSuite,
+		Skeleton:     test.Skeleton,
 	}
 
 	err := utils.ValidateStruct(payload)
 
 	if err != nil {
+		fmt.Println("HERE")
+		fmt.Println(err.Error())
 		return err
 	}
 

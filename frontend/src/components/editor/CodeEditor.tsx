@@ -22,7 +22,6 @@ export const CodeEditor: React.FC<React.ComponentProps<typeof Editor>> = (
       {...props}
       height="100%"
       defaultLanguage="javascript"
-      defaultValue="// some comment"
       theme={theme === "light" ? "vs-light" : "myDark"}
       options={{
         fontSize: 16,

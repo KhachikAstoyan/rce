@@ -80,7 +80,7 @@ export const Editor: React.FC<Props> = ({ problem }) => {
             <PanelGroup direction="vertical">
               <Panel defaultSize={50} className="relative">
                 <CodeEditor onMount={handleCodeEditorMount} />
-                <div className="absolute bottom-3 right-3">
+                <div className="absolute bottom-3 right-3 flex gap-3">
                   <Button onClick={runCode}>Run</Button>
                   <Button variant="secondary">Submit</Button>
                 </div>
