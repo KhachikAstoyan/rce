@@ -1,7 +1,7 @@
 #!/bin/bash
 
 # Check if all required arguments are provided
-if [ "$#" -ne 3 ]; then
+if [ "$#" -ne 4 ]; then
     echo "Usage: $0 <template_file> <skeleton_file> <user_code_file> <test_data_file>"
     exit 1
 fi

@@ -19,7 +19,9 @@ pub async fn test_solution(
     skeleton: String,
     tests: TestSuite,
 ) -> Result<SubmissionResult, Box<dyn error::Error>> {
-    info!("Testing solution {:?}", tests.problem_id);
+    info!("Testing solution {:?}", tests);
+    info!(target: "solution", "solution {}", code);
+    info!(target: "skeleton", "skeleton {}", skeleton);
     info!("Tests {:?}", tests);
 
     let json = serde_json::to_string(&tests)?;
@@ -125,11 +127,15 @@ async fn get_file_paths(
     submission_container_path.set_extension(lang.get_extension());
 
     let mut skeleton_host_path = std::env::temp_dir();
+    skeleton_host_path.push("skeletons");
+
+    fs::create_dir_all(&skeleton_host_path).await?;
+
     skeleton_host_path.push(format!("{}.skeleton", &problem_id));
     skeleton_host_path.set_extension(lang.get_extension());
 
     let mut skeleton_container_path = PathBuf::from(SKELETONS_DIR);
-    skeleton_container_path.push(&problem_id);
+    skeleton_container_path.push(format!("{}.submission", problem_id));
     skeleton_container_path.set_extension(lang.get_extension());
 
     info!(
