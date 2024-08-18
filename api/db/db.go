@@ -52,6 +52,7 @@ func ConnectDB(conf *core.Config) *gorm.DB {
 		&models.RefreshToken{},
 		&models.Permission{},
 		&models.Role{},
+		&models.Skeleton{},
 	)
 
 	return conn

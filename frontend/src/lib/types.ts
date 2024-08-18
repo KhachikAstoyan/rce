@@ -26,6 +26,14 @@ export interface Problem {
   solved: boolean;
 }
 
+export interface ITest {
+  id: string;
+  createdAt: string;
+  updatedAt: string;
+  language: Language;
+  testSuite: ITestSuite;
+}
+
 export enum Language {
   JavaScript = "javascript",
 }

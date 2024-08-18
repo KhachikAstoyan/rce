@@ -88,40 +88,32 @@ func (s *ProblemService) GetProblemByID(id string) (*models.Problem, error) {
 }
 
 // TODO: find a use case for this man
-func (s *ProblemService) GetAllTests(id string, lang string, c *echo.Context) ([]models.Test, error) {
+func (s *ProblemService) GetAllTests(id string, c *echo.Context) (*models.Test, error) {
 	db := s.app.DB
 
-	query := db.Scopes(utils.Paginate(c)).Where("problem_id = ?", id).Omit("Skeleton")
-	var tests []models.Test
-	var err error
+	var test models.Test
 
-	if lang == "" {
-		err = query.Find(&tests).Error
-	} else {
-		err = query.Where("language = ?", lang).Find(&tests).Error
-	}
+	err := db.Scopes(utils.Paginate(c)).Where("problem_id = ?", id).Omit("Skeleton").First(&test).Error
 
 	if err != nil {
 		return nil, echo.NewHTTPError(http.StatusNotFound, "couldnt find tests for this problem")
 	}
 
-	return tests, nil
+	return &test, nil
 }
 
-func (s *ProblemService) GetPublicTests(id string, lang string, c *echo.Context) ([]models.Test, error) {
-	tests, err := s.GetAllTests(id, lang, c)
+func (s *ProblemService) GetPublicTests(id string, c *echo.Context) (*models.Test, error) {
+	test, err := s.GetAllTests(id, c)
 
 	if err != nil {
 		return nil, err
 	}
 
-	for i := 0; i < len(tests); i++ {
-		tests[i].TestSuite.Tests = slices.DeleteFunc(tests[i].TestSuite.Tests, func(test types.Test) bool {
-			return test.IsPublic == nil || !(*test.IsPublic)
-		})
-	}
+	test.TestSuite.Tests = slices.DeleteFunc(test.TestSuite.Tests, func(test types.Test) bool {
+		return test.IsPublic == nil || !(*test.IsPublic)
+	})
 
-	return tests, nil
+	return test, nil
 }
 
 func (s *ProblemService) CreateProblem(p *dtos.CreateProblemDto) (*models.Problem, error) {
@@ -180,31 +172,53 @@ func (s *ProblemService) UpdateProblem(id string, p *dtos.CreateProblemDto) (*mo
 
 }
 
-func (s *ProblemService) AddTestToProblem(id string, t *dtos.CreateTestDto) error {
+func (s *ProblemService) AddSkeletonToTest(id string, t *dtos.CreateSkeletonDto) error {
 	db := s.app.DB
 
-	var problem models.Problem
-	err := db.Where("id = ?", id).First(&problem).Error
+	var test models.Test
+	err := db.Where("id = ?", id).First(&test).Error
 
 	if err != nil {
-		return echo.NewHTTPError(http.StatusNotFound, "problem not found")
+		return echo.NewHTTPError(http.StatusNotFound, "test not found")
 	}
 
 	if err := utils.ValidateStruct(t); err != nil {
 		return echo.NewHTTPError(http.StatusUnprocessableEntity, err.Error())
 	}
 
-	problem.Tests = append(problem.Tests, models.Test{
-		Language:  t.Language,
-		TestSuite: &t.Tests,
-		Skeleton:  t.Skeleton,
+	test.Skeletons = append(test.Skeletons, models.Skeleton{
+		Language: t.Language,
+		Skeleton: t.Skeleton,
 	})
 
-	if err := db.Save(&problem).Error; err != nil {
+	if err := db.Save(&test).Error; err != nil {
 		return echo.NewHTTPError(http.StatusInternalServerError, err)
 	}
 
 	return nil
+}
+
+func (s *ProblemService) AddTestToProblem(id string, t *dtos.CreateTestDto) (*models.Test, error) {
+	db := s.app.DB
+
+	var problem models.Problem
+	err := db.Where("id = ?", id).First(&problem).Error
+
+	if err != nil {
+		return nil, echo.NewHTTPError(http.StatusNotFound, "problem not found")
+	}
+
+	if err := utils.ValidateStruct(t); err != nil {
+		return nil, echo.NewHTTPError(http.StatusUnprocessableEntity, err.Error())
+	}
+
+	test := models.Test{TestSuite: &t.Tests, ProblemID: id}
+
+	if err := db.Create(&test).Error; err != nil {
+		return nil, echo.NewHTTPError(http.StatusInternalServerError, err)
+	}
+
+	return &test, nil
 }
 
 func (s *ProblemService) DeleteProblem(id string) error {

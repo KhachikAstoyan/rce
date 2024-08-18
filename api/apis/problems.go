@@ -29,6 +29,7 @@ func bindProblemsApi(app *core.App, group *echo.Group) {
 	subGroup.GET("/:id/tests/public", api.getTests, authorize("read:test"))
 	subGroup.POST("/:id/tests", api.addTest, authorize("write:test"))
 	subGroup.DELETE("/tests/:id", api.deleteTest, authorize("write:test"))
+	subGroup.POST("/tests/:id/skeletons", api.addSkeleton, authorize("write:test"))
 }
 
 type problemsApi struct {
@@ -62,9 +63,8 @@ func (api *problemsApi) view(c echo.Context) error {
 
 func (api *problemsApi) getTests(c echo.Context) error {
 	id := c.Param("id")
-	lang := c.QueryParam("lang")
 
-	tests, err := api.service.GetPublicTests(id, lang, &c)
+	tests, err := api.service.GetPublicTests(id, &c)
 
 	if err != nil {
 		return err
@@ -118,9 +118,24 @@ func (api *problemsApi) addTest(c echo.Context) error {
 		return echo.NewHTTPError(http.StatusBadRequest, "couldn't parse request body")
 	}
 
-	c.Logger().Print(t)
+	test, err := api.service.AddTestToProblem(id, t)
+	if err != nil {
+		return err
+	}
 
-	if err := api.service.AddTestToProblem(id, t); err != nil {
+	return c.JSON(http.StatusOK, test)
+}
+
+func (api *problemsApi) addSkeleton(c echo.Context) error {
+	id := c.Param("id")
+
+	p := new(dtos.CreateSkeletonDto)
+
+	if err := c.Bind(p); err != nil {
+		return echo.NewHTTPError(http.StatusBadRequest, "couldn't parse request body")
+	}
+
+	if err := api.service.AddSkeletonToTest(id, p); err != nil {
 		return err
 	}
 

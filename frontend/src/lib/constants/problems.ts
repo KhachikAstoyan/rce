@@ -1,6 +1,6 @@
 import { IOption } from "../types";
 
-export const problemDifficultyOptions: IOption[] = [
+export const problemDifficultyOptions: readonly IOption[] = [
   {
     label: "Easy",
     value: "easy",
@@ -13,4 +13,4 @@ export const problemDifficultyOptions: IOption[] = [
     label: "Hard",
     value: "hard",
   },
-];
+] as const;

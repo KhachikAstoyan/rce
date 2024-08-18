@@ -19,7 +19,10 @@ type ProblemResponse struct {
 }
 
 type CreateTestDto struct {
-	Language string          `json:"language" validate:"required"`
-	Tests    types.TestSuite `json:"tests" validate:"required"`
-	Skeleton string          `json:"skeleton" validate:"required"`
+	Tests types.TestSuite `json:"tests" validate:"required"`
+}
+
+type CreateSkeletonDto struct {
+	Skeleton string `json:"skeleton" validate:"required"`
+	Language string `json:"language" validate:"required"`
 }

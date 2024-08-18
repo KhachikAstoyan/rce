@@ -1,5 +1,5 @@
 import { api } from "@/lib/api";
-import { ITestSuite, Language, Problem } from "@/lib/types";
+import { ITest, ITestSuite, Language, Problem } from "@/lib/types";
 
 const getProblems = async () => {
   const response = await api.get<Problem[]>("/problems");
@@ -41,22 +41,30 @@ const getSubmissionStatus = async (submissionId: string) => {
   return response.data;
 };
 
-const createTestSuite = async (
-  problemId: string,
-  skeleton: string,
-  language: Language,
-  testSuite: ITestSuite,
-) => {
-  const response = await api.post<{ id: string }>(
-    `/problems/${problemId}/tests`,
-    {
-      language,
-      tests: testSuite,
-      skeleton,
-    },
-  );
+const createTestSuite = async (problemId: string, testSuite: ITestSuite) => {
+  const response = await api.post<ITest>(`/problems/${problemId}/tests`, {
+    tests: testSuite,
+  });
 
-  return response;
+  return response.data;
+};
+
+const createSkeleton = async (
+  testId: string,
+  language: Language,
+  skeleton: string,
+) => {
+  const response = await api.post<{}>(`/problems/tests/${testId}/skeletons`, {
+    language,
+    skeleton,
+  });
+
+  return response.data;
+};
+
+const getPublicTests = async (problemId: string) => {
+  const response = await api.get<ITest>(`/problems/${problemId}/tests/public`);
+  return response.data;
 };
 
 export const problemService = {
@@ -66,4 +74,6 @@ export const problemService = {
   getProblemDetails,
   createSubmission,
   createTestSuite,
+  getPublicTests,
+  createSkeleton,
 };

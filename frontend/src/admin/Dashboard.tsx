@@ -1,4 +1,4 @@
-import { useEffect, useRef, useState } from "react";
+import { useEffect, useState } from "react";
 import { Button } from "@/components/shadcn/button";
 import { AdminLayout } from "./layout/AdminLayout";
 import { Input } from "@/components/shadcn/input";
@@ -31,27 +31,20 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/shadcn/select";
-import { loader, OnMount } from "@monaco-editor/react";
 import "@mdxeditor/editor/style.css";
 import { problemDifficultyOptions } from "@/lib/constants/problems";
 import { problemService } from "../services/problems";
 import { toast } from "sonner";
-import { editor } from "monaco-editor";
 import { CodeEditor } from "../components/editor/CodeEditor";
-import { JAVASCRIPT_SKELETON_TEMPLATE } from "./constants";
 import { ITestSuite, Language } from "../lib/types";
 import { TestCase } from "./components/TestCase";
-
-loader.init().then((monaco) => {
-  monaco.editor.defineTheme("myDark", {
-    base: "vs-dark",
-    inherit: true,
-    rules: [],
-    colors: {
-      "editor.background": "#1a1a1a",
-    },
-  });
-});
+import { SUPPORTED_LANGUAGES } from "../lib/constants/languages";
+import {
+  Accordion,
+  AccordionContent,
+  AccordionItem,
+  AccordionTrigger,
+} from "../components/shadcn/accordion";
 
 const simpleSandpackConfig: SandpackConfig = {
   defaultPreset: "react",
@@ -73,17 +66,15 @@ export const Dashboard = () => {
   const [description, setDescription] = useState("");
   const [difficulty, setDifficulty] = useState("");
   const [name, setName] = useState("");
-  const codeEditorRef = useRef<editor.IStandaloneCodeEditor>();
+
   const [testSuite, setTestSuite] = useState<ITestSuite>({
     problemId: "",
     tests: [],
   });
   const [problemId, setProblemId] = useState("");
-
-  const handleCodeEditorMount: OnMount = (editor) => {
-    codeEditorRef.current = editor;
-    editor.focus();
-  };
+  const [skeletons, setSkeletons] = useState<Record<Language, string>>({
+    javascript: "",
+  });
 
   const addTestCase = () => {
     setTestSuite({
@@ -116,16 +107,28 @@ export const Dashboard = () => {
 
   const handleCreateTestSuite = async () => {
     try {
-      await problemService.createTestSuite(
-        problemId,
-        codeEditorRef.current?.getValue() || "",
-        Language.JavaScript,
-        testSuite,
-      );
+      const test = await problemService.createTestSuite(problemId, testSuite);
 
+      await handleCreateSkeletons(test.id);
       toast.success("Test suite created successfully");
     } catch (error) {
       toast.error("Failed to create test suite");
+    }
+  };
+
+  const handleCreateSkeletons = async (testId: string) => {
+    try {
+      Object.entries(skeletons).forEach(async ([language, skeleton]) => {
+        await problemService.createSkeleton(
+          testId,
+          language as Language,
+          skeleton,
+        );
+      });
+
+      toast.success("Skeletons created successfully");
+    } catch (error) {
+      toast.error("Failed to create skeletons");
     }
   };
 
@@ -207,12 +210,28 @@ export const Dashboard = () => {
         </div>
 
         <h2 className="text-3xl ">Skeleton code</h2>
-        <div className="h-64 border">
-          <CodeEditor
-            defaultValue={JAVASCRIPT_SKELETON_TEMPLATE}
-            onMount={handleCodeEditorMount}
-          />
-        </div>
+
+        <Accordion type="single" className="w-full" collapsible>
+          {SUPPORTED_LANGUAGES.map((language) => (
+            <AccordionItem
+              value={language.name}
+              key={language.name}
+              // className="border p-2"
+            >
+              <AccordionTrigger>{language.name}</AccordionTrigger>
+              <AccordionContent>
+                <div className="h-64">
+                  <CodeEditor
+                    defaultValue={language.skeletonTemplate}
+                    onChange={(value) => {
+                      setSkeletons({ ...skeletons, [language.name]: value });
+                    }}
+                  />
+                </div>
+              </AccordionContent>
+            </AccordionItem>
+          ))}
+        </Accordion>
 
         <h2 className="text-3xl my-3">Tests</h2>
         {!testSuite.tests.length && <p>No tests</p>}

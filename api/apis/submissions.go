@@ -97,12 +97,21 @@ func (api *submissionsApi) create(c echo.Context) error {
 
 	var problem models.Problem
 	var test models.Test
+	var skeleton models.Skeleton
 
 	if err := db.Where("id = ?", p.ProblemID).First(&problem).Error; err != nil {
 		return echo.NewHTTPError(http.StatusNotFound, "problem not found")
 	}
 
-	if err := db.Where("language = ? AND problem_id = ?", p.Language, p.ProblemID).First(&test).Error; err != nil {
+	err := db.Where("problem_id = ?", p.ProblemID).First(&test).Error
+
+	if err != nil {
+		return echo.NewHTTPError(http.StatusNotFound, "no tests found for this problem")
+	}
+
+	err = db.Where("language = ?", p.Language).Where("test_id = ?", test.ID).First(&skeleton).Error
+
+	if err != nil {
 		return echo.NewHTTPError(http.StatusNotFound, "language not supported")
 	}
 
@@ -118,7 +127,7 @@ func (api *submissionsApi) create(c echo.Context) error {
 		return echo.NewHTTPError(http.StatusInternalServerError, "couldn't create submission")
 	}
 
-	err := executor.TestSubmissionDev(&submission, &test)
+	err = executor.TestSubmission(&submission, &test, &skeleton)
 
 	if err != nil {
 		return echo.NewHTTPError(http.StatusServiceUnavailable, "code execution failed")

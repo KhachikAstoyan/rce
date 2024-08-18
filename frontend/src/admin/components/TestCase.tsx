@@ -3,6 +3,7 @@ import { ITestCase } from "../../lib/types";
 import { Input } from "../../components/shadcn/input";
 import { Label } from "../../components/shadcn/label";
 import { Button } from "../../components/shadcn/button";
+import { Checkbox } from "../../components/shadcn/checkbox";
 
 interface Props {
   testCase: ITestCase;
@@ -25,6 +26,10 @@ export const TestCase: React.FC<Props> = ({ testCase, onChange, onDelete }) => {
       [`input${Object.keys(testCase.inputs).length}`]: { type: "", value: "" },
     };
     onChange({ ...testCase, inputs: newInputs });
+  };
+
+  const changeIsPublic = (val: boolean) => {
+    onChange({ ...testCase, isPublic: val });
   };
 
   const renameInput = (oldKey: string, newKey: string) => {
@@ -133,7 +138,15 @@ export const TestCase: React.FC<Props> = ({ testCase, onChange, onDelete }) => {
         />
       </div>
 
-      <div className="flex justify-end mt-3">
+      <div className="flex justify-between mt-3">
+        <div className="flex gap-2 items-center">
+          <Checkbox
+            checked={testCase.isPublic}
+            onCheckedChange={changeIsPublic}
+            id="isPublic"
+          />
+          <Label htmlFor="isPublic">Public</Label>
+        </div>
         <Button variant="destructive" onClick={onDelete}>
           Delete test case
         </Button>
