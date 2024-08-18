@@ -25,9 +25,9 @@ func bindProblemsApi(app *core.App, group *echo.Group) {
 	subGroup.POST("", api.create, authorize("write:problem"))
 	subGroup.DELETE("/:id", api.delete, authorize("write:problem"))
 	subGroup.GET("/:id/submissions", api.listSubmissions, authorize())
-	subGroup.GET("/:id/tests", api.getTests, authorize("read:test"))
-	subGroup.POST("/:id/tests", api.addTest, authorize("write:test"))
 	// TODO: create another controller for this
+	subGroup.GET("/:id/tests/public", api.getTests, authorize("read:test"))
+	subGroup.POST("/:id/tests", api.addTest, authorize("write:test"))
 	subGroup.DELETE("/tests/:id", api.deleteTest, authorize("write:test"))
 }
 
@@ -64,7 +64,7 @@ func (api *problemsApi) getTests(c echo.Context) error {
 	id := c.Param("id")
 	lang := c.QueryParam("lang")
 
-	tests, err := api.service.GetProblemTests(id, lang, &c)
+	tests, err := api.service.GetPublicTests(id, lang, &c)
 
 	if err != nil {
 		return err

@@ -3,11 +3,13 @@ package services
 import (
 	"fmt"
 	"net/http"
+	"slices"
 
 	"github.com/KhachikAstoyan/toy-rce-api/core"
 	"github.com/KhachikAstoyan/toy-rce-api/db"
 	"github.com/KhachikAstoyan/toy-rce-api/dtos"
 	"github.com/KhachikAstoyan/toy-rce-api/models"
+	"github.com/KhachikAstoyan/toy-rce-api/types"
 	"github.com/KhachikAstoyan/toy-rce-api/utils"
 	"github.com/gosimple/slug"
 	"github.com/labstack/echo/v4"
@@ -85,10 +87,11 @@ func (s *ProblemService) GetProblemByID(id string) (*models.Problem, error) {
 	return &problem, nil
 }
 
-func (s *ProblemService) GetProblemTests(id string, lang string, c *echo.Context) ([]models.Test, error) {
+// TODO: find a use case for this man
+func (s *ProblemService) GetAllTests(id string, lang string, c *echo.Context) ([]models.Test, error) {
 	db := s.app.DB
 
-	query := db.Scopes(utils.Paginate(c)).Where("problem_id = ?", id)
+	query := db.Scopes(utils.Paginate(c)).Where("problem_id = ?", id).Omit("Skeleton")
 	var tests []models.Test
 	var err error
 
@@ -100,6 +103,22 @@ func (s *ProblemService) GetProblemTests(id string, lang string, c *echo.Context
 
 	if err != nil {
 		return nil, echo.NewHTTPError(http.StatusNotFound, "couldnt find tests for this problem")
+	}
+
+	return tests, nil
+}
+
+func (s *ProblemService) GetPublicTests(id string, lang string, c *echo.Context) ([]models.Test, error) {
+	tests, err := s.GetAllTests(id, lang, c)
+
+	if err != nil {
+		return nil, err
+	}
+
+	for i := 0; i < len(tests); i++ {
+		tests[i].TestSuite.Tests = slices.DeleteFunc(tests[i].TestSuite.Tests, func(test types.Test) bool {
+			return test.IsPublic == nil || !(*test.IsPublic)
+		})
 	}
 
 	return tests, nil
