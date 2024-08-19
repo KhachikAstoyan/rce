@@ -16,6 +16,8 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from "../shadcn/tabs";
 import { ProblemDescription } from "./ProblemDescription";
 import { TestView } from "./TestView";
 
+import Confetti from "react-confetti-boom";
+import { SubmissionStatus } from "./SubmissionStatus";
 interface Props {
   problem: Problem;
 }
@@ -27,7 +29,7 @@ export const Editor: React.FC<Props> = ({ problem }) => {
     editor.focus();
   };
   const [submissionId, setSubmissionId] = useState<string | null>(null);
-  const [shouldFetchStatus, setShouldFetchStatus] = useState(false);
+  const [shouldRunFetchStatus, setShouldFetchRunStatus] = useState(false);
   const { data: tests, isLoading: testsLoading } = useQuery({
     queryKey: ["tests", problem.id],
     queryFn: () => problemService.getPublicTests(problem.id),
@@ -37,20 +39,20 @@ export const Editor: React.FC<Props> = ({ problem }) => {
   );
   const [bottomTab, setBottomTab] = useState<"tests" | "results">("tests");
 
-  const { data: submissionStatus } = useQuery({
+  const { data: submission } = useQuery({
     queryKey: ["submission", submissionId],
     queryFn: () => problemService.getSubmissionStatus(submissionId!),
-    enabled: shouldFetchStatus,
+    enabled: shouldRunFetchStatus,
     refetchInterval: 1000,
   });
 
   useEffect(() => {
-    if (submissionStatus) {
-      setShouldFetchStatus(false);
+    if (submission) {
+      setShouldFetchRunStatus(false);
       setLeftTab("submission");
       toast.success("Code execution completed");
     }
-  }, [submissionStatus]);
+  }, [submission]);
 
   const runCode = useCallback(async () => {
     try {
@@ -66,7 +68,7 @@ export const Editor: React.FC<Props> = ({ problem }) => {
       );
 
       setSubmissionId(res.data.id);
-      setShouldFetchStatus(true);
+      setShouldFetchRunStatus(true);
       toast.success("Code submission created");
       console.log(res);
     } catch (error) {
@@ -75,9 +77,21 @@ export const Editor: React.FC<Props> = ({ problem }) => {
     }
   }, []);
 
+  console.log(submission);
+
   return (
     <div className="relative h-screen flex flex-col">
-      {shouldFetchStatus && <LoadingOverlay />}
+      {submission?.results?.success && (
+        <div className="z-50">
+          <Confetti
+            mode="boom"
+            particleCount={150}
+            effectCount={1}
+            effectInterval={3000}
+          />
+        </div>
+      )}
+      {shouldRunFetchStatus && <LoadingOverlay />}
       <EditorLayout>
         <PanelGroup
           autoSaveId="editorLayout"
@@ -88,7 +102,7 @@ export const Editor: React.FC<Props> = ({ problem }) => {
             <Tabs
               value={leftTab}
               onValueChange={(v) => setLeftTab(v as any)}
-              className="w-full"
+              className="w-full h-full"
             >
               <TabsList>
                 <TabsTrigger value="description">Description</TabsTrigger>
@@ -97,15 +111,8 @@ export const Editor: React.FC<Props> = ({ problem }) => {
               <TabsContent value="description">
                 <ProblemDescription problem={problem} />
               </TabsContent>
-              <TabsContent value="submission">
-                <div className="h-1/2 w-full">
-                  <ScrollArea className="max-w-full h-full">
-                    <h2>Submission Results</h2>
-                    <pre>
-                      {JSON.stringify(submissionStatus?.results, null, 2)}
-                    </pre>
-                  </ScrollArea>
-                </div>
+              <TabsContent className="h-full" value="submission">
+                <SubmissionStatus submission={submission} />
               </TabsContent>
             </Tabs>
           </Panel>
@@ -135,7 +142,11 @@ export const Editor: React.FC<Props> = ({ problem }) => {
                   </TabsContent>
                   <TabsContent value="results">
                     <ScrollArea className="max-w-full h-full">
-                      <pre>Results</pre>
+                      {/* TODO: here should be the "run" results with only the public test cases being executed */}
+                      {/* <TestView
+                        tests={tests!}
+                        results={submissionStatus?.results}
+                      /> */}
                     </ScrollArea>
                   </TabsContent>
                 </Tabs>

@@ -53,3 +53,34 @@ interface IValue {
   type: string;
   value: string;
 }
+
+export interface ISubmission {
+  id: string;
+  createdAt: string;
+  updatedAt: string;
+  status: "pending" | "completed" | "failed";
+  problemId: string;
+  userId: string;
+  solution: string;
+  language: Language;
+  results: ISubmissionResult;
+}
+
+export interface IAssertionResult {
+  expected: string;
+  received: string;
+}
+
+export interface ITestResult {
+  success: boolean;
+  assertionResults: IAssertionResult[];
+}
+
+export interface ISubmissionResult {
+  submissionId: string;
+  success: boolean;
+  message: string;
+  passed: number;
+  failed: number;
+  testResults: ITestResult[];
+}

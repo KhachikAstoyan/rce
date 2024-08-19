@@ -7,79 +7,36 @@ import { Checkbox } from "../../components/shadcn/checkbox";
 
 interface Props {
   testCase: ITestCase;
+  inputs: ITestCase["inputs"];
   onChange: (val: ITestCase) => void;
   onDelete: () => void;
 }
 
-export const TestCase: React.FC<Props> = ({ testCase, onChange, onDelete }) => {
-  const onInputTypeChange = (val: string, input: string) => {
-    const newInputs = {
-      ...testCase.inputs,
-      [input]: { ...testCase.inputs[input], type: val },
-    };
-    onChange({ ...testCase, inputs: newInputs });
-  };
-
-  const addInput = () => {
-    const newInputs = {
-      ...testCase.inputs,
-      [`input${Object.keys(testCase.inputs).length}`]: { type: "", value: "" },
-    };
-    onChange({ ...testCase, inputs: newInputs });
-  };
-
+export const TestCase: React.FC<Props> = ({
+  testCase,
+  onChange,
+  onDelete,
+  inputs,
+}) => {
   const changeIsPublic = (val: boolean) => {
     onChange({ ...testCase, isPublic: val });
   };
 
-  const renameInput = (oldKey: string, newKey: string) => {
-    const newInputs = Object.entries(testCase.inputs).reduce(
-      (acc, [key, val]) => {
-        if (key === oldKey) {
-          acc[newKey] = val;
-        } else {
-          acc[key] = val;
-        }
-        return acc;
-      },
-      {} as Record<string, { type: string; value: string }>,
-    );
-    onChange({ ...testCase, inputs: newInputs });
-  };
-
-  const deleteInput = (key: string) => {
-    const newInputs = Object.entries(testCase.inputs).reduce(
-      (acc, [k, val]) => {
-        if (k !== key) {
-          acc[k] = val;
-        }
-        return acc;
-      },
-      {} as Record<string, { type: string; value: string }>,
-    );
-    onChange({ ...testCase, inputs: newInputs });
-  };
-
   return (
     <div className="border-2 p-4 mb-10">
-      {Object.entries(testCase.inputs).map(([key, val]) => (
+      {Object.entries(inputs).map(([key, val]) => (
         <div className="border mb-5 p-3">
           <h2 className="text-lg mb-4 font-bold">Input: {key}</h2>
           {/* TODO: make this a select */}
           <Label htmlFor={key + "name"}>Input Name</Label>
-          <Input
-            id={key + "name"}
-            placeholder={"Name"}
-            value={key}
-            onChange={(e) => renameInput(key, e.target.value)}
-          />
+          <Input id={key + "name"} placeholder={"Name"} value={key} disabled />
 
           <Label htmlFor={key + "type"}>Type</Label>
           <Input
             id={key + "type"}
             placeholder={"Type"}
+            disabled
             value={val.type}
-            onChange={(e) => onInputTypeChange(e.target.value, key)}
           />
 
           <Label htmlFor={key + "value"}>{key}</Label>
@@ -97,18 +54,8 @@ export const TestCase: React.FC<Props> = ({ testCase, onChange, onDelete }) => {
               })
             }
           />
-
-          <Button
-            variant="destructive"
-            className="mt-4"
-            onClick={() => deleteInput(key)}
-          >
-            Delete
-          </Button>
         </div>
       ))}
-
-      <Button onClick={addInput}>Add Input</Button>
 
       <div>
         <Label htmlFor="expected">Expected Type</Label>

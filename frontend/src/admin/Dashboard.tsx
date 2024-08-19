@@ -36,7 +36,7 @@ import { problemDifficultyOptions } from "@/lib/constants/problems";
 import { problemService } from "../services/problems";
 import { toast } from "sonner";
 import { CodeEditor } from "../components/editor/CodeEditor";
-import { ITestSuite, Language } from "../lib/types";
+import { ITestCase, ITestSuite, Language } from "../lib/types";
 import { TestCase } from "./components/TestCase";
 import { SUPPORTED_LANGUAGES } from "../lib/constants/languages";
 import {
@@ -45,6 +45,7 @@ import {
   AccordionItem,
   AccordionTrigger,
 } from "../components/shadcn/accordion";
+import { InputBuilder } from "./components/InputBuilder";
 
 const simpleSandpackConfig: SandpackConfig = {
   defaultPreset: "react",
@@ -66,7 +67,7 @@ export const Dashboard = () => {
   const [description, setDescription] = useState("");
   const [difficulty, setDifficulty] = useState("");
   const [name, setName] = useState("");
-
+  const [inputs, setInputs] = useState<ITestCase["inputs"]>({});
   const [testSuite, setTestSuite] = useState<ITestSuite>({
     problemId: "",
     tests: [],
@@ -89,6 +90,10 @@ export const Dashboard = () => {
       ],
     });
   };
+
+  useEffect(() => {
+    // TODO: update 
+  }, [inputs])
 
   const handleSubmit = async () => {
     try {
@@ -209,15 +214,11 @@ export const Dashboard = () => {
           />
         </div>
 
-        <h2 className="text-3xl ">Skeleton code</h2>
+        <h2 className="text-3xl">Skeleton code</h2>
 
         <Accordion type="single" className="w-full" collapsible>
           {SUPPORTED_LANGUAGES.map((language) => (
-            <AccordionItem
-              value={language.name}
-              key={language.name}
-              // className="border p-2"
-            >
+            <AccordionItem value={language.name} key={language.name}>
               <AccordionTrigger>{language.name}</AccordionTrigger>
               <AccordionContent>
                 <div className="h-64">
@@ -235,9 +236,13 @@ export const Dashboard = () => {
 
         <h2 className="text-3xl my-3">Tests</h2>
         {!testSuite.tests.length && <p>No tests</p>}
+
+        <InputBuilder inputs={inputs} setInputs={setInputs} />
+
         {testSuite.tests.map((test, index) => (
           <TestCase
             testCase={test}
+            inputs={inputs}
             onChange={(newTest) => {
               const newTests = [...testSuite.tests];
               newTests[index] = newTest;

@@ -1,5 +1,5 @@
 import { api } from "@/lib/api";
-import { ITest, ITestSuite, Language, Problem } from "@/lib/types";
+import { ISubmission, ITest, ITestSuite, Language, Problem } from "@/lib/types";
 
 const getProblems = async () => {
   const response = await api.get<Problem[]>("/problems");
@@ -37,7 +37,7 @@ const createSubmission = async (
 };
 
 const getSubmissionStatus = async (submissionId: string) => {
-  const response = await api.get(`/submissions/${submissionId}`);
+  const response = await api.get<ISubmission>(`/submissions/${submissionId}`);
   return response.data;
 };
 
