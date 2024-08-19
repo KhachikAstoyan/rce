@@ -79,7 +79,11 @@ export const Editor: React.FC<Props> = ({ problem }) => {
     <div className="relative h-screen flex flex-col">
       {shouldFetchStatus && <LoadingOverlay />}
       <EditorLayout>
-        <PanelGroup className="max-h-full" direction="horizontal">
+        <PanelGroup
+          autoSaveId="editorLayout"
+          className="max-h-full"
+          direction="horizontal"
+        >
           <Panel defaultSize={25}>
             <Tabs
               value={leftTab}
