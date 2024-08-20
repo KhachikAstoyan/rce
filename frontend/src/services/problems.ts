@@ -26,8 +26,10 @@ const createSubmission = async (
   problemId: string,
   language: Language,
   code: string,
+  onlyPublicTests: boolean = false,
 ) => {
-  const response = await api.post<{ id: string }>("/submissions", {
+  const url = onlyPublicTests ? "/submissions/run" : "/submissions";
+  const response = await api.post<{ id: string }>(url, {
     solution: code,
     language,
     problemId,
@@ -40,6 +42,11 @@ const getSubmissionStatus = async (submissionId: string) => {
   const response = await api.get<ISubmission>(`/submissions/${submissionId}`);
   return response.data;
 };
+
+const getRunStatus = async (runId: string) => {
+  const response = await api.get<ISubmission>(`/submissions/check/${runId}`);
+  return response.data; 
+}
 
 const createTestSuite = async (problemId: string, testSuite: ITestSuite) => {
   const response = await api.post<ITest>(`/problems/${problemId}/tests`, {
@@ -104,6 +111,7 @@ export const problemService = {
   getProblems,
   createProblem,
   getSubmissionStatus,
+  getRunStatus,
   getProblemDetails,
   createSubmission,
   createTestSuite,

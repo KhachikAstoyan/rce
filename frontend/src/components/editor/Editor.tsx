@@ -30,7 +30,11 @@ export const Editor: React.FC<Props> = ({ problem }) => {
     editor.focus();
   };
   const [submissionId, setSubmissionId] = useState<string | null>(null);
-  const [shouldRunFetchStatus, setShouldFetchRunStatus] = useState(false);
+  const [runId, setRunId] = useState<string | null>(null);
+
+  const [shouldFetchRunResults, setShouldFetchRunResults] = useState(false);
+  const [shouldFetchSubmission, setShouldFetchSubmission] = useState(false);
+
   const { data: tests, isLoading: testsLoading } = useQuery({
     queryKey: ["tests", problem.id],
     queryFn: () => problemService.getPublicTests(problem.id),
@@ -48,17 +52,34 @@ export const Editor: React.FC<Props> = ({ problem }) => {
   const { data: submission } = useQuery({
     queryKey: ["submission", submissionId],
     queryFn: () => problemService.getSubmissionStatus(submissionId!),
-    enabled: shouldRunFetchStatus,
-    refetchInterval: 1000,
+    enabled: shouldFetchSubmission,
+    refetchInterval: 500,
   });
+
+  const { data: runResults } = useQuery({
+    queryKey: ["run", runId],
+    queryFn: () => problemService.getRunStatus(runId!),
+    enabled: shouldFetchRunResults,
+    refetchInterval: 500,
+  });
+
+  console.log("runResults", runResults);
 
   useEffect(() => {
     if (submission) {
-      setShouldFetchRunStatus(false);
+      setShouldFetchSubmission(false);
       setLeftTab("submission");
-      toast.success("Code execution completed");
+      toast.success("Testing completed");
     }
   }, [submission]);
+
+  useEffect(() => {
+    if (runResults) {
+      setShouldFetchRunResults(false);
+      setBottomTab("results");
+      toast.success("Code ran successfully");
+    }
+  }, [runResults]);
 
   const submitCode = useCallback(async () => {
     try {
@@ -74,7 +95,7 @@ export const Editor: React.FC<Props> = ({ problem }) => {
       );
 
       setSubmissionId(res.data.id);
-      setShouldFetchRunStatus(true);
+      setShouldFetchSubmission(true);
       toast.success("Code submission created");
       console.log(res);
     } catch (error) {
@@ -83,10 +104,31 @@ export const Editor: React.FC<Props> = ({ problem }) => {
     }
   }, []);
 
-  console.log(submission);
+  const runCode = useCallback(async () => {
+    try {
+      const code = codeEditorRef.current?.getValue();
+      if (!code) {
+        return;
+      }
+
+      const res = await problemService.createSubmission(
+        problem.id,
+        Language.JavaScript,
+        code,
+        true, // only public tests
+      );
+
+      setRunId(res.data.id);
+      setShouldFetchRunResults(true);
+      toast.info("Running code...");
+    } catch (error) {
+      toast.error("Failed to run code");
+      console.error(error);
+    }
+  }, []);
 
   return (
-    <div className="relative h-screen flex flex-col">
+    <div className="relative h-screen max-h-screen flex flex-col">
       {submission?.results?.success && (
         <div className="z-50">
           <Confetti
@@ -97,7 +139,7 @@ export const Editor: React.FC<Props> = ({ problem }) => {
           />
         </div>
       )}
-      {shouldRunFetchStatus && <LoadingOverlay />}
+      {shouldFetchSubmission && <LoadingOverlay />}
       <EditorLayout>
         <PanelGroup
           autoSaveId="editorLayout"
@@ -114,7 +156,7 @@ export const Editor: React.FC<Props> = ({ problem }) => {
                 <TabsTrigger value="description">Description</TabsTrigger>
                 <TabsTrigger value="submission">Submission</TabsTrigger>
               </TabsList>
-              <TabsContent value="description">
+              <TabsContent className="h-full" value="description">
                 <ProblemDescription problem={problem} />
               </TabsContent>
               <TabsContent className="h-full" value="submission">
@@ -134,14 +176,14 @@ export const Editor: React.FC<Props> = ({ problem }) => {
                   />
                 )}
                 <div className="absolute bottom-3 right-3 flex gap-3">
-                  <Button disabled>Run</Button>
+                  <Button onClick={runCode}>Run</Button>
                   <Button onClick={submitCode} variant="secondary">
                     Submit
                   </Button>
                 </div>
               </Panel>
               <ResizeHandle direction="vertical" />
-              <Panel defaultSize={50}>
+              <Panel className="h-full max-h-full" defaultSize={50}>
                 {testsLoading && <LoadingOverlay />}
                 <Tabs
                   value={bottomTab}
@@ -151,17 +193,13 @@ export const Editor: React.FC<Props> = ({ problem }) => {
                     <TabsTrigger value="tests">Tests</TabsTrigger>
                     <TabsTrigger value="results">Results</TabsTrigger>
                   </TabsList>
-                  <TabsContent value="tests">
-                    <TestView tests={tests!} />
-                  </TabsContent>
-                  <TabsContent value="results">
-                    <ScrollArea className="max-w-full h-full">
-                      {/* TODO: here should be the "run" results with only the public test cases being executed */}
-                      {/* <TestView
-                        tests={tests!}
-                        results={submissionStatus?.results}
-                      /> */}
+                  <TabsContent value="tests" className="h-full">
+                    <ScrollArea className=" max-h-full h-full">
+                      <TestView tests={tests!} />
                     </ScrollArea>
+                  </TabsContent>
+                  <TabsContent value="results" className="h-full">
+                    <TestView tests={tests!} results={runResults?.results} />
                   </TabsContent>
                 </Tabs>
               </Panel>

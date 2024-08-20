@@ -154,6 +154,5 @@ async fn get_file_paths(
         skeleton_container_path,
     };
 
-    // TODO: Debug why the container's starter script doesnt get invoked properly
     return Ok(paths);
 }

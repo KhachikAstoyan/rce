@@ -69,7 +69,7 @@ func (api *problemsApi) view(c echo.Context) error {
 func (api *problemsApi) getTests(c echo.Context) error {
 	id := c.Param("id")
 
-	tests, err := api.service.GetPublicTests(id, &c)
+	tests, err := api.service.GetPublicTests(id)
 
 	if err != nil {
 		return err

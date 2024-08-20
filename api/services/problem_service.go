@@ -87,13 +87,13 @@ func (s *ProblemService) GetProblemByID(id string) (*models.Problem, error) {
 	return &problem, nil
 }
 
-// TODO: find a use case for this man
-func (s *ProblemService) GetAllTests(id string, c *echo.Context) (*models.Test, error) {
+// TODO: use this when fetching the tests to send to the executor
+func (s *ProblemService) GetAllTests(id string) (*models.Test, error) {
 	db := s.app.DB
 
 	var test models.Test
 
-	err := db.Scopes(utils.Paginate(c)).Where("problem_id = ?", id).Omit("Skeleton").First(&test).Error
+	err := db.Where("problem_id = ?", id).Omit("Skeleton").First(&test).Error
 
 	if err != nil {
 		return nil, echo.NewHTTPError(http.StatusNotFound, "couldnt find tests for this problem")
@@ -160,8 +160,8 @@ func (s *ProblemService) DeleteSolutionTemplate(problemId, language string) erro
 	return nil
 }
 
-func (s *ProblemService) GetPublicTests(id string, c *echo.Context) (*models.Test, error) {
-	test, err := s.GetAllTests(id, c)
+func (s *ProblemService) GetPublicTests(id string) (*models.Test, error) {
+	test, err := s.GetAllTests(id)
 
 	if err != nil {
 		return nil, err

@@ -39,7 +39,13 @@ export const TestView: React.FC<Props> = ({ tests, results }) => {
 
   if (results?.message) {
     // return <div className="p-3 text-red-600">{results.message}</div>;
-    return <ValueDisplay label="" value={results.message} className="bg-red-100 text-red-600 m-2"/>
+    return (
+      <ValueDisplay
+        label=""
+        value={results.message}
+        className="bg-red-100 text-red-600 m-2"
+      />
+    );
   }
 
   return (
