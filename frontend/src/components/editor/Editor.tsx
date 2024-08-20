@@ -23,6 +23,7 @@ interface Props {
 }
 
 export const Editor: React.FC<Props> = ({ problem }) => {
+  const [language] = useState<Language>(Language.JavaScript);
   const codeEditorRef = useRef<editor.IStandaloneCodeEditor>();
   const handleCodeEditorMount: OnMount = (editor) => {
     codeEditorRef.current = editor;
@@ -34,6 +35,11 @@ export const Editor: React.FC<Props> = ({ problem }) => {
     queryKey: ["tests", problem.id],
     queryFn: () => problemService.getPublicTests(problem.id),
   });
+  const { data: solutionTemplate, isLoading: isTemplateLoading } = useQuery({
+    queryKey: ["template", problem.id, language],
+    queryFn: () => problemService.getTemplate(problem.id, language),
+  });
+
   const [leftTab, setLeftTab] = useState<"description" | "submission">(
     "description",
   );
@@ -54,7 +60,7 @@ export const Editor: React.FC<Props> = ({ problem }) => {
     }
   }, [submission]);
 
-  const runCode = useCallback(async () => {
+  const submitCode = useCallback(async () => {
     try {
       const code = codeEditorRef.current?.getValue();
       if (!code) {
@@ -120,10 +126,18 @@ export const Editor: React.FC<Props> = ({ problem }) => {
           <Panel>
             <PanelGroup direction="vertical">
               <Panel defaultSize={50} className="relative">
-                <CodeEditor onMount={handleCodeEditorMount} />
+                {isTemplateLoading && <LoadingOverlay />}
+                {solutionTemplate && (
+                  <CodeEditor
+                    defaultValue={solutionTemplate?.template ?? ""}
+                    onMount={handleCodeEditorMount}
+                  />
+                )}
                 <div className="absolute bottom-3 right-3 flex gap-3">
-                  <Button onClick={runCode}>Run</Button>
-                  <Button variant="secondary">Submit</Button>
+                  <Button disabled>Run</Button>
+                  <Button onClick={submitCode} variant="secondary">
+                    Submit
+                  </Button>
                 </div>
               </Panel>
               <ResizeHandle direction="vertical" />

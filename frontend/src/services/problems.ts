@@ -67,6 +67,39 @@ const getPublicTests = async (problemId: string) => {
   return response.data;
 };
 
+interface IGetTemplateResponse {
+  template: string;
+  language: string;
+  id: string;
+  createdAt: string;
+  updatedAt: string;
+}
+
+const getTemplate = async (problemId: string, language: Language) => {
+  const response = await api.get<IGetTemplateResponse>(
+    `/problems/${problemId}/templates/${language}`,
+  );
+
+  return response.data;
+};
+
+interface ICreateTemplatePayload {
+  template: string;
+  language: string;
+}
+
+const createTemplate = async (
+  problemId: string,
+  payload: ICreateTemplatePayload,
+) => {
+  const response = await api.post<IGetTemplateResponse>(
+    `/problems/${problemId}/templates`,
+    payload,
+  );
+
+  return response.data;
+};
+
 export const problemService = {
   getProblems,
   createProblem,
@@ -76,4 +109,6 @@ export const problemService = {
   createTestSuite,
   getPublicTests,
   createSkeleton,
+  getTemplate,
+  createTemplate,
 };

@@ -76,6 +76,9 @@ export const Dashboard = () => {
   const [skeletons, setSkeletons] = useState<Record<Language, string>>({
     javascript: "",
   });
+  const [templates, setTemplates] = useState<Record<Language, string>>({
+    javascript: "",
+  });
 
   const addTestCase = () => {
     setTestSuite({
@@ -83,7 +86,7 @@ export const Dashboard = () => {
       tests: [
         ...testSuite.tests,
         {
-          inputs: {},
+          inputs: { ...inputs },
           isPublic: true,
           expected: { type: "string", value: "" },
         },
@@ -92,8 +95,20 @@ export const Dashboard = () => {
   };
 
   useEffect(() => {
-    // TODO: update 
-  }, [inputs])
+    const newTestSuite = { ...testSuite };
+
+    newTestSuite.tests.forEach((test) => {
+      Object.entries(inputs).forEach(([inputName, input]) => {
+        if (!test.inputs[inputName]) {
+          test.inputs[inputName] = input;
+        } else {
+          test.inputs[inputName].type = input.type;
+        }
+      });
+    });
+
+    setTestSuite(newTestSuite);
+  }, [inputs]);
 
   const handleSubmit = async () => {
     try {
@@ -137,8 +152,24 @@ export const Dashboard = () => {
     }
   };
 
+  const handleCreateTemplates = async () => {
+    try {
+      Object.entries(templates).forEach(async ([language, template]) => {
+        await problemService.createTemplate(problemId, {
+          language: language as Language,
+          template,
+        });
+      });
+
+      toast.success("Templates created successfully");
+    } catch (error) {
+      toast.error("Failed to create templates");
+    }
+  };
+
   useEffect(() => {
     if (problemId) {
+      handleCreateTemplates();
       handleCreateTestSuite();
     }
   }, [problemId]);
@@ -214,20 +245,33 @@ export const Dashboard = () => {
           />
         </div>
 
-        <h2 className="text-3xl">Skeleton code</h2>
+        <h2 className="text-3xl">Skeleton code (for the executor)</h2>
 
         <Accordion type="single" className="w-full" collapsible>
           {SUPPORTED_LANGUAGES.map((language) => (
             <AccordionItem value={language.name} key={language.name}>
               <AccordionTrigger>{language.name}</AccordionTrigger>
               <AccordionContent>
-                <div className="h-64">
-                  <CodeEditor
-                    defaultValue={language.skeletonTemplate}
-                    onChange={(value) => {
-                      setSkeletons({ ...skeletons, [language.name]: value });
-                    }}
-                  />
+                <div className="flex flex-col gap-10">
+                  <div className="h-64">
+                    <h2>Skeleton code</h2>
+                    <CodeEditor
+                      defaultValue={language.skeletonTemplate}
+                      onChange={(value) => {
+                        setSkeletons({ ...skeletons, [language.name]: value });
+                      }}
+                    />
+                  </div>
+
+                  <div className="h-64">
+                    <h2>Template code</h2>
+                    <CodeEditor
+                      defaultValue={""}
+                      onChange={(value) => {
+                        setTemplates({ ...templates, [language.name]: value });
+                      }}
+                    />
+                  </div>
                 </div>
               </AccordionContent>
             </AccordionItem>

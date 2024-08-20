@@ -43,7 +43,7 @@ export const TestCase: React.FC<Props> = ({
           <Input
             id={key + "value"}
             placeholder={"Value"}
-            value={val.value}
+            value={testCase.inputs[key].value}
             onChange={(e) =>
               onChange({
                 ...testCase,

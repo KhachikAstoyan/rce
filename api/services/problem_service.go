@@ -102,6 +102,64 @@ func (s *ProblemService) GetAllTests(id string, c *echo.Context) (*models.Test, 
 	return &test, nil
 }
 
+// TODO: add functions for update, delete and list
+
+func (s *ProblemService) GetSolutionTemplate(problemId, language string) (*models.SolutionTemplate, error) {
+	db := s.app.DB
+
+	template := new(models.SolutionTemplate)
+	if err := db.Where(&models.SolutionTemplate{Language: language, ProblemID: problemId}).First(template).Error; err != nil {
+		return nil, echo.NewHTTPError(http.StatusNotFound)
+	}
+
+	return template, nil
+}
+
+func (s *ProblemService) CreateSolutionTemplate(dto *dtos.CreateSolutionTemplateDTO) (*models.SolutionTemplate, error) {
+	db := s.app.DB
+
+	if err := utils.ValidateStruct(dto); err != nil {
+		return nil, echo.NewHTTPError(http.StatusUnprocessableEntity, err)
+	}
+
+	count := int64(0)
+	err := db.Model(&models.SolutionTemplate{}).
+		Where("problem_id = ? AND language = ?", dto.ProblemId, dto.Language).
+		Count(&count).
+		Error
+
+	if err != nil {
+		return nil, echo.NewHTTPError(http.StatusInternalServerError, err)
+	}
+
+	if count > 0 {
+		return nil, echo.NewHTTPError(http.StatusBadRequest, "already exists")
+	}
+
+	template := models.SolutionTemplate{
+		Language:  dto.Language,
+		Template:  dto.Template,
+		ProblemID: dto.ProblemId,
+	}
+
+	if err := db.Create(&template).Error; err != nil {
+		return nil, echo.NewHTTPError(http.StatusInternalServerError, "something went wrong")
+	}
+
+	return &template, nil
+}
+
+func (s *ProblemService) DeleteSolutionTemplate(problemId, language string) error {
+	db := s.app.DB
+	if err := db.
+		Where("language = ? AND problem_id = ?", language, problemId).
+		Delete(&models.SolutionTemplate{}).Error; err != nil {
+		return err
+	}
+
+	return nil
+}
+
 func (s *ProblemService) GetPublicTests(id string, c *echo.Context) (*models.Test, error) {
 	test, err := s.GetAllTests(id, c)
 

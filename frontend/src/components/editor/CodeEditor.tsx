@@ -40,7 +40,12 @@ export const CodeEditor: React.FC<CodeEditorProps> = ({
       defaultLanguage="javascript"
       theme={theme === "light" ? "vs-light" : "myDark"}
       options={{
+        suggest: {
+          showFields: false,
+          showFunctions: false,
+        },
         fontSize: 16,
+        quickSuggestions: false,
         minimap: { enabled: false },
       }}
       onMount={customOnMount || handleCodeEditorMount}

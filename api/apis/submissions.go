@@ -65,24 +65,21 @@ type submissionsApi struct {
 }
 
 func (api *submissionsApi) status(c echo.Context) error {
-	fmt.Println("YOU GOT THIS BABY")
 	db := api.app.DB
 
 	id := c.Param("id")
 	var submission models.Submission
 
 	if err := db.Select("id, created_at, updated_at, status, problem_id, user_id, solution, language, results").Where("id = ?", id).First(&submission).Error; err != nil {
-		return echo.NewHTTPError(http.StatusNotFound, "submission not foudn")
+		return echo.NewHTTPError(http.StatusNotFound, "submission not found")
 	}
 
-	fmt.Println("submissionID")
 	fmt.Println(submission.ID)
 
 	if submission.Status == "pending" || submission.Status == "" {
 		return c.NoContent(http.StatusNoContent)
 	}
 
-	fmt.Println("RETURNING")
 	return c.JSON(http.StatusOK, submission)
 }
 

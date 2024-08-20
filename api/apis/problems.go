@@ -30,6 +30,11 @@ func bindProblemsApi(app *core.App, group *echo.Group) {
 	subGroup.POST("/:id/tests", api.addTest, authorize("write:test"))
 	subGroup.DELETE("/tests/:id", api.deleteTest, authorize("write:test"))
 	subGroup.POST("/tests/:id/skeletons", api.addSkeleton, authorize("write:test"))
+
+	// TODO: maybe another controller for this one too
+	subGroup.GET("/:id/templates/:lang", api.getSolutionTemplate)
+	subGroup.DELETE("/:id/templates/:lang", api.deleteSolutionTemplate)
+	subGroup.POST("/:id/templates", api.createSolutionTemplate)
 }
 
 type problemsApi struct {
@@ -173,4 +178,47 @@ func (api *problemsApi) listSubmissions(c echo.Context) error {
 	}
 
 	return c.JSON(http.StatusOK, submissions)
+}
+
+func (api *problemsApi) getSolutionTemplate(c echo.Context) error {
+	id := c.Param("id")
+	lang := c.Param("lang")
+
+	template, err := api.service.GetSolutionTemplate(id, lang)
+
+	if err != nil {
+		return err
+	}
+
+	return c.JSON(http.StatusOK, template)
+}
+
+func (api *problemsApi) createSolutionTemplate(c echo.Context) error {
+	dto := new(dtos.CreateSolutionTemplateDTO)
+	id := c.Param("id")
+
+	if err := c.Bind(dto); err != nil {
+		return echo.NewHTTPError(http.StatusBadRequest, "Couldn't process the request body")
+	}
+
+	dto.ProblemId = id
+
+	template, err := api.service.CreateSolutionTemplate(dto)
+
+	if err != nil {
+		return err
+	}
+
+	return c.JSON(http.StatusOK, template)
+}
+
+func (api *problemsApi) deleteSolutionTemplate(c echo.Context) error {
+	id := c.Param("id")
+	lang := c.Param("lang")
+
+	if err := api.service.DeleteSolutionTemplate(id, lang); err != nil {
+		return err
+	}
+
+	return c.NoContent(http.StatusOK)
 }
