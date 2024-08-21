@@ -8,7 +8,6 @@ use amiquip::{
 };
 use executor::types::{ExecuteRequestPayload, SubmissionResult};
 use log::error;
-use tracing::info;
 
 extern crate pretty_env_logger;
 
@@ -46,7 +45,6 @@ async fn main() {
         match message {
             ConsumerMessage::Delivery(delivery) => {
                 let body = String::from_utf8_lossy(&delivery.body);
-                println!("Received message: {}", body);
                 let payload: Result<ExecuteRequestPayload, serde_json::Error> =
                     serde_json::from_str(&body);
 
@@ -64,8 +62,6 @@ async fn main() {
                 };
                 let submission_id = data.submission_id.clone();
 
-                info!("Parsed the message body");
-                println!("Parsed the message body, starting code execution");
                 let execution_result =
                     tokio::spawn(async move { executor::execute_handler(data).await }).await;
 

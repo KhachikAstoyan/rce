@@ -5,13 +5,8 @@ use log::info;
 
 pub async fn execute_handler(payload: ExecuteRequestPayload) -> SubmissionResult {
     info!("Got code execution request");
-    let output = test_solution(
-        payload.language,
-        payload.solution,
-        payload.skeleton,
-        payload.tests,
-    )
-    .await;
+    let submission_id = payload.submission_id.clone();
+    let output = test_solution(payload).await;
 
     info!("Sent execution results to the main api");
     return match output {
@@ -20,7 +15,9 @@ pub async fn execute_handler(payload: ExecuteRequestPayload) -> SubmissionResult
             failed: 0,
             message: "couldn't execute your code, please try again later".into(),
             passed: 0,
-            submission_id: Some(payload.submission_id),
+            stdout: Some(String::from("")),
+            stderr: Some(String::from("")),
+            submission_id: Some(submission_id),
             success: false,
             test_results: vec![],
         },

@@ -6,19 +6,24 @@ use std::{io, path::PathBuf, process::Output, time::Duration};
 use tokio::time::timeout;
 use tokio::{fs, process::Command};
 
-use super::types::TestSuite;
+use super::types::ExecuteRequestPayload;
 
 // directories inside the docker container
 const INPUTS_DIR: &str = "/app/inputs";
 const SUBMISSIONS_DIR: &str = "/app/submissions";
 const SKELETONS_DIR: &str = "/app/skeletons";
 
+const RESULTS_DIR: &str = "./results";
+const RESULTS_DIR_CONTAINER: &str = "/app/results";
+
 pub async fn test_solution(
-    lang: Language,
-    code: String,
-    skeleton: String,
-    tests: TestSuite,
+    payload: ExecuteRequestPayload,
 ) -> Result<SubmissionResult, Box<dyn error::Error>> {
+    let tests = payload.tests;
+    let lang = payload.language;
+    let code = payload.solution;
+    let skeleton = payload.skeleton;
+
     info!("Testing solution {:?}", tests);
     info!(target: "solution", "solution {}", code);
     info!(target: "skeleton", "skeleton {}", skeleton);
@@ -31,8 +36,9 @@ pub async fn test_solution(
     info!("Formed paths for host and container");
     info!(target: "paths", "{:?}", paths);
 
-    let container_output = run_docker_container(&paths, &lang).await?;
+    let container_output = run_docker_container(&paths, &lang, &payload.submission_id).await?;
     let stdout = str::from_utf8(&container_output.stdout).unwrap_or_default();
+    let stderr: &str = str::from_utf8(&container_output.stderr).unwrap_or_default();
 
     info!("Finished running docker container");
     info!(
@@ -43,20 +49,37 @@ pub async fn test_solution(
     info!(
         target: "docker:stderr",
         "{:?}",
-        str::from_utf8(&container_output.stderr).unwrap_or_default()
+       stderr
     );
 
-    let submission_results: SubmissionResult = serde_json::from_str(&stdout)?;
+    let mut results_path = PathBuf::from(RESULTS_DIR);
+    results_path.push(format!("{}.json", payload.submission_id));
+
+    info!("Reading results file {:?}", results_path);
+    let results_json = fs::read_to_string(&results_path).await?;
+    info!(target: "results_json", "{}", results_json);
+    let mut submission_results: SubmissionResult = serde_json::from_str(&results_json)?;
+
+    submission_results.stdout = Some(stdout.to_string());
+    submission_results.stderr = Some(stderr.to_string());
+
+    // it's fine if we ignore this, let's not crash anything
+    // just because we can't remove a file
+    let _ = fs::remove_file(results_path).await;
 
     return Ok(submission_results);
 }
 
-async fn run_docker_container(paths: &FilePaths, lang: &Language) -> Result<Output, io::Error> {
+async fn run_docker_container(
+    paths: &FilePaths,
+    lang: &Language,
+    submission_id: &String,
+) -> Result<Output, io::Error> {
     info!("Running docker container");
     let mut com = Command::new("docker");
 
     com.arg("run")
-        .arg("--rm")
+        // .arg("--rm")
         .arg("--network")
         .arg("none")
         .arg("-v")
@@ -77,10 +100,13 @@ async fn run_docker_container(paths: &FilePaths, lang: &Language) -> Result<Outp
             paths.skeleton_host_path.to_str().unwrap(),
             paths.skeleton_container_path.to_str().unwrap()
         ))
+        .arg("-v")
+        .arg(format!("{RESULTS_DIR}:/{RESULTS_DIR_CONTAINER}"))
         .arg(format!("toyrce:{}", lang.to_string().to_lowercase()))
         .arg(paths.skeleton_container_path.to_str().unwrap())
         .arg(paths.submission_container_path.to_str().unwrap())
-        .arg(paths.input_container_path.to_str().unwrap());
+        .arg(paths.input_container_path.to_str().unwrap())
+        .arg(submission_id);
 
     timeout(Duration::from_secs(20), com.output()).await?
 }
