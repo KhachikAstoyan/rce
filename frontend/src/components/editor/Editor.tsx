@@ -15,8 +15,11 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from "../shadcn/tabs";
 import { ProblemDescription } from "./ProblemDescription";
 import { TestView } from "./TestView";
 
+const INVISIBLE_DIV = document.createElement("div");
+
 import Confetti from "react-confetti-boom";
 import { SubmissionStatus } from "./SubmissionStatus";
+import { createPortal } from "react-dom";
 interface Props {
   problem: Problem;
 }
@@ -34,6 +37,11 @@ export const Editor: React.FC<Props> = ({ problem }) => {
   const [shouldFetchRunResults, setShouldFetchRunResults] = useState(false);
   const [shouldFetchSubmission, setShouldFetchSubmission] = useState(false);
 
+  // panel references
+  const leftPanelRef = useRef<HTMLDivElement>(INVISIBLE_DIV);
+  const topRightPanelRef = useRef<HTMLDivElement>(INVISIBLE_DIV);
+  const bottomRightPanelRef = useRef<HTMLDivElement>(INVISIBLE_DIV);
+
   const { data: tests, isLoading: testsLoading } = useQuery({
     queryKey: ["tests", problem.id],
     queryFn: () => problemService.getPublicTests(problem.id),
@@ -48,6 +56,7 @@ export const Editor: React.FC<Props> = ({ problem }) => {
   );
   const [bottomTab, setBottomTab] = useState<"tests" | "results">("tests");
 
+  // TODO: refactor this into a custom hook to cleanup everything a little
   const { data: submission } = useQuery({
     queryKey: ["submission", submissionId],
     queryFn: () => problemService.getSubmissionStatus(submissionId!),
@@ -127,87 +136,105 @@ export const Editor: React.FC<Props> = ({ problem }) => {
   }, []);
 
   return (
-    <div className="relative h-screen max-h-screen flex flex-col">
-      {submission?.results?.success && (
-        <div className="z-50">
-          <Confetti
-            mode="boom"
-            particleCount={150}
-            effectCount={1}
-            effectInterval={3000}
-          />
-        </div>
-      )}
-      {shouldFetchSubmission && <LoadingOverlay />}
-      <EditorLayout>
-        <PanelGroup
-          autoSaveId="editorLayout"
-          className="max-h-full"
-          direction="horizontal"
+    <>
+      {createPortal(
+        <Tabs
+          value={leftTab}
+          onValueChange={(v) => setLeftTab(v as any)}
+          className="w-full h-full"
         >
-          <Panel defaultSize={25}>
-            <Tabs
-              value={leftTab}
-              onValueChange={(v) => setLeftTab(v as any)}
-              className="w-full h-full"
-            >
-              <TabsList>
-                <TabsTrigger value="description">Description</TabsTrigger>
-                <TabsTrigger value="submission">Submission</TabsTrigger>
-              </TabsList>
-              <TabsContent className="h-full" value="description">
-                <ProblemDescription problem={problem} />
-              </TabsContent>
-              <TabsContent className="h-full" value="submission">
-                <SubmissionStatus submission={submission} />
-              </TabsContent>
-            </Tabs>
-          </Panel>
-          <ResizeHandle />
-          <Panel>
-            <PanelGroup direction="vertical">
-              <Panel defaultSize={50} className="relative">
-                {isTemplateLoading && <LoadingOverlay />}
-                {solutionTemplate && (
-                  <CodeEditor
-                    defaultValue={solutionTemplate?.template ?? ""}
-                    onMount={handleCodeEditorMount}
-                  />
-                )}
-                <div className="absolute bottom-3 right-3 flex gap-3">
-                  <Button onClick={runCode}>Run</Button>
-                  <Button onClick={submitCode} variant="secondary">
-                    Submit
-                  </Button>
-                </div>
-              </Panel>
-              <ResizeHandle direction="vertical" />
-              <Panel
-                className="h-full max-h-full overflow-y-scroll"
-                defaultSize={50}
-                style={{ overflowY: "scroll" }}
-              >
-                {testsLoading && <LoadingOverlay />}
-                <Tabs
-                  value={bottomTab}
-                  onValueChange={(v) => setBottomTab(v as any)}
+          <TabsList>
+            <TabsTrigger value="description">Description</TabsTrigger>
+            <TabsTrigger value="submission">Submission</TabsTrigger>
+          </TabsList>
+          <TabsContent className="h-full" value="description">
+            <ProblemDescription problem={problem} />
+          </TabsContent>
+          <TabsContent className="h-full" value="submission">
+            <SubmissionStatus submission={submission} />
+          </TabsContent>
+        </Tabs>,
+        leftPanelRef.current!,
+      )}
+
+      {createPortal(
+        <>
+          {isTemplateLoading && <LoadingOverlay />}
+          {solutionTemplate && (
+            <CodeEditor
+              defaultValue={solutionTemplate?.template ?? ""}
+              onMount={handleCodeEditorMount}
+            />
+          )}
+          <div className="absolute bottom-3 right-3 flex gap-3">
+            <Button onClick={runCode}>Run</Button>
+            <Button onClick={submitCode} variant="secondary">
+              Submit
+            </Button>
+          </div>
+        </>,
+        topRightPanelRef.current!,
+      )}
+
+      {createPortal(
+        <>
+          {testsLoading && <LoadingOverlay />}
+          <Tabs value={bottomTab} onValueChange={(v) => setBottomTab(v as any)}>
+            <TabsList>
+              <TabsTrigger value="tests">Tests</TabsTrigger>
+              <TabsTrigger value="results">Results</TabsTrigger>
+            </TabsList>
+            <TabsContent value="tests" className="h-full">
+              <TestView tests={tests!} />
+            </TabsContent>
+            <TabsContent value="results" className="h-full">
+              <TestView tests={tests!} results={runResults?.results} />
+            </TabsContent>
+          </Tabs>
+        </>,
+        bottomRightPanelRef.current,
+      )}
+
+      <div className="relative h-screen max-h-screen flex flex-col">
+        {submission?.results?.success && (
+          <div className="z-50">
+            <Confetti
+              mode="boom"
+              particleCount={150}
+              effectCount={1}
+              effectInterval={3000}
+            />
+          </div>
+        )}
+        {shouldFetchSubmission && <LoadingOverlay />}
+        <EditorLayout>
+          <PanelGroup
+            autoSaveId="editorLayout"
+            className="max-h-full"
+            direction="horizontal"
+          >
+            <Panel defaultSize={25}>
+              <div className="h-full" ref={leftPanelRef}></div>
+            </Panel>
+            <ResizeHandle />
+            <Panel>
+              <PanelGroup direction="vertical">
+                <Panel defaultSize={50} className="relative">
+                  <div className="h-full" ref={topRightPanelRef}></div>
+                </Panel>
+                <ResizeHandle direction="vertical" />
+                <Panel
+                  className="h-full max-h-full overflow-y-scroll"
+                  defaultSize={50}
+                  style={{ overflowY: "scroll" }}
                 >
-                  <TabsList>
-                    <TabsTrigger value="tests">Tests</TabsTrigger>
-                    <TabsTrigger value="results">Results</TabsTrigger>
-                  </TabsList>
-                  <TabsContent value="tests" className="h-full">
-                    <TestView tests={tests!} />
-                  </TabsContent>
-                  <TabsContent value="results" className="h-full">
-                    <TestView tests={tests!} results={runResults?.results} />
-                  </TabsContent>
-                </Tabs>
-              </Panel>
-            </PanelGroup>
-          </Panel>
-        </PanelGroup>
-      </EditorLayout>
-    </div>
+                  <div className="h-full" ref={bottomRightPanelRef}></div>
+                </Panel>
+              </PanelGroup>
+            </Panel>
+          </PanelGroup>
+        </EditorLayout>
+      </div>
+    </>
   );
 };
