@@ -56,7 +56,7 @@ async fn run_docker_container(paths: &FilePaths, lang: &Language) -> Result<Outp
     let mut com = Command::new("docker");
 
     com.arg("run")
-        // .arg("--rm")
+        .arg("--rm")
         .arg("--network")
         .arg("none")
         .arg("-v")
@@ -81,8 +81,6 @@ async fn run_docker_container(paths: &FilePaths, lang: &Language) -> Result<Outp
         .arg(paths.skeleton_container_path.to_str().unwrap())
         .arg(paths.submission_container_path.to_str().unwrap())
         .arg(paths.input_container_path.to_str().unwrap());
-
-    info!(target: "XERS KERELES", "{:?}", com);
 
     timeout(Duration::from_secs(20), com.output()).await?
 }
