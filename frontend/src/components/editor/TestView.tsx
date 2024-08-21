@@ -68,17 +68,18 @@ export const TestView: React.FC<Props> = ({ tests, results }) => {
           ),
         )}
 
-        {results?.stdout && (
+        {results && (
           <>
             <ExpectedReceived testResults={results.testResults[currentTest]} />
           </>
         )}
 
+        {results?.stdout && (
+          <ValueDisplay label="stdout" value={results.stdout} />
+        )}
+
         {results?.stderr && (
-          <>
-            <ValueDisplay label="stdout" value={results.stdout} />
-            <ValueDisplay label="stderr" value={results.stderr} />
-          </>
+          <ValueDisplay label="stdout" value={results.stderr} />
         )}
       </div>
     </div>

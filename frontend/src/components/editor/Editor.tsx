@@ -1,7 +1,6 @@
 import { PanelGroup, Panel } from "react-resizable-panels";
 import { EditorLayout } from "@/layouts/EditorLayout";
 import { Language, Problem } from "@/lib/types";
-import { ScrollArea } from "@/components/shadcn/scroll-area";
 import { OnMount } from "@monaco-editor/react";
 import { editor } from "monaco-editor";
 import { useCallback, useEffect, useRef, useState } from "react";
@@ -183,27 +182,27 @@ export const Editor: React.FC<Props> = ({ problem }) => {
                 </div>
               </Panel>
               <ResizeHandle direction="vertical" />
-              <Panel className="h-full max-h-full" defaultSize={50}>
-                <div className="overflow-y-scroll">
-                  {testsLoading && <LoadingOverlay />}
-                  <Tabs
-                    value={bottomTab}
-                    onValueChange={(v) => setBottomTab(v as any)}
-                  >
-                    <TabsList>
-                      <TabsTrigger value="tests">Tests</TabsTrigger>
-                      <TabsTrigger value="results">Results</TabsTrigger>
-                    </TabsList>
-                    <TabsContent value="tests" className="h-full">
-                      <ScrollArea className=" max-h-full h-full">
-                        <TestView tests={tests!} />
-                      </ScrollArea>
-                    </TabsContent>
-                    <TabsContent value="results" className="h-full">
-                      <TestView tests={tests!} results={runResults?.results} />
-                    </TabsContent>
-                  </Tabs>
-                </div>
+              <Panel
+                className="h-full max-h-full overflow-y-scroll"
+                defaultSize={50}
+                style={{ overflowY: "scroll" }}
+              >
+                {testsLoading && <LoadingOverlay />}
+                <Tabs
+                  value={bottomTab}
+                  onValueChange={(v) => setBottomTab(v as any)}
+                >
+                  <TabsList>
+                    <TabsTrigger value="tests">Tests</TabsTrigger>
+                    <TabsTrigger value="results">Results</TabsTrigger>
+                  </TabsList>
+                  <TabsContent value="tests" className="h-full">
+                    <TestView tests={tests!} />
+                  </TabsContent>
+                  <TabsContent value="results" className="h-full">
+                    <TestView tests={tests!} results={runResults?.results} />
+                  </TabsContent>
+                </Tabs>
               </Panel>
             </PanelGroup>
           </Panel>
