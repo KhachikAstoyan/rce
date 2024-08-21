@@ -79,6 +79,8 @@ export interface ITestResult {
 export interface ISubmissionResult {
   submissionId: string;
   success: boolean;
+  stdout: string;
+  stderr: string;
   message: string;
   passed: number;
   failed: number;

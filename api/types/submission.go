@@ -10,6 +10,8 @@ type SubmissionResult struct {
 	SubmissionId string       `json:"submissionId"`
 	Success      bool         `json:"success"`
 	Message      string       `json:"message"`
+	Stdout       string       `json:"stdout"`
+	Stderr       string       `json:"stderr"`
 	Passed       uint32       `json:"passed"`
 	Failed       uint32       `json:"failed"`
 	TestResults  []TestResult `json:"testResults"`

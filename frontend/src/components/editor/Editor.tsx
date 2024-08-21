@@ -184,24 +184,26 @@ export const Editor: React.FC<Props> = ({ problem }) => {
               </Panel>
               <ResizeHandle direction="vertical" />
               <Panel className="h-full max-h-full" defaultSize={50}>
-                {testsLoading && <LoadingOverlay />}
-                <Tabs
-                  value={bottomTab}
-                  onValueChange={(v) => setBottomTab(v as any)}
-                >
-                  <TabsList>
-                    <TabsTrigger value="tests">Tests</TabsTrigger>
-                    <TabsTrigger value="results">Results</TabsTrigger>
-                  </TabsList>
-                  <TabsContent value="tests" className="h-full">
-                    <ScrollArea className=" max-h-full h-full">
-                      <TestView tests={tests!} />
-                    </ScrollArea>
-                  </TabsContent>
-                  <TabsContent value="results" className="h-full">
-                    <TestView tests={tests!} results={runResults?.results} />
-                  </TabsContent>
-                </Tabs>
+                <div className="overflow-y-scroll">
+                  {testsLoading && <LoadingOverlay />}
+                  <Tabs
+                    value={bottomTab}
+                    onValueChange={(v) => setBottomTab(v as any)}
+                  >
+                    <TabsList>
+                      <TabsTrigger value="tests">Tests</TabsTrigger>
+                      <TabsTrigger value="results">Results</TabsTrigger>
+                    </TabsList>
+                    <TabsContent value="tests" className="h-full">
+                      <ScrollArea className=" max-h-full h-full">
+                        <TestView tests={tests!} />
+                      </ScrollArea>
+                    </TabsContent>
+                    <TabsContent value="results" className="h-full">
+                      <TestView tests={tests!} results={runResults?.results} />
+                    </TabsContent>
+                  </Tabs>
+                </div>
               </Panel>
             </PanelGroup>
           </Panel>
