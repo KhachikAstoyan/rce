@@ -25,13 +25,12 @@ func bindProblemsApi(app *core.App, group *echo.Group) {
 	subGroup.POST("", api.create, authorize("write:problem"))
 	subGroup.DELETE("/:id", api.delete, authorize("write:problem"))
 	subGroup.GET("/:id/submissions", api.listSubmissions, authorize())
-	// TODO: create another controller for this
+
 	subGroup.GET("/:id/tests/public", api.getTests, authorize("read:test"))
 	subGroup.POST("/:id/tests", api.addTest, authorize("write:test"))
 	subGroup.DELETE("/tests/:id", api.deleteTest, authorize("write:test"))
 	subGroup.POST("/tests/:id/skeletons", api.addSkeleton, authorize("write:test"))
 
-	// TODO: maybe another controller for this one too
 	subGroup.GET("/:id/templates/:lang", api.getSolutionTemplate)
 	subGroup.DELETE("/:id/templates/:lang", api.deleteSolutionTemplate)
 	subGroup.POST("/:id/templates", api.createSolutionTemplate)

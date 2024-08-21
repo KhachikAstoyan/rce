@@ -67,8 +67,7 @@ async fn main() {
                 info!("Parsed the message body");
                 println!("Parsed the message body, starting code execution");
                 let execution_result =
-                    tokio::spawn(async move { executor::execute_handler(data).await.unwrap() })
-                        .await;
+                    tokio::spawn(async move { executor::execute_handler(data).await }).await;
 
                 match execution_result {
                     Ok(mut result) => {

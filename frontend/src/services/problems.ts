@@ -39,12 +39,12 @@ const createSubmission = async (
 };
 
 const getSubmissionStatus = async (submissionId: string) => {
-  const response = await api.get<ISubmission>(`/submissions/${submissionId}`);
+  const response = await api.get<ISubmission>(`/submissions/${submissionId}/status`);
   return response.data;
 };
 
 const getRunStatus = async (runId: string) => {
-  const response = await api.get<ISubmission>(`/submissions/check/${runId}`);
+  const response = await api.get<ISubmission>(`/submissions/${runId}/check`);
   return response.data; 
 }
 

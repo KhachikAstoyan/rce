@@ -87,7 +87,6 @@ func (s *ProblemService) GetProblemByID(id string) (*models.Problem, error) {
 	return &problem, nil
 }
 
-// TODO: use this when fetching the tests to send to the executor
 func (s *ProblemService) GetAllTests(id string) (*models.Test, error) {
 	db := s.app.DB
 
@@ -102,7 +101,7 @@ func (s *ProblemService) GetAllTests(id string) (*models.Test, error) {
 	return &test, nil
 }
 
-// TODO: add functions for update, delete and list
+// TODO: add functions for update, delete and list if needed
 
 func (s *ProblemService) GetSolutionTemplate(problemId, language string) (*models.SolutionTemplate, error) {
 	db := s.app.DB
@@ -228,6 +227,18 @@ func (s *ProblemService) UpdateProblem(id string, p *dtos.CreateProblemDto) (*mo
 
 	return &problem, nil
 
+}
+
+func (s *ProblemService) GetSkeleton(testId, lang string) (*models.Skeleton, error) {
+	db := s.app.DB
+	var skeleton models.Skeleton
+	err := db.Where("language = ?", lang).Where("test_id = ?", testId).First(&skeleton).Error
+
+	if err != nil {
+		return nil, echo.NewHTTPError(http.StatusInternalServerError, "error finding the skeleton for the language")
+	}
+
+	return &skeleton, err
 }
 
 func (s *ProblemService) AddSkeletonToTest(id string, t *dtos.CreateSkeletonDto) error {

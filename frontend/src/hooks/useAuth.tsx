@@ -2,6 +2,7 @@ import { authAtom } from "@/store/auth";
 import { useAtom } from "jotai";
 import { useCallback, useEffect } from "react";
 import { authService } from "@/services/auth";
+import { toast } from "sonner";
 
 export function useAuth(fetchProfile: boolean = false) {
   const [auth, setAuth] = useAtom(authAtom);
@@ -38,8 +39,7 @@ export function useAuth(fetchProfile: boolean = false) {
     try {
       await authService.logOut();
     } catch (error) {
-      // TODO: add notification
-      console.error("Failed to log out:", error);
+      toast.error("Failed to log out");
     } finally {
       setAuth({ user: null });
       localStorage.removeItem("accessToken");

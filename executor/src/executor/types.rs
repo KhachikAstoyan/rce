@@ -20,7 +20,8 @@ impl SubmissionResult {
         format!(
             r#"{{ // Add curly braces here
             "success": false,
-            "submission_id": {},
+            "message": "Something went wrong while executing your code",
+            "submissionId": {},
             "passed": 0,
             "failed": 0,
             "testResults": []

@@ -127,7 +127,6 @@ func (api *authApi) getRefreshTokenHandler(c echo.Context) error {
 		return echo.NewHTTPError(http.StatusUnauthorized, "unauthorized")
 	}
 
-	// TODO: refactor this part
 	refreshToken, err := api.authService.GenerateAndStoreRefreshToken(userId)
 
 	if err != nil {
