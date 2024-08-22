@@ -49,7 +49,7 @@ export const TestView: React.FC<Props> = ({ tests, results }) => {
   }
 
   return (
-    <div className="p-3">
+    <div className="p-3 pb-8">
       <div className="flex gap-2">
         {testSuite.tests.map((_, index) => (
           <Button
@@ -74,12 +74,19 @@ export const TestView: React.FC<Props> = ({ tests, results }) => {
           </>
         )}
 
-        {results?.stdout && (
-          <ValueDisplay label="stdout" value={results.stdout} />
+        {results?.testResults[currentTest]?.stdout && (
+          <ValueDisplay
+            label="stdout"
+            value={results?.testResults[currentTest]?.stdout}
+          />
         )}
 
-        {results?.stderr && (
-          <ValueDisplay label="stdout" value={results.stderr} />
+        {results?.testResults[currentTest]?.stderr && (
+          <ValueDisplay
+            label="stderr"
+            className="text-red-600"
+            value={results?.testResults[currentTest]?.stderr}
+          />
         )}
       </div>
     </div>

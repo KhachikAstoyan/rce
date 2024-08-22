@@ -1,6 +1,7 @@
 //USER_CODE_PLACEHOLDER
 
 import fs from "fs";
+import util from "util";
 
 declare global {
   function solution(args: Record<string, Value>): any;
@@ -79,6 +80,35 @@ function run() {
     ) as TestSuite;
 
     testSuite.tests.forEach((test) => {
+      let testStdout = "";
+      let testStderr = "";
+
+      // Capture stdout
+      const originalStdoutWrite = process.stdout.write.bind(process.stdout);
+      // @ts-ignore
+      process.stdout.write = (chunk) => {
+        testStdout += chunk;
+      };
+
+      // Capture stderr
+      const originalStderrWrite = process.stderr.write.bind(process.stderr);
+      // @ts-ignore
+      process.stderr.write = (chunk) => {
+        testStderr += chunk;
+      };
+
+      // Capture console.log and console.error
+      const originalConsoleLog = console.log;
+      const originalConsoleError = console.error;
+      console.log = (...args) => {
+        const output = util.format(...args) + "\n";
+        testStdout += output;
+      };
+      console.error = (...args) => {
+        const output = util.format(...args) + "\n";
+        testStderr += output;
+      };
+
       const expected = test.expected.value;
 
       Object.entries(test.inputs).map(([key, value]) => {
@@ -87,8 +117,15 @@ function run() {
 
       const result = solution(test.inputs);
 
+      process.stdout.write = originalStdoutWrite;
+      process.stderr.write = originalStderrWrite;
+      console.log = originalConsoleLog;
+      console.error = originalConsoleError;
+
       const testResult = {
         success: compareValues(test.expected, result),
+        stdout: testStdout,
+        stderr: testStderr,
         assertionResults: [
           {
             expected,

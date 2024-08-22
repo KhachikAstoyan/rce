@@ -74,13 +74,13 @@ export interface IAssertionResult {
 export interface ITestResult {
   success: boolean;
   assertionResults: IAssertionResult[];
+  stdout: string;
+  stderr: string;
 }
 
 export interface ISubmissionResult {
   submissionId: string;
   success: boolean;
-  stdout: string;
-  stderr: string;
   message: string;
   passed: number;
   failed: number;

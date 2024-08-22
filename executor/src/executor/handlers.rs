@@ -15,8 +15,6 @@ pub async fn execute_handler(payload: ExecuteRequestPayload) -> SubmissionResult
             failed: 0,
             message: "couldn't execute your code, please try again later".into(),
             passed: 0,
-            stdout: Some(String::from("")),
-            stderr: Some(String::from("")),
             submission_id: Some(submission_id),
             success: false,
             test_results: vec![],

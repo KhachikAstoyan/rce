@@ -33,6 +33,8 @@ func (s *SubmissionService) SaveSubmissionResults(results *types.SubmissionResul
 	db := s.app.DB
 	var submission models.Submission
 
+	fmt.Println(results)
+
 	if err := db.Where("id = ?", results.SubmissionId).First(&submission).Error; err != nil {
 		return echo.NewHTTPError(http.StatusNotFound, "submission not found")
 	}

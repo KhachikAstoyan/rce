@@ -58,10 +58,7 @@ pub async fn test_solution(
     info!("Reading results file {:?}", results_path);
     let results_json = fs::read_to_string(&results_path).await?;
     info!(target: "results_json", "{}", results_json);
-    let mut submission_results: SubmissionResult = serde_json::from_str(&results_json)?;
-
-    submission_results.stdout = Some(stdout.to_string());
-    submission_results.stderr = Some(stderr.to_string());
+    let submission_results: SubmissionResult = serde_json::from_str(&results_json)?;
 
     // it's fine if we ignore this, let's not crash anything
     // just because we can't remove a file

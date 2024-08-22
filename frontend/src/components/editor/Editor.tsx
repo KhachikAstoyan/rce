@@ -81,6 +81,7 @@ export const Editor: React.FC<Props> = ({ problem }) => {
     }
   }, [submission]);
 
+  // refactor this to not use useEffect
   useEffect(() => {
     if (runResults) {
       setShouldFetchRunResults(false);
@@ -137,6 +138,11 @@ export const Editor: React.FC<Props> = ({ problem }) => {
 
   return (
     <>
+      {/* 
+        These portal will allow to rearrange the views however the 
+        user wants. Right now it's just a no-op, but I'll implement
+        drag and drop once other core features are done. TODO:
+      */}
       {createPortal(
         <Tabs
           value={leftTab}

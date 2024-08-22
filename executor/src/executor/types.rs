@@ -9,8 +9,6 @@ use crate::language::Language;
 pub struct SubmissionResult {
     pub success: bool,
     pub submission_id: Option<String>,
-    pub stdout: Option<String>,
-    pub stderr: Option<String>,
     pub message: String,
     pub passed: u32,
     pub failed: u32,
@@ -23,8 +21,6 @@ impl SubmissionResult {
             r#"{{ // Add curly braces here
             "success": false,
             "message": "Something went wrong while executing your code",
-            "stdout": "",
-            "stderr": "".
             "submissionId": {},
             "passed": 0,
             "failed": 0,
@@ -75,6 +71,8 @@ pub struct ExecutionResultPayload {
 #[serde(rename_all = "camelCase")]
 pub struct TestResult {
     pub success: bool,
+    pub stdout: String,
+    pub stderr: String,
     pub assertion_results: Vec<AssertionResult>,
 }
 
