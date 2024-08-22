@@ -1,49 +1,36 @@
-import { Link } from "@tanstack/react-router";
-import { Home, LineChart, Package, ShoppingCart, Users } from "lucide-react";
-import { Badge } from "@/components/shadcn/badge";
+import { Link, LinkProps } from "@tanstack/react-router";
+import { Home, ShoppingCart } from "lucide-react";
 import { Logo } from "@/components/common/Logo";
+import { isOnPath } from "../../lib/utils";
+
+const NavigationItem: React.FC<LinkProps & { isActive?: boolean }> = ({
+  isActive,
+  ...props
+}) => {
+  return (
+    <Link
+      {...props}
+      className={`flex items-center gap-3 rounded-lg px-3 py-2 transition-all ${
+        isActive ? "bg-muted text-primary" : "text-muted-foreground"
+      }`}
+    />
+  );
+};
 
 export const SideNavigationItems = () => {
   return (
     <nav className="grid items-start px-2 text-sm font-medium lg:px-4">
-      <Link
-        href="#"
-        className="flex items-center gap-3 rounded-lg bg-muted px-3 py-2 text-primary transition-all hover:text-primary"
-      >
+      <NavigationItem to="/admin" isActive={isOnPath("/admin")}>
         <Home className="h-4 w-4" />
         Dashboard
-      </Link>
-      <Link
-        href="#"
-        className="flex items-center gap-3 rounded-lg px-3 py-2 text-muted-foreground transition-all hover:text-primary"
+      </NavigationItem>
+      <NavigationItem
+        to="/admin/problems"
+        isActive={isOnPath("/admin/problems")}
       >
         <ShoppingCart className="h-4 w-4" />
-        Orders
-        <Badge className="ml-auto flex h-6 w-6 shrink-0 items-center justify-center rounded-full">
-          6
-        </Badge>
-      </Link>
-      <Link
-        href="#"
-        className="flex items-center gap-3 rounded-lg px-3 py-2 text-muted-foreground transition-all hover:text-primary"
-      >
-        <Package className="h-4 w-4" />
-        Products{" "}
-      </Link>
-      <Link
-        href="#"
-        className="flex items-center gap-3 rounded-lg px-3 py-2 text-muted-foreground transition-all hover:text-primary"
-      >
-        <Users className="h-4 w-4" />
-        Customers
-      </Link>
-      <Link
-        href="#"
-        className="flex items-center gap-3 rounded-lg px-3 py-2 text-muted-foreground transition-all hover:text-primary"
-      >
-        <LineChart className="h-4 w-4" />
-        Analytics
-      </Link>
+        Problems
+      </NavigationItem>
     </nav>
   );
 };

@@ -5,11 +5,10 @@ import { problemService } from "../../services/problems";
 
 export const Problem = () => {
   const { problemSlug } = useParams({ strict: false });
+  // TODO: extract this to a custom hook
   const { data, isLoading, isError } = useQuery({
     queryKey: ["problem", problemSlug],
-    queryFn: async () => {
-      return await problemService.getProblemDetails(problemSlug!);
-    },
+    queryFn: async () => problemService.getProblemDetails(problemSlug!),
   });
 
   if (isLoading) {

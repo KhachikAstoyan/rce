@@ -18,3 +18,7 @@ export function formatMillisecondsString(ms: string) {
   const msNum = parseFloat(ms);
   return `${msNum.toFixed(2)} ms`;
 }
+
+export function isOnPath(path: string) {
+  return window.location.pathname === path;
+}
