@@ -13,3 +13,8 @@ export function capitalize(value: string) {
 export function formatDate(date: string) {
   return format(new Date(date), "MMM dd, yyyy HH:mm");
 }
+
+export function formatMillisecondsString(ms: string) {
+  const msNum = parseFloat(ms);
+  return `${msNum.toFixed(2)} ms`;
+}

@@ -76,6 +76,7 @@ export interface ITestResult {
   assertionResults: IAssertionResult[];
   stdout: string;
   stderr: string;
+  runtimeMs: string;
 }
 
 export interface ISubmissionResult {

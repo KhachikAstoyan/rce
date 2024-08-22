@@ -20,18 +20,23 @@ interface TestSuite {
   }[];
 }
 
+interface TestCaseResult {
+  success: boolean;
+  stdout: string;
+  stderr: string;
+  runtimeMs: string;
+  assertionResults: {
+    expected: any;
+    received: any;
+  }[];
+}
+
 interface TestSuiteResult {
   success: boolean;
   message: string;
   passed: number;
   failed: number;
-  testResults: {
-    success: boolean;
-    assertionResults: {
-      expected: any;
-      received: any;
-    }[];
-  }[];
+  testResults: TestCaseResult[];
 }
 
 function parseValue(input: Value): any {
@@ -62,6 +67,17 @@ function compareValues(expected: Value, received: any): boolean {
     default:
       throw new Error("Unknown type");
   }
+}
+
+function measureTimeMs(cb: Function, ...args: any[]) {
+  const start = process.hrtime.bigint();
+  const result = cb(...args);
+  const end = process.hrtime.bigint();
+
+  return {
+    result,
+    timeMs: Number(end - start) / 1e6,
+  };
 }
 
 function run() {
@@ -115,17 +131,18 @@ function run() {
         test.inputs[key] = parseValue(value);
       });
 
-      const result = solution(test.inputs);
+      const { result, timeMs } = measureTimeMs(solution, test.inputs);
 
       process.stdout.write = originalStdoutWrite;
       process.stderr.write = originalStderrWrite;
       console.log = originalConsoleLog;
       console.error = originalConsoleError;
 
-      const testResult = {
+      const testResult: TestCaseResult = {
         success: compareValues(test.expected, result),
         stdout: testStdout,
         stderr: testStderr,
+        runtimeMs: timeMs.toString(),
         assertionResults: [
           {
             expected,

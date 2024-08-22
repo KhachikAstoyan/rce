@@ -18,6 +18,7 @@ type SubmissionResult struct {
 type TestResult struct {
 	Success          bool              `json:"success"`
 	AssertionResults []AssertionResult `json:"assertionResults"`
+	RuntimeMS        string            `json:"runtimeMs"`
 	Stdout           string            `json:"stdout"`
 	Stderr           string            `json:"stderr"`
 }

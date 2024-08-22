@@ -2,6 +2,8 @@ import React from "react";
 import { ISubmissionResult, ITest, ITestResult } from "../../lib/types";
 import { Button } from "../shadcn/button";
 import { ValueDisplay } from "./ValueDisplay";
+import { Badge } from "../shadcn/badge";
+import { formatMillisecondsString } from "../../lib/utils";
 
 interface Props {
   tests?: ITest;
@@ -32,7 +34,6 @@ const ExpectedReceived: React.FC<{
 
 export const TestView: React.FC<Props> = ({ tests, results }) => {
   const testSuite = tests?.testSuite;
-  console.log(testSuite);
   const [currentTest, setCurrentTest] = React.useState(0);
 
   if (!testSuite) return null;
@@ -48,6 +49,8 @@ export const TestView: React.FC<Props> = ({ tests, results }) => {
     );
   }
 
+  const currentTestResult = results?.testResults[currentTest];
+
   return (
     <div className="p-3 pb-8">
       <div className="flex gap-2">
@@ -61,6 +64,14 @@ export const TestView: React.FC<Props> = ({ tests, results }) => {
         ))}
       </div>
 
+      {currentTestResult?.runtimeMs && (
+        <div className="my-3">
+          <Badge variant="secondary">
+            Runtime: {formatMillisecondsString(currentTestResult?.runtimeMs)}
+          </Badge>
+        </div>
+      )}
+
       <div className="flex flex-col gap-4 mt-3">
         {Object.entries(testSuite.tests[currentTest].inputs).map(
           ([key, value]) => (
@@ -70,22 +81,19 @@ export const TestView: React.FC<Props> = ({ tests, results }) => {
 
         {results && (
           <>
-            <ExpectedReceived testResults={results.testResults[currentTest]} />
+            <ExpectedReceived testResults={currentTestResult} />
           </>
         )}
 
-        {results?.testResults[currentTest]?.stdout && (
-          <ValueDisplay
-            label="stdout"
-            value={results?.testResults[currentTest]?.stdout}
-          />
+        {currentTestResult?.stdout && (
+          <ValueDisplay label="stdout" value={currentTestResult?.stdout} />
         )}
 
-        {results?.testResults[currentTest]?.stderr && (
+        {currentTestResult?.stderr && (
           <ValueDisplay
             label="stderr"
             className="text-red-600"
-            value={results?.testResults[currentTest]?.stderr}
+            value={currentTestResult?.stderr}
           />
         )}
       </div>

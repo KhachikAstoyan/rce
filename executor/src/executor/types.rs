@@ -73,6 +73,7 @@ pub struct TestResult {
     pub success: bool,
     pub stdout: String,
     pub stderr: String,
+    pub runtime_ms: String,
     pub assertion_results: Vec<AssertionResult>,
 }
 
