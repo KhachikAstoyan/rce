@@ -30,42 +30,83 @@ func InitProblemService(app *core.App) *ProblemService {
 	return problemService
 }
 
+const getProblemsQuery string = `
+	SELECT
+		p.*,
+		ARRAY_AGG(DISTINCT sk.language) FILTER (WHERE sk.language IS NOT NULL AND sk.language != '') as supported_languages,
+		EXISTS (
+			SELECT 1
+			FROM submissions s
+			WHERE s.problem_id = p.id
+			AND s.user_id = $1
+			AND s.status = 'completed'
+		) as solved
+	FROM
+		problems p
+	LEFT JOIN
+		skeletons sk ON sk.problem_id = p.id
+	GROUP BY
+		p.id
+	ORDER BY created_at DESC
+`
+
 func (s *ProblemService) GetProblems(page, pageSize int, userId interface{}) ([]dtos.ProblemResponse, error) {
 	db := s.app.DB
-
 	var problems []dtos.ProblemResponse
-	// result := db.Scopes(utils.Paginate(&c)).Omit("Tests").Find(&problems)
-	query := `
-		SELECT
-			p.*,
-			ARRAY_AGG(DISTINCT sk.language) FILTER (WHERE sk.language IS NOT NULL AND sk.language != '') as supported_languages,
-			EXISTS (
-				SELECT 1
-				FROM submissions s
-				WHERE s.problem_id = p.id
-				AND s.user_id = $1
-				AND s.status = 'completed'
-			) as solved
-		FROM
-			problems p
-		LEFT JOIN
-			skeletons sk ON sk.problem_id = p.id
-		GROUP BY
-			p.id
-		ORDER BY created_at DESC
-	`
 
-	err := db.Raw(query, userId).Scan(&problems).Error
+	err := db.Raw(getProblemsQuery, userId).Scan(&problems).Error
 
 	if err != nil {
 		return nil, echo.NewHTTPError(http.StatusInternalServerError, "couldnt find problems")
 	}
+
+	fmt.Println("WHAT THE FUCK")
+	fmt.Println(problems)
 
 	for i := range problems {
 		problems[i].SupportedLanguages = []string(problems[i].SupportedLanguages)
 	}
 
 	return problems, nil
+}
+
+func (s *ProblemService) GetProblemDetailsByID(id string, userId interface{}) (*dtos.ProblemResponse, error) {
+	db := s.app.DB
+
+	var problem dtos.ProblemResponse
+
+	whereClause := "problems.slug = ?"
+	if utils.IsUUID(id) {
+		whereClause = "problems.id = ?"
+	}
+
+	query := `
+		SELECT
+			problems.*,
+			ARRAY_REMOVE(ARRAY_AGG(DISTINCT skeletons.language), '') as supported_languages,
+			EXISTS (
+				SELECT 1
+				FROM submissions
+				WHERE submissions.problem_id = problems.id
+				AND submissions.user_id = ?
+				AND submissions.status = 'completed'
+			) as solved
+		FROM
+			problems
+		LEFT JOIN
+			skeletons ON skeletons.problem_id = problems.id
+		WHERE
+			` + whereClause + `
+		GROUP BY
+			problems.id
+	`
+
+	if err := db.Raw(query, userId, id).Scan(&problem).Error; err != nil {
+		fmt.Println(err)
+		return nil, echo.NewHTTPError(http.StatusInternalServerError, "couldn't find the problem")
+	}
+
+	return &problem, nil
 }
 
 func (s *ProblemService) GetProblemByID(id string) (*models.Problem, error) {

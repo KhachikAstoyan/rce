@@ -4,11 +4,10 @@ This is the code execution service for my toy remote code execution engine. I de
 
 ## TODO
 
-- [ ] Make it possible to execute multiple submissions inside one container
-- [ ] Use https://github.com/ioi/isolate for isolating them
-- [-] Or use gvisor
 - [x] Make sure to handle errors during submitting results to the DB
 - [x] Come up with a way to post submission results efficiently
+- [x] Add other languages
+- [ ] Instead of number, use int or float for better compatibility with better languages
 
 ## How to set it up.
 

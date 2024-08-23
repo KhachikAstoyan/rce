@@ -59,7 +59,7 @@ func (api *problemsApi) list(c echo.Context) error {
 
 func (api *problemsApi) view(c echo.Context) error {
 	id := c.Param("id")
-	problem, err := api.service.GetProblemByID(id)
+	problem, err := api.service.GetProblemDetailsByID(id, c.Get("userId"))
 
 	if err != nil {
 		return err
