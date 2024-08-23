@@ -1,3 +1,5 @@
+import { Language } from "./constants/languages";
+
 export interface IOption {
   label: string;
   value: string;
@@ -32,10 +34,6 @@ export interface ITest {
   updatedAt: string;
   language: Language;
   testSuite: ITestSuite;
-}
-
-export enum Language {
-  JavaScript = "javascript",
 }
 
 export interface ITestSuite {

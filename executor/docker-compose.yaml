@@ -6,3 +6,8 @@ services:
       context: ./environments/javascript
       dockerfile: Dockerfile
     image: toyrce:javascript
+  python:
+    build:
+      context: "./environments/python"
+      dockerfile: Dockerfile
+    image: toyrce:python

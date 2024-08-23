@@ -33,7 +33,7 @@ export const Problems = () => {
             accessorKey: "name",
             header: "Name",
             cell: (cell) => (
-              <Link to={`/admin/problems/${cell.row.original.slug}`}>
+              <Link to={`/admin/problems/${cell.row.original.id}`}>
                 {cell.getValue() as string}
               </Link>
             ),

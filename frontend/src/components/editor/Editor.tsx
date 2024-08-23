@@ -1,6 +1,6 @@
 import { PanelGroup, Panel } from "react-resizable-panels";
 import { EditorLayout } from "@/layouts/EditorLayout";
-import { Language, Problem } from "@/lib/types";
+import { Problem } from "@/lib/types";
 import { OnMount } from "@monaco-editor/react";
 import { editor } from "monaco-editor";
 import { useCallback, useEffect, useRef, useState } from "react";
@@ -20,12 +20,13 @@ const INVISIBLE_DIV = document.createElement("div");
 import Confetti from "react-confetti-boom";
 import { SubmissionStatus } from "./SubmissionStatus";
 import { createPortal } from "react-dom";
+import { Language } from "../../lib/constants/languages";
 interface Props {
   problem: Problem;
 }
 
 export const Editor: React.FC<Props> = ({ problem }) => {
-  const [language] = useState<Language>(Language.JavaScript);
+  const [language] = useState<Language>(Language.Python);
   const codeEditorRef = useRef<editor.IStandaloneCodeEditor>();
   const handleCodeEditorMount: OnMount = (editor) => {
     codeEditorRef.current = editor;
@@ -71,8 +72,6 @@ export const Editor: React.FC<Props> = ({ problem }) => {
     refetchInterval: 500,
   });
 
-  console.log("runResults", runResults);
-
   useEffect(() => {
     if (submission) {
       setShouldFetchSubmission(false);
@@ -99,7 +98,7 @@ export const Editor: React.FC<Props> = ({ problem }) => {
 
       const res = await problemService.createSubmission(
         problem.id,
-        Language.JavaScript,
+        language,
         code,
       );
 
@@ -113,7 +112,7 @@ export const Editor: React.FC<Props> = ({ problem }) => {
     }
   }, []);
 
-  const runCode = useCallback(async () => {
+  const runCode = async () => {
     try {
       const code = codeEditorRef.current?.getValue();
       if (!code) {
@@ -122,7 +121,7 @@ export const Editor: React.FC<Props> = ({ problem }) => {
 
       const res = await problemService.createSubmission(
         problem.id,
-        Language.JavaScript,
+        language,
         code,
         true, // only public tests
       );
@@ -134,7 +133,7 @@ export const Editor: React.FC<Props> = ({ problem }) => {
       toast.error("Failed to run code");
       console.error(error);
     }
-  }, []);
+  };
 
   return (
     <>
@@ -169,6 +168,7 @@ export const Editor: React.FC<Props> = ({ problem }) => {
           {solutionTemplate && (
             <CodeEditor
               defaultValue={solutionTemplate?.template ?? ""}
+              language={language}
               onMount={handleCodeEditorMount}
             />
           )}

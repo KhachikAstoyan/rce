@@ -21,6 +21,7 @@ type CodeEditorProps = React.ComponentProps<typeof Editor> & {
 export const CodeEditor: React.FC<CodeEditorProps> = ({
   onChange,
   onMount: customOnMount,
+  options,
   ...props
 }) => {
   const codeEditorRef = useRef<editor.IStandaloneCodeEditor>();
@@ -37,7 +38,6 @@ export const CodeEditor: React.FC<CodeEditorProps> = ({
     <Editor
       {...props}
       height="100%"
-      defaultLanguage="javascript"
       theme={theme === "light" ? "vs-light" : "myDark"}
       options={{
         suggest: {
@@ -47,6 +47,7 @@ export const CodeEditor: React.FC<CodeEditorProps> = ({
         fontSize: 16,
         quickSuggestions: false,
         minimap: { enabled: false },
+        ...options,
       }}
       onMount={customOnMount || handleCodeEditorMount}
     />

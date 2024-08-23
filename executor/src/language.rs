@@ -7,6 +7,8 @@ use std::collections::HashMap;
 pub enum Language {
     #[serde(rename = "javascript")]
     Javascript,
+    #[serde(rename = "python")]
+    Python,
     // #[serde(rename = "rust")]
     // Rust,
 }
@@ -26,12 +28,12 @@ impl fmt::Display for Language {
 static LANGUAGE_EXTENSIONS: Lazy<HashMap<Language, &'static str>> = Lazy::new(|| {
     HashMap::from([
         (Language::Javascript, "js"),
+        (Language::Python, "py"),
         // (Language::Rust, "rs"),
         // (Language::Typescript, "ts"),
         // (Language::Go, "go"),
         // (Language::C, "c"),
         // (Language::Cpp, "cpp"),
-        // (Language::Python, "py"),
         // (Language::Java, "java"),
         // (Language::Bash, "sh"),
     ])

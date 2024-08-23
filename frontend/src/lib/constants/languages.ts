@@ -1,7 +1,10 @@
-import { Language } from "../types";
+export enum Language {
+  JavaScript = "javascript",
+  Python = "python",
+  Typescript = "typescript",
+}
 
 interface ILanguageData {
-  name: string;
   skeletonTemplate: string;
 }
 
@@ -11,9 +14,39 @@ function solution(args) {
 }
 `;
 
-export const SUPPORTED_LANGUAGES: readonly ILanguageData[] = [
-  {
-    name: Language.JavaScript,
+const PYTHON_SKELETON_TEMPLATE = `
+def solution(args):
+  # return problemName(*args)
+`;
+
+const TYPESCRIPT_SKELETON_TEMPLATE = `
+interface Value {
+  type: string;
+  value: string;
+}
+
+function solution(args: Record<string, Value>): any {
+  // return problemName(...args)
+}
+`;
+
+
+export const SUPPORTED_LANGUAGES: Record<Language, ILanguageData> = {
+  [Language.JavaScript]: {
     skeletonTemplate: JAVASCRIPT_SKELETON_TEMPLATE,
   },
-] as const;
+  [Language.Python]: {
+    skeletonTemplate: PYTHON_SKELETON_TEMPLATE,
+  },
+  [Language.Typescript]: {
+    skeletonTemplate: TYPESCRIPT_SKELETON_TEMPLATE,
+  },
+} as const;
+
+export const getLanguageData = (
+  language?: string,
+): ILanguageData | undefined => {
+  const data = SUPPORTED_LANGUAGES[language as Language];
+
+  return data;
+};

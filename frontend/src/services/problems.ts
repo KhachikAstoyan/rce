@@ -1,5 +1,6 @@
 import { api } from "@/lib/api";
-import { ISubmission, ITest, ITestSuite, Language, Problem } from "@/lib/types";
+import { ISubmission, ITest, ITestSuite, Problem } from "@/lib/types";
+import { Language } from "@/lib/constants/languages";
 
 const getProblems = async () => {
   const response = await api.get<Problem[]>("/problems");
@@ -39,14 +40,16 @@ const createSubmission = async (
 };
 
 const getSubmissionStatus = async (submissionId: string) => {
-  const response = await api.get<ISubmission>(`/submissions/${submissionId}/status`);
+  const response = await api.get<ISubmission>(
+    `/submissions/${submissionId}/status`,
+  );
   return response.data;
 };
 
 const getRunStatus = async (runId: string) => {
   const response = await api.get<ISubmission>(`/submissions/${runId}/check`);
-  return response.data; 
-}
+  return response.data;
+};
 
 const createTestSuite = async (problemId: string, testSuite: ITestSuite) => {
   const response = await api.post<ITest>(`/problems/${problemId}/tests`, {
@@ -57,11 +60,11 @@ const createTestSuite = async (problemId: string, testSuite: ITestSuite) => {
 };
 
 const createSkeleton = async (
-  testId: string,
+  problemId: string,
   language: Language,
   skeleton: string,
 ) => {
-  const response = await api.post<{}>(`/problems/tests/${testId}/skeletons`, {
+  const response = await api.post<{}>(`/problems/${problemId}/skeletons`, {
     language,
     skeleton,
   });
@@ -85,6 +88,22 @@ interface IGetTemplateResponse {
 const getTemplate = async (problemId: string, language: Language) => {
   const response = await api.get<IGetTemplateResponse>(
     `/problems/${problemId}/templates/${language}`,
+  );
+
+  return response.data;
+};
+
+const getProblemSkeletons = async (problemId: string) => {
+  const response = await api.get<Record<string, string>>(
+    `/problems/${problemId}/skeletons`,
+  );
+
+  return response.data;
+};
+
+const getProblemTemplates = async (problemId: string) => {
+  const response = await api.get<Record<string, string>>(
+    `/problems/${problemId}/templates`,
   );
 
   return response.data;
@@ -119,4 +138,6 @@ export const problemService = {
   createSkeleton,
   getTemplate,
   createTemplate,
+  getProblemSkeletons,
+  getProblemTemplates,
 };

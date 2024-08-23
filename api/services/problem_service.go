@@ -38,7 +38,7 @@ func (s *ProblemService) GetProblems(page, pageSize int, userId interface{}) ([]
 	query := `
 		SELECT
 			p.*,
-			ARRAY_AGG(DISTINCT t.language) FILTER (WHERE t.language IS NOT NULL AND t.language != '') as supported_languages,
+			ARRAY_AGG(DISTINCT sk.language) FILTER (WHERE sk.language IS NOT NULL AND sk.language != '') as supported_languages,
 			EXISTS (
 				SELECT 1
 				FROM submissions s
@@ -49,7 +49,7 @@ func (s *ProblemService) GetProblems(page, pageSize int, userId interface{}) ([]
 		FROM
 			problems p
 		LEFT JOIN
-			tests t ON t.problem_id = p.id
+			skeletons sk ON sk.problem_id = p.id
 		GROUP BY
 			p.id
 		ORDER BY created_at DESC
@@ -92,7 +92,7 @@ func (s *ProblemService) GetAllTests(id string) (*models.Test, error) {
 
 	var test models.Test
 
-	err := db.Where("problem_id = ?", id).Omit("Skeleton").First(&test).Error
+	err := db.Where("problem_id = ?", id).First(&test).Error
 
 	if err != nil {
 		return nil, echo.NewHTTPError(http.StatusNotFound, "couldnt find tests for this problem")
@@ -229,10 +229,10 @@ func (s *ProblemService) UpdateProblem(id string, p *dtos.CreateProblemDto) (*mo
 
 }
 
-func (s *ProblemService) GetSkeleton(testId, lang string) (*models.Skeleton, error) {
+func (s *ProblemService) GetSkeleton(problemId, lang string) (*models.Skeleton, error) {
 	db := s.app.DB
 	var skeleton models.Skeleton
-	err := db.Where("language = ?", lang).Where("test_id = ?", testId).First(&skeleton).Error
+	err := db.Where("language = ?", lang).Where("problem_id = ?", problemId).First(&skeleton).Error
 
 	if err != nil {
 		return nil, echo.NewHTTPError(http.StatusInternalServerError, "error finding the skeleton for the language")
@@ -241,14 +241,14 @@ func (s *ProblemService) GetSkeleton(testId, lang string) (*models.Skeleton, err
 	return &skeleton, err
 }
 
-func (s *ProblemService) AddSkeletonToTest(id string, t *dtos.CreateSkeletonDto) error {
+func (s *ProblemService) AddSkeletonToProblem(id string, t *dtos.CreateSkeletonDto) error {
 	db := s.app.DB
 
-	var test models.Test
+	var test models.Problem
 	err := db.Where("id = ?", id).First(&test).Error
 
 	if err != nil {
-		return echo.NewHTTPError(http.StatusNotFound, "test not found")
+		return echo.NewHTTPError(http.StatusNotFound, "problem not found")
 	}
 
 	if err := utils.ValidateStruct(t); err != nil {
@@ -265,6 +265,45 @@ func (s *ProblemService) AddSkeletonToTest(id string, t *dtos.CreateSkeletonDto)
 	}
 
 	return nil
+}
+
+func (s *ProblemService) GetProblemSkeletons(problemId string) (map[string]string, error) {
+	db := s.app.DB
+
+	var skeletons []models.Skeleton
+
+	err := db.Where("problem_id = ?", problemId).Find(&skeletons).Error
+
+	if err != nil {
+		return nil, echo.NewHTTPError(http.StatusNotFound, "couldn't find skeletons")
+	}
+
+	skeletonResults := make(map[string]string)
+
+	for _, skeleton := range skeletons {
+		skeletonResults[skeleton.Language] = skeleton.Skeleton
+	}
+
+	return skeletonResults, nil
+}
+
+func (s *ProblemService) GetProblemSolutionTemplates(problemId string) (map[string]string, error) {
+	db := s.app.DB
+
+	var templates []models.SolutionTemplate
+	err := db.Where("problem_id = ?", problemId).Find(&templates).Error
+
+	if err != nil {
+		return nil, echo.NewHTTPError(http.StatusNotFound, "couldn't find templates")
+	}
+
+	templateResults := make(map[string]string)
+
+	for _, template := range templates {
+		templateResults[template.Language] = template.Template
+	}
+
+	return templateResults, nil
 }
 
 func (s *ProblemService) AddTestToProblem(id string, t *dtos.CreateTestDto) (*models.Test, error) {

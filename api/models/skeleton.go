@@ -8,5 +8,5 @@ type Skeleton struct {
 	UpdatedAt time.Time `json:"updatedAt"`
 	Skeleton  string    `json:"skeleton"`
 	Language  string    `json:"language"`
-	TestID    string    `json:"-" gorm:"not null"`
+	ProblemID string    `json:"-" gorm:"not null"`
 }

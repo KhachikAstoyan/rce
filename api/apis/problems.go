@@ -28,9 +28,12 @@ func bindProblemsApi(app *core.App, group *echo.Group) {
 
 	subGroup.GET("/:id/tests/public", api.getTests, authorize("read:test"))
 	subGroup.POST("/:id/tests", api.addTest, authorize("write:test"))
-	subGroup.DELETE("/tests/:id", api.deleteTest, authorize("write:test"))
-	subGroup.POST("/tests/:id/skeletons", api.addSkeleton, authorize("write:test"))
+	subGroup.GET("/:id/skeletons", api.getSkeletons, authorize("write:test"))
+	subGroup.POST("/:id/skeletons", api.addSkeleton, authorize("write:test"))
 
+	subGroup.DELETE("/tests/:id", api.deleteTest, authorize("write:test"))
+
+	subGroup.GET("/:id/templates", api.getAllSolutionTemplates)
 	subGroup.GET("/:id/templates/:lang", api.getSolutionTemplate)
 	subGroup.DELETE("/:id/templates/:lang", api.deleteSolutionTemplate)
 	subGroup.POST("/:id/templates", api.createSolutionTemplate)
@@ -139,11 +142,23 @@ func (api *problemsApi) addSkeleton(c echo.Context) error {
 		return echo.NewHTTPError(http.StatusBadRequest, "couldn't parse request body")
 	}
 
-	if err := api.service.AddSkeletonToTest(id, p); err != nil {
+	if err := api.service.AddSkeletonToProblem(id, p); err != nil {
 		return err
 	}
 
 	return c.NoContent(http.StatusOK)
+}
+
+func (api *problemsApi) getSkeletons(c echo.Context) error {
+	id := c.Param("id")
+
+	skeletons, err := api.service.GetProblemSkeletons(id)
+
+	if err != nil {
+		return err
+	}
+
+	return c.JSON(http.StatusOK, skeletons)
 }
 
 func (api *problemsApi) delete(c echo.Context) error {
@@ -177,6 +192,18 @@ func (api *problemsApi) listSubmissions(c echo.Context) error {
 	}
 
 	return c.JSON(http.StatusOK, submissions)
+}
+
+func (api *problemsApi) getAllSolutionTemplates(c echo.Context) error {
+	id := c.Param("id")
+
+	templates, err := api.service.GetProblemSolutionTemplates(id)
+
+	if err != nil {
+		return err
+	}
+
+	return c.JSON(http.StatusOK, templates)
 }
 
 func (api *problemsApi) getSolutionTemplate(c echo.Context) error {

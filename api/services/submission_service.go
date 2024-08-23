@@ -74,7 +74,7 @@ func (s *SubmissionService) CreateSubmission(p *dtos.CreateSubmissionDto, userId
 		return nil, err
 	}
 
-	skeleton, err := s.problemService.GetSkeleton(test.ID, p.Language)
+	skeleton, err := s.problemService.GetSkeleton(p.ProblemID, p.Language)
 
 	if err != nil {
 		return nil, err

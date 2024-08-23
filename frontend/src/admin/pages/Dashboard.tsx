@@ -126,20 +126,19 @@ export const Dashboard = () => {
 
   const handleCreateTestSuite = async () => {
     try {
-      const test = await problemService.createTestSuite(problemId, testSuite);
+      await problemService.createTestSuite(problemId, testSuite);
 
-      await handleCreateSkeletons(test.id);
       toast.success("Test suite created successfully");
     } catch (error) {
       toast.error("Failed to create test suite");
     }
   };
 
-  const handleCreateSkeletons = async (testId: string) => {
+  const handleCreateSkeletons = async () => {
     try {
       Object.entries(skeletons).forEach(async ([language, skeleton]) => {
         await problemService.createSkeleton(
-          testId,
+          problemId,
           language as Language,
           skeleton,
         );
@@ -170,6 +169,7 @@ export const Dashboard = () => {
     if (problemId) {
       handleCreateTemplates();
       handleCreateTestSuite();
+      handleCreateSkeletons();
     }
   }, [problemId]);
 
@@ -246,17 +246,18 @@ export const Dashboard = () => {
       <h2 className="text-3xl">Skeleton code (for the executor)</h2>
 
       <Accordion type="single" className="w-full" collapsible>
-        {SUPPORTED_LANGUAGES.map((language) => (
-          <AccordionItem value={language.name} key={language.name}>
-            <AccordionTrigger>{language.name}</AccordionTrigger>
+        {Object.entries(SUPPORTED_LANGUAGES).map(([language, languageData]) => (
+          <AccordionItem value={language} key={language}>
+            <AccordionTrigger>{language}</AccordionTrigger>
             <AccordionContent>
               <div className="flex flex-col gap-10">
                 <div className="h-64">
                   <h2>Skeleton code</h2>
                   <CodeEditor
-                    defaultValue={language.skeletonTemplate}
+                    defaultValue={languageData.skeletonTemplate}
+                    language={language}
                     onChange={(value) => {
-                      setSkeletons({ ...skeletons, [language.name]: value });
+                      setSkeletons({ ...skeletons, [language]: value });
                     }}
                   />
                 </div>
@@ -265,8 +266,9 @@ export const Dashboard = () => {
                   <h2>Template code</h2>
                   <CodeEditor
                     defaultValue={""}
+                    language={language}
                     onChange={(value) => {
-                      setTemplates({ ...templates, [language.name]: value });
+                      setTemplates({ ...templates, [language]: value });
                     }}
                   />
                 </div>
