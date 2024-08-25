@@ -56,15 +56,33 @@ pub async fn test_solution(
     results_path.push(format!("{}.json", payload.submission_id));
 
     info!("Reading results file {:?}", results_path);
-    let results_json = fs::read_to_string(&results_path).await?;
-    info!(target: "results_json", "{}", results_json);
-    let submission_results: SubmissionResult = serde_json::from_str(&results_json)?;
+    let results_json = fs::read_to_string(&results_path).await;
 
-    // it's fine if we ignore this, let's not crash anything
-    // just because we can't remove a file
-    let _ = fs::remove_file(results_path).await;
+    match results_json {
+        Ok(json) => {
+            info!(target: "results_json", "{}", json);
+            let submission_results: SubmissionResult = serde_json::from_str(&json)?;
 
-    return Ok(submission_results);
+            // it's fine if we ignore this, let's not crash anything
+            // just because we can't remove a file
+            let _ = fs::remove_file(results_path).await;
+
+            Ok(submission_results)
+        },
+        Err(_) => {
+            let submission_result = SubmissionResult {
+                submission_id: Some(payload.submission_id),
+                passed: 0,
+                failed: 0,
+                success: false,
+                message: stdout.to_string(),
+                test_results: vec![]
+            };
+
+            Ok(submission_result)
+        }
+    }
+
 }
 
 async fn run_docker_container(

@@ -11,6 +11,9 @@ pub enum Language {
     Python,
     #[serde(rename = "java")]
     Java,
+    #[serde(rename = "typescript")]
+    Typescript,
+
     // #[serde(rename = "rust")]
     // Rust,
 }

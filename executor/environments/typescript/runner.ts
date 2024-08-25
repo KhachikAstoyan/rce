@@ -59,6 +59,7 @@ function compareValues(expected: Value, received: any): boolean {
   switch (expected.type) {
     case "string":
       return received === expected.value;
+    case "int":
     case "number":
       return received === Number(expected.value);
     case "boolean":

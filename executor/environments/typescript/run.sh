@@ -11,11 +11,14 @@ USER_CODE_FILE=$3
 TEST_DATA_FILE=$4
 SUBMISSION_ID=$5
 
-cat $USER_CODE_FILE >> temp.js
-echo "" >> temp.js
-cat $PROBLEM_SKELETON_FILE >> temp.js
-echo "" >> temp.js
-cat $TEMPLATE_FILE >> temp.js
+
+cat $USER_CODE_FILE >> temp.ts 
+echo "" >> runner.ts 
+cat $PROBLEM_SKELETON_FILE >> temp.ts 
+echo "" >> runner.ts 
+cat $TEMPLATE_FILE >> temp.ts 
+
+npm run build
 
 node temp.js $TEST_DATA_FILE
 

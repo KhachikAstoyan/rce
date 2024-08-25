@@ -2,15 +2,14 @@ version: "3.8"
 
 services:
   javascript:
-    build:
-      context: ./environments/javascript
-      dockerfile: Dockerfile
+    build: ./environments/javascript
     image: toyrce:javascript
   python:
-    build:
-      context: "./environments/python"
-      dockerfile: Dockerfile
+    build: ./environments/python
     image: toyrce:python
   java:
     build: ./environments/java
     image: toyrce:java
+  typescript:
+    build: ./environments/typescript
+    image: toyrce:typescript
