@@ -11,3 +11,6 @@ services:
       context: "./environments/python"
       dockerfile: Dockerfile
     image: toyrce:python
+  java:
+    build: ./environments/java
+    image: toyrce:java
