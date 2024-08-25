@@ -27,9 +27,9 @@ function solution(args: Record<string, Value>): any {
 `;
 
 const JAVA_SKELETON_TEMPLATE = `
-public class Submission {
+class Submission {
   // determine return type from the problem
-  public static void run(Map<string, Object> args) {
+  public static void run(Map<String, Object> args) {
     // DON'T FORGET TO CASE THE OBJECT
   }
 }

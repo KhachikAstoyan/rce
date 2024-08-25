@@ -60,9 +60,6 @@ func (s *ProblemService) GetProblems(page, pageSize int, userId interface{}) ([]
 		return nil, echo.NewHTTPError(http.StatusInternalServerError, "couldnt find problems")
 	}
 
-	fmt.Println("WHAT THE FUCK")
-	fmt.Println(problems)
-
 	for i := range problems {
 		problems[i].SupportedLanguages = []string(problems[i].SupportedLanguages)
 	}
@@ -83,7 +80,8 @@ func (s *ProblemService) GetProblemDetailsByID(id string, userId interface{}) (*
 	query := `
 		SELECT
 			problems.*,
-			ARRAY_REMOVE(ARRAY_AGG(DISTINCT skeletons.language), '') as supported_languages,
+			ARRAY_AGG(DISTINCT skeletons.language) 
+        FILTER (WHERE skeletons.language IS NOT NULL AND skeletons.language != '') as supported_languages,
 			EXISTS (
 				SELECT 1
 				FROM submissions
@@ -307,6 +305,18 @@ func (s *ProblemService) AddSkeletonToProblem(id string, t *dtos.CreateSkeletonD
 
 	return nil
 }
+
+func (s *ProblemService) DeleteSkeleton(problemId string, language string) error {
+  db := s.app.DB
+
+  err := db.Where("problem_id = ? AND language = ?", problemId, language).Delete(&models.Skeleton{}).Error
+
+  if err != nil {
+    return echo.NewHTTPError(http.StatusNotFound, "couldn't delete the skeleton")
+  }
+  
+  return nil
+} 
 
 func (s *ProblemService) GetProblemSkeletons(problemId string) (map[string]string, error) {
 	db := s.app.DB

@@ -12,6 +12,7 @@ import { useState } from "react";
 import { CodeEditor } from "../../components/editor/CodeEditor";
 import { Button } from "../../components/shadcn/button";
 import { AddLanguageDialog } from "../components/AddLanguageDialog";
+import { toast } from "sonner";
 
 export const ProblemDetails = () => {
   const { id } = useParams({ strict: false });
@@ -36,6 +37,21 @@ export const ProblemDetails = () => {
     queryKey: ["problem", id],
     queryFn: async () => problemService.getProblemDetails(id!),
   });
+
+  const handleDeleteLanguageSupport = async (language: string) => {
+    try {
+      if(!id) throw new Error("");
+
+      const deleteSkeleton = problemService.deleteSkeleton(id, language);
+      const deleteTemplate = problemService.deleteSolutionTemplate(id, language);
+
+      await Promise.all([deleteSkeleton, deleteTemplate])
+
+      toast.success(`${language} support delete for this problem`)
+    } catch (_e) {
+      toast.error(`Couldn't delete support for ${language}`) 
+    }
+  }
 
   if (isLoading) {
     return "Loading...";
@@ -73,6 +89,7 @@ export const ProblemDetails = () => {
             <AccordionTrigger>{language}</AccordionTrigger>
             <AccordionContent>
               <div className="flex flex-col gap-10">
+                <Button className="self-start" onClick={() => handleDeleteLanguageSupport(language)}>Delete support</Button>
                 <div className="h-64">
                   <h2>Skeleton code</h2>
                   <CodeEditor

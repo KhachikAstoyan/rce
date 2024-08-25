@@ -255,9 +255,10 @@ export const Dashboard = () => {
                   <h2>Skeleton code</h2>
                   <CodeEditor
                     defaultValue={languageData.skeletonTemplate}
+                    value={skeletons[language]}
                     language={language}
                     onChange={(value) => {
-                      setSkeletons({ ...skeletons, [language]: value });
+                      setSkeletons({ ...skeletons, [language as Language]: value });
                     }}
                   />
                 </div>
@@ -266,9 +267,10 @@ export const Dashboard = () => {
                   <h2>Template code</h2>
                   <CodeEditor
                     defaultValue={""}
+                    value={templates[language]}
                     language={language}
                     onChange={(value) => {
-                      setTemplates({ ...templates, [language]: value });
+                      setTemplates({ ...templates, [language as Language]: value });
                     }}
                   />
                 </div>

@@ -109,6 +109,18 @@ const getProblemTemplates = async (problemId: string) => {
   return response.data;
 };
 
+const deleteSkeleton = async (problemId: string, language: string) => {
+  const response = await api.delete<{}>(`/problems/${problemId}/skeletons/${language}`)
+
+  return response.data;
+} 
+
+const deleteSolutionTemplate = async (problemId: string, language: string) => {
+  const response = await api.delete<{}>(`/problems/${problemId}/templates/${language}`)
+
+  return response.data;
+}
+
 interface ICreateTemplatePayload {
   template: string;
   language: string;
@@ -140,4 +152,6 @@ export const problemService = {
   createTemplate,
   getProblemSkeletons,
   getProblemTemplates,
+  deleteSkeleton,
+  deleteSolutionTemplate
 };

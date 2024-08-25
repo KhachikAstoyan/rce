@@ -1,6 +1,7 @@
 package apis
 
 import (
+	"fmt"
 	"net/http"
 
 	"github.com/KhachikAstoyan/toy-rce-api/core"
@@ -30,6 +31,7 @@ func bindProblemsApi(app *core.App, group *echo.Group) {
 	subGroup.POST("/:id/tests", api.addTest, authorize("write:test"))
 	subGroup.GET("/:id/skeletons", api.getSkeletons, authorize("write:test"))
 	subGroup.POST("/:id/skeletons", api.addSkeleton, authorize("write:test"))
+  subGroup.DELETE("/:id/skeletons/:lang", api.deleteSeleton, authorize("write:test"))
 
 	subGroup.DELETE("/tests/:id", api.deleteTest, authorize("write:test"))
 
@@ -159,6 +161,20 @@ func (api *problemsApi) getSkeletons(c echo.Context) error {
 	}
 
 	return c.JSON(http.StatusOK, skeletons)
+}
+
+func (api *problemsApi) deleteSeleton(c echo.Context) error {
+  problemId := c.Param("id")
+  language := c.Param("lang")
+
+  fmt.Println(problemId)
+  fmt.Println(language)
+
+  if err := api.service.DeleteSkeleton(problemId, language); err != nil {
+    return err
+  }
+
+  return c.NoContent(http.StatusOK) 
 }
 
 func (api *problemsApi) delete(c echo.Context) error {

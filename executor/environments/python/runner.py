@@ -1,6 +1,3 @@
-# def solution():
-#     pass
-
 import json
 import sys
 import time

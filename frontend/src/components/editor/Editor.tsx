@@ -34,7 +34,7 @@ interface Props {
 }
 
 export const Editor: React.FC<Props> = ({ problem }) => {
-  const [language, setLanguage] = useState<Language>(Language.Python);
+  const [language, setLanguage] = useState<Language>(Language.Java);
   const codeEditorRef = useRef<editor.IStandaloneCodeEditor>();
   const handleCodeEditorMount: OnMount = (editor) => {
     codeEditorRef.current = editor;

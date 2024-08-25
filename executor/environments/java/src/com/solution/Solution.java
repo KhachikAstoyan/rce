@@ -1,186 +1,196 @@
-// the imports are going to be injected at build time
+package com.solution;
+
+import org.json.*;
+import java.io.*;
+import java.util.*;
+import java.time.*;
+import java.util.concurrent.Callable;
+
+class Value {
+    public String type;
+    public String value;
+
+    public Value(String type, String value) {
+        this.type = type;
+        this.value = value;
+    }
+
+    @Override
+    public String toString() {
+      return this.type + " " + this.value + " VALUE";
+    }
+}
+
+class TestSuite {
+    public String problemId;
+    public List<JSONObject> tests;
+
+    public TestSuite(String problemId, List<JSONObject> tests) {
+        this.problemId = problemId;
+        this.tests = tests;
+    }
+}
+
+class JsonConverter {
+  public static String toJson(Object obj) {
+    if (obj instanceof int[] || obj instanceof double[]) {
+      return new JSONArray(obj).toString();
+    } else if (obj.getClass().isArray()) {
+      return new JSONArray(Arrays.asList((Object[])obj)).toString();
+    } else if (obj instanceof Number || obj instanceof Boolean) {
+      return obj.toString();
+    } else {
+      return JSONObject.quote(obj.toString());
+    }
+  }
+}
+
+class TestCaseResult {
+    public boolean success;
+    public String stdout;
+    public String stderr;
+    public String runtimeMs;
+    public List<JSONObject> assertionResults;
+
+    public TestCaseResult(boolean success, String stdout, String stderr, String runtimeMs, List<JSONObject> assertionResults) {
+        this.success = success;
+        this.stdout = stdout;
+        this.stderr = stderr;
+        this.runtimeMs = runtimeMs;
+        this.assertionResults = assertionResults;
+    }
+
+    public JSONObject toJson() {
+        JSONObject json = new JSONObject();
+        json.put("success", success);
+        json.put("stdout", stdout);
+        json.put("stderr", stderr);
+        json.put("runtimeMs", runtimeMs);
+
+        if (assertionResults != null) {
+            json.put("assertionResults", assertionResults);
+        }
+
+        return json;
+    }
+}
+
+class TestSuiteResult {
+    public boolean success;
+    public String message;
+    public int passed;
+    public int failed;
+    public List<TestCaseResult> testResults;
+
+    public TestSuiteResult(boolean success, String message, int passed, int failed, List<TestCaseResult> testResults) {
+        this.success = success;
+        this.message = message;
+        this.passed = passed;
+        this.failed = failed;
+        this.testResults = testResults;
+    }
+
+    public JSONObject toJson() {
+      JSONObject json = new JSONObject();
+      json.put("success", success);
+      json.put("message", message);
+      json.put("passed", passed);
+      json.put("failed", failed);
+
+      // Convert list of testResults to JSONArray
+      if (testResults != null) {
+        json.put("testResults", testResults.stream()
+            .map(TestCaseResult::toJson)
+            .collect(java.util.stream.Collectors.toList()));
+      }
+
+      return json;
+    }
+}
+
+@SuppressWarnings({"unchecked", "rawtypes", "deprecation"})
 public class Solution {
-
-    interface Value {
-        String getType();
-        String getValue();
-    }
-
-    static class StringValue implements Value {
-        private final String value;
-
-        public StringValue(String value) {
-            this.value = value;
-        }
-
-        public String getType() {
-            return "string";
-        }
-
-        public String getValue() {
-            return value;
-        }
-    }
-
-    static class NumberValue implements Value {
-        private final String value;
-
-        public NumberValue(String value) {
-            this.value = value;
-        }
-
-        public String getType() {
-            return "number";
-        }
-
-        public String getValue() {
-            return value;
-        }
-    }
-
-    static class BooleanValue implements Value {
-        private final String value;
-
-        public BooleanValue(String value) {
-            this.value = value;
-        }
-
-        public String getType() {
-            return "boolean";
-        }
-
-        public String getValue() {
-            return value;
-        }
-    }
-
-    static class ArrayValue implements Value {
-        private final String value;
-
-        public ArrayValue(String value) {
-            this.value = value;
-        }
-
-        public String getType() {
-            return "array";
-        }
-
-        public String getValue() {
-            return value;
-        }
-    }
-
-    static class TestSuite {
-        String problemId;
-        List<Test> tests;
-
-        static class Test {
-            Map<String, Value> inputs;
-            Value expected;
-        }
-    }
-
-    static class TestCaseResult {
-        boolean success;
-        String stdout;
-        String stderr;
-        String runtimeMs;
-        List<AssertionResult> assertionResults;
-
-        static class AssertionResult {
-            Object expected;
-            Object received;
-        }
-    }
-
-    static class TestSuiteResult {
-        boolean success;
-        String message;
-        int passed;
-        int failed;
-        List<TestCaseResult> testResults;
-    }
-
-    static Object parseValue(Value input) {
-        switch (input.getType()) {
+    public static boolean compareValues(Value expected, Object received) throws JSONException {
+        switch (expected.type) {
             case "string":
-                return input.getValue();
+                return received.equals(expected.value);
             case "number":
-                return Double.parseDouble(input.getValue());
+            case "int":
+                return Integer.parseInt(expected.value) == (Integer) received;
+            case "double":
+                return Double.parseDouble(expected.value) == (double) received;
             case "boolean":
-                return Boolean.parseBoolean(input.getValue());
+                return Boolean.parseBoolean(expected.value) == (boolean) received;
             case "array":
-                return new JSONArray(input.getValue()).toList();
+                return expected.value.equals(JsonConverter.toJson(received));
             default:
                 throw new IllegalArgumentException("Unknown type");
         }
     }
 
-    static boolean compareValues(Value expected, Object received) {
-        switch (expected.getType()) {
-            case "string":
-                return received.equals(expected.getValue());
-            case "number":
-                return received.equals(Double.parseDouble(expected.getValue()));
-            case "boolean":
-                return received.equals(Boolean.parseBoolean(expected.getValue()));
-            case "array":
-                return received.equals(new JSONArray(expected.getValue()).toList());
-            default:
-                throw new IllegalArgumentException("Unknown type");
-        }
-    }
-
-    static long measureTimeMs(Runnable task) {
+    public static Map<String, Object> measureTimeMs(Callable<Object> cb) throws Exception {
         long start = System.nanoTime();
-        task.run();
+        Object result = cb.call();
         long end = System.nanoTime();
-        return (end - start) / 1_000_000;
+
+        Map<String, Object> map = new HashMap<>();
+        map.put("result", result);
+        map.put("time_ms", (end - start) / 1e6);
+        return map;
     }
 
     public static void main(String[] args) {
-        TestSuiteResult testSuiteResult = new TestSuiteResult();
-        testSuiteResult.success = true;
-        testSuiteResult.passed = 0;
-        testSuiteResult.failed = 0;
-        testSuiteResult.testResults = new ArrayList<>();
+        TestSuiteResult testSuiteResult = new TestSuiteResult(true, "", 0, 0, new ArrayList<>());
 
         try {
-            String testsPath = args[1];
-            String testSuiteJson = new String(Files.readAllBytes(Paths.get(testsPath)));
-            TestSuite testSuite = new JSONObject(testSuiteJson).toJavaObject(TestSuite.class);
+            String testsPath = args[0];
+            String content = new String(java.nio.file.Files.readAllBytes(java.nio.file.Paths.get(testsPath)));
+            JSONObject jsonObject = new JSONObject(content);
+            TestSuite testSuite = new TestSuite(jsonObject.getString("problemId"), 
+                                                jsonObject.getJSONArray("tests").toList().stream()
+                                                    .map(obj -> new JSONObject((Map<String, ?>) obj))
+                                                    .collect(java.util.stream.Collectors.toList()));
 
-            for (TestSuite.Test test : testSuite.tests) {
-                ByteArrayOutputStream stdout = new ByteArrayOutputStream();
-                ByteArrayOutputStream stderr = new ByteArrayOutputStream();
-                PrintStream originalOut = System.out;
-                PrintStream originalErr = System.err;
+            for (JSONObject test : testSuite.tests) {
+                ByteArrayOutputStream stdoutCapture = new ByteArrayOutputStream();
+                ByteArrayOutputStream stderrCapture = new ByteArrayOutputStream();
+                PrintStream originalStdout = System.out;
+                PrintStream originalStderr = System.err;
 
-                System.setOut(new PrintStream(stdout));
-                System.setErr(new PrintStream(stderr));
+                System.setOut(new PrintStream(stdoutCapture));
+                System.setErr(new PrintStream(stderrCapture));
 
+                JSONObject expected = test.getJSONObject("expected");
+                JSONObject inputs = test.getJSONObject("inputs");
                 Map<String, Object> parsedInputs = new HashMap<>();
-                for (Map.Entry<String, Value> entry : test.inputs.entrySet()) {
-                    parsedInputs.put(entry.getKey(), parseValue(entry.getValue()));
+                for (String key : inputs.keySet()) {
+                    JSONObject valueObj = inputs.getJSONObject(key);
+                    parsedInputs.put(key, ValueParser.parseValue(new Value(valueObj.getString("type"), valueObj.getString("value"))));
                 }
 
-                long timeMs = measureTimeMs(() -> {
-                    // Call the solution function with parsed inputs
-                    Submission.run(parsedInputs);
-                });
+                Map<String, Object> measured = measureTimeMs(() -> Submission.run(parsedInputs));
+                Object result = measured.get("result");
+                double timeMs = (double) measured.get("time_ms");
 
-                System.setOut(originalOut);
-                System.setErr(originalErr);
+                System.setOut(originalStdout);
+                System.setErr(originalStderr);
 
-                TestCaseResult testResult = new TestCaseResult();
-                testResult.stdout = stdout.toString();
-                testResult.stderr = stderr.toString();
-                testResult.runtimeMs = Long.toString(timeMs);
+                boolean success = compareValues(new Value(expected.getString("type"), expected.getString("value")), result);
+                List<JSONObject> assertionResults = new ArrayList<>();
 
-                boolean success = compareValues(test.expected, parsedInputs);
-                testResult.success = success;
+                assertionResults.add(new JSONObject()
+                    .put("expected", expected.getString("value"))
+                    .put("received", result != null ? JsonConverter.toJson(result) : "null"));
 
-                if (success) {
+                TestCaseResult testResult = new TestCaseResult(
+                    success,
+                    stdoutCapture.toString(),
+                    stderrCapture.toString(),
+                    String.valueOf(timeMs),
+                    assertionResults
+                );
+
+                if (testResult.success) {
                     testSuiteResult.passed++;
                 } else {
                     testSuiteResult.failed++;
@@ -190,16 +200,18 @@ public class Solution {
             }
 
             testSuiteResult.success = testSuiteResult.failed == 0;
-
-        } catch (Exception e) {
-            testSuiteResult.success = false;
-            testSuiteResult.message = e.getMessage();
-        } finally {
-            try {
-                Files.write(Paths.get("test-results.json"), new JSONObject(testSuiteResult).toString().getBytes());
-            } catch (IOException e) {
-                e.printStackTrace();
-            }
+        } catch (Exception error) {
+          error.printStackTrace();
+          testSuiteResult.success = false;
+          testSuiteResult.message = error.toString();
+        } 
+        try {
+          FileWriter file = new FileWriter("test-results.json");
+          // file.write(new JSONObject(testSuiteResult).toString());
+          file.write(testSuiteResult.toJson().toString());
+          file.close();
+        } catch (IOException e) {
+          e.printStackTrace();
         }
     }
 }
