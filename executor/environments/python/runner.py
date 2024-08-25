@@ -52,9 +52,9 @@ class TestSuiteResult:
 def parse_value(input: Value) -> Any:
     if input.type == "string":
         return input.value
-    elif input.type == "number":
+    elif input.type == "number" or input.type == "int":
         return float(input.value)
-    elif input.type == "boolean":
+    elif input.type == "boolean": 
         return input.value.lower() == "true"
     elif input.type == "array":
         return json.loads(input.value)
@@ -65,7 +65,7 @@ def parse_value(input: Value) -> Any:
 def compare_values(expected: Value, received: Any) -> bool:
     if expected.type == "string":
         return received == expected.value
-    elif expected.type == "number":
+    elif expected.type == "number" or expected.type == "int":
         return received == float(expected.value)
     elif expected.type == "boolean":
         return received == (expected.value.lower() == "true")
@@ -99,11 +99,12 @@ def run():
             stdout_capture = StringIO()
             stderr_capture = StringIO()
 
-            sys.stdout = stdout_capture
-            sys.stderr = stderr_capture
+            # sys.stdout = stdout_capture
+            # sys.stderr = stderr_capture
 
             expected = test["expected"]["value"]
             inputs = {k: parse_value(Value(**v)) for k, v in test["inputs"].items()}
+            print(inputs)
 
             measured = measure_time_ms(solution, inputs)
             result = measured["result"]

@@ -51,7 +51,7 @@ function parseValue(input: Value): any {
     case "array":
       return JSON.parse(input.value);
     default:
-      throw new Error(`Unknown type ${input.type}`);
+      throw new Error("Unknown type");
   }
 }
 
@@ -60,14 +60,13 @@ function compareValues(expected: Value, received: any): boolean {
     case "string":
       return received === expected.value;
     case "number":
-    case "int":
       return received === Number(expected.value);
     case "boolean":
       return received === (expected.value === "true");
     case "array":
       return JSON.stringify(received) === expected.value;
     default:
-      throw new Error(`Unknown type ${expected.type}`);
+      throw new Error("Unknown type");
   }
 }
 
