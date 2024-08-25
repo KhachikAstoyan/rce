@@ -21,7 +21,7 @@ def solution(args):
 `; 
 
 const TYPESCRIPT_SKELETON_TEMPLATE = `
-function solution(args: Record<string, Value>): any {
+function solution(args: Record<string, any>): any {
   // return problemName(...args)
 }
 `;

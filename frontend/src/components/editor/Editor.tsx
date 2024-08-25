@@ -103,7 +103,7 @@ export const Editor: React.FC<Props> = ({ problem }) => {
     }
   }, [runResults]);
 
-  const submitCode = useCallback(async () => {
+  const submitCode = async () => {
     try {
       const code = codeEditorRef.current?.getValue();
       if (!code) {
@@ -124,7 +124,7 @@ export const Editor: React.FC<Props> = ({ problem }) => {
       toast.error("Failed to run code");
       console.error(error);
     }
-  }, []);
+  };
 
   const runCode = async () => {
     try {
