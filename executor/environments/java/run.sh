@@ -1,4 +1,6 @@
 #!/bin/bash
+set -e
+
 if [ "$#" -ne 4 ]; then
   echo "Usage: $0 <skeleton_file> <user_code_file> <test_data_file> <submission_id>"
   exit 1

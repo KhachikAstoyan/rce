@@ -1,4 +1,5 @@
 #!/bin/bash
+set -e
 if [ "$#" -ne 5 ]; then
   echo "Usage: $0 <template_file> <skeleton_file> <user_code_file> <test_data_file> <submission_id>"
   exit 1

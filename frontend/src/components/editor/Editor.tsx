@@ -81,6 +81,12 @@ export const Editor: React.FC<Props> = ({ problem }) => {
   });
 
   useEffect(() => {
+    if(codeEditorRef.current && solutionTemplate) {
+      codeEditorRef.current.setValue(solutionTemplate.template);
+    }
+  }, [solutionTemplate])
+
+  useEffect(() => {
     if (submission) {
       setShouldFetchSubmission(false);
       setLeftTab("submission");
@@ -127,6 +133,8 @@ export const Editor: React.FC<Props> = ({ problem }) => {
         return;
       }
 
+      console.log(code);
+
       const res = await problemService.createSubmission(
         problem.id,
         language,
@@ -142,6 +150,10 @@ export const Editor: React.FC<Props> = ({ problem }) => {
       console.error(error);
     }
   };
+
+  useEffect(() => {
+    console.log("current language is " + language);
+  }, [language])
 
   return (
     <>
