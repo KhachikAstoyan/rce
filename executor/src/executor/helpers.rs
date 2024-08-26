@@ -68,10 +68,10 @@ pub async fn test_solution(
             let _ = fs::remove_file(results_path).await;
 
             Ok(submission_results)
-        },
-        // if there's no results file, then something went wrong 
+        }
+        // if there's no results file, then something went wrong
         // during compilation/build phase, and we can output
-        // the stdout/stderr so that the user knows what's up 
+        // the stdout/stderr so that the user knows what's up
         Err(_) => {
             let mut message = stdout.to_string();
             if message.is_empty() {
@@ -80,20 +80,18 @@ pub async fn test_solution(
             message.push_str(stderr);
             message = message.trim().to_string();
 
-
             let submission_result = SubmissionResult {
                 submission_id: Some(payload.submission_id),
                 passed: 0,
                 failed: 0,
                 success: false,
-                message, 
-                test_results: vec![]
+                message,
+                test_results: vec![],
             };
 
             Ok(submission_result)
         }
     }
-
 }
 
 async fn run_docker_container(

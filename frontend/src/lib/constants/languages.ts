@@ -2,7 +2,7 @@ export enum Language {
   JavaScript = "javascript",
   Python = "python",
   Typescript = "typescript",
-  Java = 'java'
+  Java = "java",
 }
 
 interface ILanguageData {
@@ -18,7 +18,7 @@ function solution(args) {
 const PYTHON_SKELETON_TEMPLATE = `
 def solution(args):
   # return problemName(*args)
-`; 
+`;
 
 const TYPESCRIPT_SKELETON_TEMPLATE = `
 function solution(args: Record<string, any>): any {
@@ -29,12 +29,11 @@ function solution(args: Record<string, any>): any {
 const JAVA_SKELETON_TEMPLATE = `
 class Submission {
   // determine return type from the problem
-  public static void run(Map<String, Object> args) {
+  public static Object run(Map<String, Object> args) {
     // DON'T FORGET TO CASE THE OBJECT
   }
 }
-`
-
+`;
 
 export const SUPPORTED_LANGUAGES: Record<Language, ILanguageData> = {
   [Language.JavaScript]: {
@@ -47,8 +46,8 @@ export const SUPPORTED_LANGUAGES: Record<Language, ILanguageData> = {
     skeletonTemplate: TYPESCRIPT_SKELETON_TEMPLATE,
   },
   [Language.Java]: {
-    skeletonTemplate: JAVA_SKELETON_TEMPLATE
-  }
+    skeletonTemplate: JAVA_SKELETON_TEMPLATE,
+  },
 } as const;
 
 export const getLanguageData = (

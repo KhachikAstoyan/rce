@@ -60,7 +60,7 @@ function compareValues(expected: Value, received: any): boolean {
     case "string":
       return received === expected.value;
     case "number":
-    case "int":
+      case "int":
       return received === Number(expected.value);
     case "boolean":
       return received === (expected.value === "true");

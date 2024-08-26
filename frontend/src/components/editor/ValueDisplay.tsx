@@ -18,7 +18,7 @@ export const ValueDisplay: React.FC<Props> = ({
       <pre
         {...props}
         className={cn(
-          "bg-neutral-100 dark:bg-slate-800 overflow-x-scroll p-3 rounded",
+          "bg-neutral-100 dark:bg-slate-800 text-wrap p-3 rounded",
           className,
         )}
       >

@@ -45,25 +45,25 @@ export const InputBuilder: React.FC<Props> = ({ inputs, setInputs }) => {
   return (
     <div>
       {Object.entries(inputs).map(([key, val]) => (
-        <div className="border mb-5 p-3">
-          <h2 className="text-lg mb-4 font-bold">Input: {key}</h2>
-          {/* TODO: make this a select */}
-          <Label htmlFor={key + "name"}>Input Name</Label>
-          <Input
-            id={key + "name"}
-            placeholder={"Name"}
-            value={key}
-            onChange={(e) => renameInput(key, e.target.value)}
-          />
-
-          <Label htmlFor={key + "type"}>Type</Label>
-          <Input
-            id={key + "type"}
-            placeholder={"Type"}
-            value={val.type}
-            onChange={(e) => onInputTypeChange(e.target.value, key)}
-          />
-
+        <div className="flex gap-3 items-center">
+          <div>
+            <Label htmlFor={key + "name"}>Input Name</Label>
+            <Input
+              id={key + "name"}
+              placeholder={"Name"}
+              value={key}
+              onChange={(e) => renameInput(key, e.target.value)}
+            />
+          </div>
+          <div>
+            <Label htmlFor={key + "type"}>Type</Label>
+            <Input
+              id={key + "type"}
+              placeholder={"Type"}
+              value={val.type}
+              onChange={(e) => onInputTypeChange(e.target.value, key)}
+            />
+          </div>
           <Button
             variant="destructive"
             className="mt-4"

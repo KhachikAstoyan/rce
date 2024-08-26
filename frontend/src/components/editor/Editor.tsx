@@ -3,7 +3,7 @@ import { EditorLayout } from "@/layouts/EditorLayout";
 import { Problem } from "@/lib/types";
 import { OnMount } from "@monaco-editor/react";
 import { editor } from "monaco-editor";
-import { useCallback, useEffect, useRef, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import { CodeEditor } from "./CodeEditor";
 import { ResizeHandle } from "./ResizeHandle";
 import { toast } from "sonner";
@@ -20,7 +20,7 @@ const INVISIBLE_DIV = document.createElement("div");
 import Confetti from "react-confetti-boom";
 import { SubmissionStatus } from "./SubmissionStatus";
 import { createPortal } from "react-dom";
-import { Language, SUPPORTED_LANGUAGES } from "../../lib/constants/languages";
+import { Language } from "../../lib/constants/languages";
 import {
   Select,
   SelectContent,
@@ -34,7 +34,9 @@ interface Props {
 }
 
 export const Editor: React.FC<Props> = ({ problem }) => {
-  const [language, setLanguage] = useState<Language>(Language.Java);
+  const [language, setLanguage] = useState<Language | undefined>(
+    problem.supportedLanguages[0] as Language,
+  );
   const codeEditorRef = useRef<editor.IStandaloneCodeEditor>();
   const handleCodeEditorMount: OnMount = (editor) => {
     codeEditorRef.current = editor;
@@ -57,7 +59,8 @@ export const Editor: React.FC<Props> = ({ problem }) => {
   });
   const { data: solutionTemplate, isLoading: isTemplateLoading } = useQuery({
     queryKey: ["template", problem.id, language],
-    queryFn: () => problemService.getTemplate(problem.id, language),
+    enabled: !!language,
+    queryFn: () => problemService.getTemplate(problem.id, language!),
   });
 
   const [leftTab, setLeftTab] = useState<"description" | "submission">(
@@ -81,10 +84,10 @@ export const Editor: React.FC<Props> = ({ problem }) => {
   });
 
   useEffect(() => {
-    if(codeEditorRef.current && solutionTemplate) {
+    if (codeEditorRef.current && solutionTemplate) {
       codeEditorRef.current.setValue(solutionTemplate.template);
     }
-  }, [solutionTemplate])
+  }, [solutionTemplate]);
 
   useEffect(() => {
     if (submission) {
@@ -106,7 +109,7 @@ export const Editor: React.FC<Props> = ({ problem }) => {
   const submitCode = async () => {
     try {
       const code = codeEditorRef.current?.getValue();
-      if (!code) {
+      if (!code || !language) {
         return;
       }
 
@@ -129,7 +132,7 @@ export const Editor: React.FC<Props> = ({ problem }) => {
   const runCode = async () => {
     try {
       const code = codeEditorRef.current?.getValue();
-      if (!code) {
+      if (!code || !language) {
         return;
       }
 
@@ -150,10 +153,6 @@ export const Editor: React.FC<Props> = ({ problem }) => {
       console.error(error);
     }
   };
-
-  useEffect(() => {
-    console.log("current language is " + language);
-  }, [language])
 
   return (
     <>
@@ -202,7 +201,7 @@ export const Editor: React.FC<Props> = ({ problem }) => {
                   <SelectValue placeholder="Language" />
                 </SelectTrigger>
                 <SelectContent>
-                  {Object.keys(SUPPORTED_LANGUAGES).map((lang) => (
+                  {problem.supportedLanguages.map((lang) => (
                     <SelectItem key={lang} value={lang}>
                       {lang}
                     </SelectItem>

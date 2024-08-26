@@ -35,9 +35,9 @@ import { problemDifficultyOptions } from "@/lib/constants/problems";
 import { problemService } from "../../services/problems";
 import { toast } from "sonner";
 import { CodeEditor } from "@/components/editor/CodeEditor";
-import { ITestCase, ITestSuite, Language } from "@/lib/types";
+import { ITestCase, ITestSuite } from "@/lib/types";
 import { TestCase } from "../components/TestCase";
-import { SUPPORTED_LANGUAGES } from "@/lib/constants/languages";
+import { type Language, SUPPORTED_LANGUAGES } from "@/lib/constants/languages";
 import {
   Accordion,
   AccordionContent,
@@ -62,6 +62,8 @@ const simpleSandpackConfig: SandpackConfig = {
   ],
 };
 
+type LanguageToStringMap = Record<string, string | undefined>;
+
 export const Dashboard = () => {
   const [description, setDescription] = useState("");
   const [difficulty, setDifficulty] = useState("");
@@ -72,12 +74,8 @@ export const Dashboard = () => {
     tests: [],
   });
   const [problemId, setProblemId] = useState("");
-  const [skeletons, setSkeletons] = useState<Record<Language, string>>({
-    javascript: "",
-  });
-  const [templates, setTemplates] = useState<Record<Language, string>>({
-    javascript: "",
-  });
+  const [skeletons, setSkeletons] = useState<LanguageToStringMap>({});
+  const [templates, setTemplates] = useState<LanguageToStringMap>({});
 
   const addTestCase = () => {
     setTestSuite({
@@ -137,6 +135,9 @@ export const Dashboard = () => {
   const handleCreateSkeletons = async () => {
     try {
       Object.entries(skeletons).forEach(async ([language, skeleton]) => {
+        if (!skeleton) {
+          return;
+        }
         await problemService.createSkeleton(
           problemId,
           language as Language,
@@ -153,6 +154,8 @@ export const Dashboard = () => {
   const handleCreateTemplates = async () => {
     try {
       Object.entries(templates).forEach(async ([language, template]) => {
+        if (!template) return;
+
         await problemService.createTemplate(problemId, {
           language: language as Language,
           template,
@@ -258,7 +261,10 @@ export const Dashboard = () => {
                     value={skeletons[language]}
                     language={language}
                     onChange={(value) => {
-                      setSkeletons({ ...skeletons, [language as Language]: value });
+                      setSkeletons({
+                        ...skeletons,
+                        [language as Language]: value,
+                      });
                     }}
                   />
                 </div>
@@ -270,7 +276,10 @@ export const Dashboard = () => {
                     value={templates[language]}
                     language={language}
                     onChange={(value) => {
-                      setTemplates({ ...templates, [language as Language]: value });
+                      setTemplates({
+                        ...templates,
+                        [language as Language]: value,
+                      });
                     }}
                   />
                 </div>
@@ -280,13 +289,15 @@ export const Dashboard = () => {
         ))}
       </Accordion>
 
-      <h2 className="text-3xl my-3">Tests</h2>
+      <h2 className="text-3xl my-3">Inputs</h2>
       {!testSuite.tests.length && <p>No tests</p>}
 
       <InputBuilder inputs={inputs} setInputs={setInputs} />
 
+      <h2 className="text-3xl my-3 mt-8">Tests</h2>
       {testSuite.tests.map((test, index) => (
         <TestCase
+          index={index}
           testCase={test}
           inputs={inputs}
           onChange={(newTest) => {
