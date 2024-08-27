@@ -1,6 +1,5 @@
 import { api } from "@/lib/api";
 import { ISubmission, ITest, ITestSuite, Problem } from "@/lib/types";
-import { Language } from "@/lib/constants/languages";
 
 const getProblems = async () => {
   const response = await api.get<Problem[]>("/problems");
@@ -25,7 +24,7 @@ const getProblemDetails = async (id: string) => {
 
 const createSubmission = async (
   problemId: string,
-  language: Language,
+  language: string,
   code: string,
   onlyPublicTests: boolean = false,
 ) => {
@@ -61,7 +60,7 @@ const createTestSuite = async (problemId: string, testSuite: ITestSuite) => {
 
 const createSkeleton = async (
   problemId: string,
-  language: Language,
+  language: string,
   skeleton: string,
 ) => {
   const response = await api.post<{}>(`/problems/${problemId}/skeletons`, {

@@ -110,23 +110,7 @@ class TestSuiteResult {
 
 @SuppressWarnings({"unchecked", "rawtypes", "deprecation"})
 public class Solution {
-    public static boolean compareValues(Value expected, Object received) throws JSONException {
-        switch (expected.type) {
-            case "string":
-                return received.equals(expected.value);
-            case "number":
-            case "int":
-                return Integer.parseInt(expected.value) == (Integer) received;
-            case "double":
-                return Double.parseDouble(expected.value) == (double) received;
-            case "boolean":
-                return Boolean.parseBoolean(expected.value) == (boolean) received;
-            case "array":
-                return expected.value.equals(JsonConverter.toJson(received));
-            default:
-                throw new IllegalArgumentException("Unknown type");
-        }
-    }
+    
 
     public static Map<String, Object> measureTimeMs(Callable<Object> cb) throws Exception {
         long start = System.nanoTime();
@@ -175,7 +159,7 @@ public class Solution {
                 System.setOut(originalStdout);
                 System.setErr(originalStderr);
 
-                boolean success = compareValues(new Value(expected.getString("type"), expected.getString("value")), result);
+                boolean success = ValueParser.compareValues(new Value(expected.getString("type"), expected.getString("value")), result);
                 List<JSONObject> assertionResults = new ArrayList<>();
 
                 assertionResults.add(new JSONObject()

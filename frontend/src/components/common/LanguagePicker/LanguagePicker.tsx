@@ -17,7 +17,7 @@ export const LanguagePicker: React.FC<LanguagePickerProps> = ({
         value={value}
         onValueChange={onChange}
       >
-        <SelectTrigger>
+        <SelectTrigger> 
           <SelectValue placeholder="Language" />
         </SelectTrigger>
         <SelectContent>

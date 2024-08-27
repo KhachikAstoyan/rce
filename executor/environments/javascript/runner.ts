@@ -40,35 +40,47 @@ interface TestSuiteResult {
 }
 
 function parseValue(input: Value): any {
-  switch (input.type) {
-    case "string":
-      return input.value;
-    case "number":
-    case "int":
-      return Number(input.value);
-    case "boolean":
-      return input.value === "true";
-    case "array":
-      return JSON.parse(input.value);
-    default:
-      throw new Error(`Unknown type ${input.type}`);
+  const { value, type } = input;
+
+  if (type === "string") {
+    return value;
   }
+
+  if (type === "int") {
+    return parseInt(value);
+  }
+
+  if (type === "boolean") {
+    return value === "true";
+  }
+
+  if (type.startsWith("array")) {
+    return JSON.parse(value);
+  }
+
+  throw new Error(`Unknown type ${input.type}`);
 }
 
 function compareValues(expected: Value, received: any): boolean {
-  switch (expected.type) {
-    case "string":
-      return received === expected.value;
-    case "number":
-      case "int":
-      return received === Number(expected.value);
-    case "boolean":
-      return received === (expected.value === "true");
-    case "array":
-      return JSON.stringify(received) === expected.value;
-    default:
-      throw new Error(`Unknown type ${expected.type}`);
+  const { value, type } = expected;
+
+  if (type === "string") {
+    return received === expected;
   }
+
+  if (type === "int") {
+    return received === parseInt(value);
+  }
+
+  if (type === "boolean") {
+    return received === (value === "true");
+  }
+
+  if (type.startsWith("array")) {
+    return JSON.stringify(received) === value;
+  }
+
+  throw new Error(`Unknown type ${input.type}`);
 }
 
 function measureTimeMs(cb: Function, ...args: any[]) {
@@ -94,7 +106,7 @@ function run() {
     const args = process.argv.slice(2);
     const testsPath = args[0];
     const testSuite = JSON.parse(
-      fs.readFileSync(testsPath, "utf8")
+      fs.readFileSync(testsPath, "utf8"),
     ) as TestSuite;
 
     testSuite.tests.forEach((test) => {

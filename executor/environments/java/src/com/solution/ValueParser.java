@@ -5,18 +5,46 @@ import org.json.JSONException;
 
 public class ValueParser {
   public static Object parseValue(Value input) throws JSONException {
-    switch (input.type) {
+    String type = input.type;
+    String value = input.value;
+
+    if(type == "string") { 
+      return input.value;
+    }
+
+    if(type === "int") {
+      return Integer.parseInt(input.value);
+    }
+
+    if(type === "float") {
+      return Float.parseFloat(value);
+    }
+
+    if(type === "boolean") {
+      return Boolean.parseBoolean(value);
+    }
+
+    if(type.startsWith("array")) {
+      return parseArray(input.value);
+    }
+
+    throw new IllegalArgumentException("Unknown type");
+    
+  }
+
+  public static boolean compareValues(Value expected, Object received) throws JSONException {
+    switch (expected.type) {
       case "string":
-        return input.value;
-      case "int":
+        return received.equals(expected.value);
       case "number":
-        return Integer.parseInt(input.value);
+      case "int":
+        return Integer.parseInt(expected.value) == (Integer) received;
       case "double":
-        return Double.parseDouble(input.value);
+        return Double.parseDouble(expected.value) == (double) received;
       case "boolean":
-        return Boolean.parseBoolean(input.value);
+        return Boolean.parseBoolean(expected.value) == (boolean) received;
       case "array":
-        return parseArray(input.value);
+        return expected.value.equals(JsonConverter.toJson(received));
       default:
         throw new IllegalArgumentException("Unknown type");
     }

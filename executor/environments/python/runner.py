@@ -52,11 +52,11 @@ class TestSuiteResult:
 def parse_value(input: Value) -> Any:
     if input.type == "string":
         return input.value
-    elif input.type == "number" or input.type == "int":
-        return float(input.value)
+    elif input.type == "int":
+        return int(input.value)
     elif input.type == "boolean": 
         return input.value.lower() == "true"
-    elif input.type == "array":
+    elif input.type.startswith("array")
         return json.loads(input.value)
     else:
         raise ValueError("Unknown type")
@@ -69,7 +69,7 @@ def compare_values(expected: Value, received: Any) -> bool:
         return received == float(expected.value)
     elif expected.type == "boolean":
         return received == (expected.value.lower() == "true")
-    elif expected.type == "array":
+    elif expected.type.startswith("array"):
         return json.dumps(received) == expected.value
     else:
         raise ValueError("Unknown type")
