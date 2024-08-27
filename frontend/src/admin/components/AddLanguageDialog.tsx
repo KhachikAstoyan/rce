@@ -7,13 +7,17 @@ import {
   DialogHeader,
   DialogTitle,
 } from "@/components/shadcn/dialog";
-import { Input } from "@/components/shadcn/input";
 import { Label } from "@/components/shadcn/label";
 import { Button } from "@/components/shadcn/button";
 import { CodeEditor } from "../../components/editor/CodeEditor";
-import { getLanguageData, Language } from "../../lib/constants/languages";
+import {
+  getLanguageData,
+  Language,
+  SUPPORTED_LANGUAGES,
+} from "../../lib/constants/languages";
 import { toast } from "sonner";
 import { problemService } from "../../services/problems";
+import { LanguagePicker } from "@/components/common/LanguagePicker/LanguagePicker";
 
 interface AddLanguageDialogProps extends React.ComponentProps<typeof Dialog> {
   problemId: string;
@@ -23,10 +27,12 @@ export const AddLanguageDialog: React.FC<AddLanguageDialogProps> = ({
   problemId,
   ...props
 }) => {
-  const [language, setLanguage] = useState<string | undefined>("");
+  const [language, setLanguage] = useState<string>("");
   const [skeleton, setSkeleton] = useState<string | undefined>("");
   const [template, setTemplate] = useState<string | undefined>("");
   const [isNextStep, setIsNextStep] = useState(false);
+
+  const isValidLanguageSupport = language && skeleton && template;
 
   useEffect(() => {
     setSkeleton("");
@@ -34,7 +40,7 @@ export const AddLanguageDialog: React.FC<AddLanguageDialogProps> = ({
 
     if (isNextStep) {
       const languageData = getLanguageData(language!);
-      setSkeleton(languageData?.skeletonTemplate);
+      setSkeleton(languageData?.skeletonTemplate || "");
     }
   }, [isNextStep]);
 
@@ -46,10 +52,14 @@ export const AddLanguageDialog: React.FC<AddLanguageDialogProps> = ({
   }, [props.open]);
 
   const handleSubmit = useCallback(async () => {
-    if (!language || !skeleton || !template) return;
+    if (!isValidLanguageSupport) return;
 
     try {
-      await problemService.createSkeleton(problemId!, language as Language, skeleton!);
+      await problemService.createSkeleton(
+        problemId!,
+        language as Language,
+        skeleton!,
+      );
       await problemService.createTemplate(problemId!, { language, template });
       toast.success("Language support added");
       props.onOpenChange && props.onOpenChange(false);
@@ -76,10 +86,10 @@ export const AddLanguageDialog: React.FC<AddLanguageDialogProps> = ({
               <Label htmlFor="name" className="text-left">
                 Name
               </Label>
-              <Input
-                id="name"
+              <LanguagePicker
                 value={language}
-                onChange={(e) => setLanguage(e.target.value)}
+                onChange={setLanguage}
+                supportedLanguages={Object.keys(SUPPORTED_LANGUAGES)}
               />
             </div>
           )}
@@ -109,9 +119,9 @@ export const AddLanguageDialog: React.FC<AddLanguageDialogProps> = ({
         </div>
         <DialogFooter>
           {isNextStep ? (
-            <Button onClick={handleSubmit}>Save</Button>
+            <Button disabled={!isValidLanguageSupport} onClick={handleSubmit}>Save</Button>
           ) : (
-            <Button onClick={() => setIsNextStep(true)}>Next</Button>
+            <Button disabled={!language} onClick={() => setIsNextStep(true)}>Next</Button>
           )}
         </DialogFooter>
       </DialogContent>

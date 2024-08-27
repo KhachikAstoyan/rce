@@ -20,22 +20,15 @@ const INVISIBLE_DIV = document.createElement("div");
 import Confetti from "react-confetti-boom";
 import { SubmissionStatus } from "./SubmissionStatus";
 import { createPortal } from "react-dom";
-import { Language } from "../../lib/constants/languages";
-import {
-  Select,
-  SelectContent,
-  SelectItem,
-  SelectTrigger,
-  SelectValue,
-} from "@/components/shadcn/select";
+import { LanguagePicker } from "../common/LanguagePicker/LanguagePicker";
 
 interface Props {
   problem: Problem;
 }
 
 export const Editor: React.FC<Props> = ({ problem }) => {
-  const [language, setLanguage] = useState<Language | undefined>(
-    problem.supportedLanguages[0] as Language,
+  const [language, setLanguage] = useState<string | undefined>(
+    problem.supportedLanguages[0],
   );
   const codeEditorRef = useRef<editor.IStandaloneCodeEditor>();
   const handleCodeEditorMount: OnMount = (editor) => {
@@ -193,21 +186,7 @@ export const Editor: React.FC<Props> = ({ problem }) => {
           )}
           <div className="absolute bottom-3 px-3 w-full flex  justify-between">
             <div>
-              <Select
-                value={language}
-                onValueChange={(v) => setLanguage(v as Language)}
-              >
-                <SelectTrigger className="w-[180px]">
-                  <SelectValue placeholder="Language" />
-                </SelectTrigger>
-                <SelectContent>
-                  {problem.supportedLanguages.map((lang) => (
-                    <SelectItem key={lang} value={lang}>
-                      {lang}
-                    </SelectItem>
-                  ))}
-                </SelectContent>
-              </Select>
+              <LanguagePicker value={language} onChange={setLanguage} supportedLanguages={problem.supportedLanguages}/>
             </div>
             <div className="flex gap-3">
               <Button onClick={runCode}>Run</Button>

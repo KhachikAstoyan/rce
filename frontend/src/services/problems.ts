@@ -85,7 +85,7 @@ interface IGetTemplateResponse {
   updatedAt: string;
 }
 
-const getTemplate = async (problemId: string, language: Language) => {
+const getTemplate = async (problemId: string, language: string) => {
   const response = await api.get<IGetTemplateResponse>(
     `/problems/${problemId}/templates/${language}`,
   );
@@ -148,8 +148,8 @@ export const problemService = {
   createTestSuite,
   getPublicTests,
   createSkeleton,
-  getTemplate,
   createTemplate,
+  getTemplate,
   getProblemSkeletons,
   getProblemTemplates,
   deleteSkeleton,
