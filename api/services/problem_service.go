@@ -383,6 +383,8 @@ func (s *ProblemService) AddTestToProblem(id string, t *dtos.CreateTestDto) (*mo
 func (s *ProblemService) DeleteProblem(id string) error {
 	db := s.app.DB
 
+  // TODO: make this a transaction!!
+
 	if err := db.Where("problem_id = ?", id).Delete(&models.Submission{}).Error; err != nil {
 		return echo.NewHTTPError(http.StatusNotFound, "problem not found")
 	}
@@ -390,6 +392,10 @@ func (s *ProblemService) DeleteProblem(id string) error {
 	if err := db.Where("problem_id = ?", id).Delete(&models.Test{}).Error; err != nil {
 		return echo.NewHTTPError(http.StatusNotFound, "problem not found")
 	}
+  
+  if err := db.Where("problem_id = ?", id).Delete(&models.SolutionTemplate{}); err != nil {
+    return echo.NewHTTPError(http.StatusNotFound, "problem not found")
+  }
 
 	result := db.Where("id = ?", id).Delete(&models.Problem{})
 
