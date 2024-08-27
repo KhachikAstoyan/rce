@@ -44,6 +44,7 @@ import {
   AccordionItem,
   AccordionTrigger,
 } from "../../components/shadcn/accordion";
+import { TypeSelector } from "../components/TypeSelector/TypeSelector";
 import { InputBuilder } from "../components/InputBuilder";
 
 const simpleSandpackConfig: SandpackConfig = {
@@ -69,6 +70,7 @@ export const Dashboard = () => {
   const [difficulty, setDifficulty] = useState("");
   const [name, setName] = useState("");
   const [inputs, setInputs] = useState<ITestCase["inputs"]>({});
+  const [expectedType, setExpectedType] = useState<string>("");
   const [testSuite, setTestSuite] = useState<ITestSuite>({
     problemId: "",
     tests: [],
@@ -85,7 +87,7 @@ export const Dashboard = () => {
         {
           inputs: { ...inputs },
           isPublic: true,
-          expected: { type: "string", value: "" },
+          expected: { type: expectedType, value: "" },
         },
       ],
     });
@@ -294,12 +296,18 @@ export const Dashboard = () => {
 
       <InputBuilder inputs={inputs} setInputs={setInputs} />
 
-      <h2 className="text-3xl my-3 mt-8">Tests</h2>
+      <h2 className="text-3xl my-3">Expected type</h2>
+      <div className="w-[300px]">
+        <TypeSelector value={expectedType} onChange={setExpectedType} />
+      </div>
+
+      <h2 className="text-3xl my-3">Tests</h2>
       {testSuite.tests.map((test, index) => (
         <TestCase
           index={index}
           testCase={test}
           inputs={inputs}
+          expectedType={expectedType}
           onChange={(newTest) => {
             const newTests = [...testSuite.tests];
             newTests[index] = newTest;

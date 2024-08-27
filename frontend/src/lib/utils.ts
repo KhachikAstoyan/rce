@@ -1,6 +1,7 @@
 import { type ClassValue, clsx } from "clsx";
 import { format } from "date-fns";
 import { twMerge } from "tailwind-merge";
+import { dataTypeLabelMap } from "./constants/types";
 
 export function cn(...inputs: ClassValue[]) {
   return twMerge(clsx(inputs));
@@ -21,4 +22,8 @@ export function formatMillisecondsString(ms: string) {
 
 export function isOnPath(path: string) {
   return window.location.pathname === path;
+}
+
+export function getTypeLabel(dataType: string) {
+  return dataTypeLabelMap[dataType] || dataType;
 }

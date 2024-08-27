@@ -4,11 +4,13 @@ import { Input } from "../../components/shadcn/input";
 import { Label } from "../../components/shadcn/label";
 import { Button } from "../../components/shadcn/button";
 import { Checkbox } from "../../components/shadcn/checkbox";
+import { getTypeLabel } from "@/lib/utils";
 
 interface Props {
   testCase: ITestCase;
   index: any;
   inputs: ITestCase["inputs"];
+  expectedType: string;
   onChange: (val: ITestCase) => void;
   onDelete: () => void;
 }
@@ -19,6 +21,7 @@ export const TestCase: React.FC<Props> = ({
   index,
   onDelete,
   inputs,
+  expectedType
 }) => {
   const changeIsPublic = (val: boolean) => {
     onChange({ ...testCase, isPublic: val });
@@ -52,21 +55,7 @@ export const TestCase: React.FC<Props> = ({
 
       <div className="flex gap-2">
         <div>
-          <Label htmlFor="expected">Expected Type</Label>
-          <Input
-            id="expected"
-            placeholder={"Type"}
-            value={testCase.expected.type}
-            onChange={(e) =>
-              onChange({
-                ...testCase,
-                expected: { ...testCase.expected, type: e.target.value },
-              })
-            }
-          />
-        </div>
-        <div>
-          <Label htmlFor="expectedValue">Expected Value</Label>
+          <Label htmlFor="expectedValue">Expected Value ({getTypeLabel(expectedType)})</Label>
           <Input
             id="expectedValue"
             placeholder={"Value"}
