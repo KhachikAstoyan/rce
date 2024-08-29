@@ -384,20 +384,30 @@ func (s *ProblemService) DeleteProblem(id string) error {
 	db := s.app.DB
 
   // TODO: make this a transaction!!
+  tx := db.Begin()
+  defer func() {
+    if r := recover(); r != nil {
+      tx.Rollback()
+    }
+  }()
 
-	if err := db.Where("problem_id = ?", id).Delete(&models.Submission{}).Error; err != nil {
-		return echo.NewHTTPError(http.StatusNotFound, "problem not found")
+	if err := tx.Where("problem_id = ?", id).Delete(&models.Submission{}).Error; err != nil {
+		return echo.NewHTTPError(http.StatusInternalServerError, "couldn't delete the submissions for problem")
 	}
 
-	if err := db.Where("problem_id = ?", id).Delete(&models.Test{}).Error; err != nil {
-		return echo.NewHTTPError(http.StatusNotFound, "problem not found")
+	if err := tx.Where("problem_id = ?", id).Delete(&models.Test{}).Error; err != nil {
+		return echo.NewHTTPError(http.StatusInternalServerError, "couldn't delete the tests for this problem")
 	}
   
-  if err := db.Where("problem_id = ?", id).Delete(&models.SolutionTemplate{}); err != nil {
-    return echo.NewHTTPError(http.StatusNotFound, "problem not found")
+  if err := tx.Where("problem_id = ?", id).Delete(&models.SolutionTemplate{}).Error; err != nil {
+    return echo.NewHTTPError(http.StatusInternalServerError, "couldn't delete the solution templates for this problem'")
   }
 
-	result := db.Where("id = ?", id).Delete(&models.Problem{})
+  if err := tx.Where("problem_id = ?", id).Delete(&models.Skeleton{}).Error; err != nil {
+    return echo.NewHTTPError(http.StatusInternalServerError, "couldn't delete skeletons for problem")
+  }
+
+	result := tx.Where("id = ?", id).Delete(&models.Problem{})
 
 	if result.Error != nil {
 		return echo.NewHTTPError(http.StatusInternalServerError, "error deleting the problem")
