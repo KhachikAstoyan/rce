@@ -307,16 +307,16 @@ func (s *ProblemService) AddSkeletonToProblem(id string, t *dtos.CreateSkeletonD
 }
 
 func (s *ProblemService) DeleteSkeleton(problemId string, language string) error {
-  db := s.app.DB
+	db := s.app.DB
 
-  err := db.Where("problem_id = ? AND language = ?", problemId, language).Delete(&models.Skeleton{}).Error
+	err := db.Where("problem_id = ? AND language = ?", problemId, language).Delete(&models.Skeleton{}).Error
 
-  if err != nil {
-    return echo.NewHTTPError(http.StatusNotFound, "couldn't delete the skeleton")
-  }
-  
-  return nil
-} 
+	if err != nil {
+		return echo.NewHTTPError(http.StatusNotFound, "couldn't delete the skeleton")
+	}
+
+	return nil
+}
 
 func (s *ProblemService) GetProblemSkeletons(problemId string) (map[string]string, error) {
 	db := s.app.DB
@@ -383,13 +383,19 @@ func (s *ProblemService) AddTestToProblem(id string, t *dtos.CreateTestDto) (*mo
 func (s *ProblemService) DeleteProblem(id string) error {
 	db := s.app.DB
 
-  // TODO: make this a transaction!!
-  tx := db.Begin()
-  defer func() {
-    if r := recover(); r != nil {
-      tx.Rollback()
-    }
-  }()
+	// TODO: make this a transaction!!
+	tx := db.Begin()
+	defer func() {
+		if r := recover(); r != nil {
+			tx.Rollback()
+			// You might want to handle the panic or log it
+			panic(r) // Re-throw the panic after rolling back
+		} else if tx.Error != nil {
+			tx.Rollback() // Rollback on error
+		} else {
+			tx.Commit() // Commit if no errors
+		}
+	}()
 
 	if err := tx.Where("problem_id = ?", id).Delete(&models.Submission{}).Error; err != nil {
 		return echo.NewHTTPError(http.StatusInternalServerError, "couldn't delete the submissions for problem")
@@ -398,14 +404,14 @@ func (s *ProblemService) DeleteProblem(id string) error {
 	if err := tx.Where("problem_id = ?", id).Delete(&models.Test{}).Error; err != nil {
 		return echo.NewHTTPError(http.StatusInternalServerError, "couldn't delete the tests for this problem")
 	}
-  
-  if err := tx.Where("problem_id = ?", id).Delete(&models.SolutionTemplate{}).Error; err != nil {
-    return echo.NewHTTPError(http.StatusInternalServerError, "couldn't delete the solution templates for this problem'")
-  }
 
-  if err := tx.Where("problem_id = ?", id).Delete(&models.Skeleton{}).Error; err != nil {
-    return echo.NewHTTPError(http.StatusInternalServerError, "couldn't delete skeletons for problem")
-  }
+	if err := tx.Where("problem_id = ?", id).Delete(&models.SolutionTemplate{}).Error; err != nil {
+		return echo.NewHTTPError(http.StatusInternalServerError, "couldn't delete the solution templates for this problem'")
+	}
+
+	if err := tx.Where("problem_id = ?", id).Delete(&models.Skeleton{}).Error; err != nil {
+		return echo.NewHTTPError(http.StatusInternalServerError, "couldn't delete skeletons for problem")
+	}
 
 	result := tx.Where("id = ?", id).Delete(&models.Problem{})
 
