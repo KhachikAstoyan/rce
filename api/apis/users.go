@@ -22,7 +22,7 @@ func bindUsersApi(app *core.App, group *echo.Group) {
 
 type usersApi struct {
 	app         *core.App
-	userService *services.UserService
+	service *services.UserService
 }
 
 func (api *usersApi) me(c echo.Context) error {
@@ -32,7 +32,7 @@ func (api *usersApi) me(c echo.Context) error {
 		return echo.ErrUnauthorized
 	}
 
-	user, err := api.userService.GetUserWithPermissions(id)
+	user, err := api.service.GetUserWithPermissions(id)
 
 	if err != nil {
 		return err

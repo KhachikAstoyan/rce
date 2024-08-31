@@ -12,13 +12,14 @@ import (
 func main() {
 	config := core.LoadConfig()
 	db := db.ConnectDB(&config)
-	_, err := queue.GetMQConnection(&config)
+  defer db.Close()
 
-	defer queue.CloseConnection()
+	_, err := queue.GetMQConnection(&config)
 
 	if err != nil {
 		log.Fatal(err)
 	}
+  defer queue.CloseConnection()
 
 	err = queue.InitializeQueues()
 

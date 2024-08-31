@@ -1,8 +1,10 @@
 package services
 
 import (
+	"database/sql"
 	"errors"
 	"fmt"
+	"log"
 	"net/http"
 	"time"
 
@@ -10,7 +12,6 @@ import (
 	"github.com/KhachikAstoyan/toy-rce-api/models"
 	"github.com/golang-jwt/jwt/v5"
 	"github.com/labstack/echo/v4"
-	"gorm.io/gorm"
 )
 
 type AuthService struct {
@@ -104,9 +105,19 @@ func (s *AuthService) GenerateAndStoreRefreshToken(userID string) (string, error
 		Token:     refrehToken,
 	}
 
-	if err := s.app.DB.Create(&refreshTokenRecord).Error; err != nil {
-		return "", err
-	}
+
+	// if err := s.app.DB.Create(&refreshTokenRecord).Error; err != nil {
+	// 	return "", err
+	// }
+  err = s.app.DB.QueryRowx(`
+    INSERT INTO refresh_tokens (user_id, token, expires_at)
+    VALUES (:user_id, :token, :expires_at)
+    RETURNING *
+  `, refreshTokenRecord).StructScan(&refreshTokenRecord)
+
+  if err != nil {
+    return "", echo.NewHTTPError(http.StatusInternalServerError, err.Error())
+  }
 
 	return refrehToken, nil
 }
@@ -116,21 +127,18 @@ func (s *AuthService) GenerateTokenCookie(refreshToken string) *http.Cookie {
 	cookie.Name = "refreshToken"
 	cookie.Value = refreshToken
 	cookie.Expires = getRefreshTokenExpiration()
-	// Use the root domain to allow sharing between subdomains
-	cookie.Domain = ".quandry.com" // Assuming this is your root domain
+  cookie.Domain = ".quandry.com" // TODO: get this from the config 
 
-	// Set Path to root to make the cookie available across the entire site
 	cookie.Path = "/"
 
-	// Apply secure settings even in development, but allow for exceptions if needed
 	cookie.HttpOnly = true
 	cookie.Secure = true
-	cookie.SameSite = http.SameSiteNoneMode // Changed from Strict to None
+	cookie.SameSite = http.SameSiteNoneMode 
 
 	if s.app.IsDev() {
 		// Optionally relax some settings for development
-		cookie.Secure = false                  // Allow non-HTTPS in development
-		cookie.SameSite = http.SameSiteLaxMode // Less strict for easier testing
+		cookie.Secure = false                
+		cookie.SameSite = http.SameSiteLaxMode 
 	}
 
 	return cookie
@@ -138,13 +146,13 @@ func (s *AuthService) GenerateTokenCookie(refreshToken string) *http.Cookie {
 
 func (s *AuthService) FindRefreshToken(token string) (*models.RefreshToken, error) {
 	var storedToken models.RefreshToken
-	err := s.app.DB.Where("token = ? AND expires_at > ?", token, time.Now()).First(&storedToken).Error
-	if err != nil {
-		if errors.Is(err, gorm.ErrRecordNotFound) {
-			return nil, echo.NewHTTPError(http.StatusUnauthorized, "invalid refresh token")
-		}
+	// err := s.app.DB.Where("token = ? AND expires_at > ?", token, time.Now()).First(&storedToken).Error
+  err := s.app.DB.Get(&storedToken, `
+    SELECT * FROM refresh_tokens WHERE token = $1 AND expires_at > $2
+  `, token, time.Now())
 
-		return nil, echo.NewHTTPError(http.StatusInternalServerError, "db error")
+	if err != nil {
+		return nil, echo.NewHTTPError(http.StatusInternalServerError, err.Error())
 	}
 
 	return &storedToken, nil
@@ -153,12 +161,26 @@ func (s *AuthService) FindRefreshToken(token string) (*models.RefreshToken, erro
 func (s *AuthService) UpdateRefreshToken(refreshToken *models.RefreshToken, token string) error {
 	refreshToken.Token = token
 	refreshToken.ExpiresAt = getRefreshTokenExpiration()
+  refreshToken.UpdatedAt = time.Now()
 
-	return s.app.DB.Save(refreshToken).Error
+  _, err := s.app.DB.NamedExec(`
+    UPDATE refresh_tokens 
+    SET token = :token, expires_at = :expires_at, updated_at = :updated_at
+    WHERE id = :id
+  `, refreshToken)
+
+	// return s.app.DB.Save(refreshToken).Error
+  return err
 }
 
 func (s *AuthService) DeleteRefreshToken(userId, token string) error {
-	err := s.app.DB.Where(&models.RefreshToken{UserID: userId, Token: token}).Delete(&models.RefreshToken{}).Error
+  db := s.app.DB
+	// err := s.app.DB.Where(&models.RefreshToken{UserID: userId, Token: token}).Delete(&models.RefreshToken{}).Error
+  _, err := db.Exec(`
+    DELETE FROM refresh_tokens 
+    WHERE user_id = $1 AND token = $2
+  `, userId, token)
+
 	if err != nil {
 		return echo.NewHTTPError(http.StatusInternalServerError, "couldn't log out")
 	}
@@ -171,71 +193,123 @@ func (s *AuthService) AssignRoleToUser(userId, roleName string) error {
 	var user models.User
 	var role models.Role
 
-	if err := db.Where(models.User{ID: userId}).First(&user).Error; err != nil {
-		return err
-	}
+	// if err := db.Where(models.User{ID: userId}).First(&user).Error; err != nil {
+	// 	return err
+	// }
+	//
+	// if err := db.Where("name = ?", roleName).First(&role).Error; err != nil {
+	//
+	// 	role := models.Role{
+	// 		Name: roleName,
+	// 	}
+	//
+	// 	// create the user role in case it doesn't already exist
+	// 	// or there was some error or something
+	// 	if err := db.Create(&role).Error; err != nil {
+	// 		return err
+	// 	}
+	// }
 
-	if err := db.Where("name = ?", roleName).First(&role).Error; err != nil {
+	// return db.Model(&user).Association("Roles").Append(&role)
 
-		role := models.Role{
-			Name: roleName,
-		}
+  query := `SELECT * from USERS where id = $1 LIMIT 1`
+  if err := db.Get(&user, query, userId); err != nil {
+    return err
+  }
 
-		// create the user role in case it doesn't already exist
-		// or there was some error or something
-		if err := db.Create(&role).Error; err != nil {
-			return err
-		}
-	}
+  query = `SELECT * FROM roles WHERE name = $1 LIMIT 1`
+  err := db.Get(&role, query, roleName)
 
-	return db.Model(&user).Association("Roles").Append(&role)
+  if err != nil {
+    if errors.Is(err, sql.ErrNoRows) {
+      // role not found, let's create it
+      query = `INSERT into roles (name) VALUES ($1) RETURNING *`
+      
+      if err := db.QueryRowx(query, roleName).StructScan(&role); err != nil {
+        return err
+      }
+    } else {
+      return err
+    }
+  }
+
+  query = `INSERT INTO user_roles (user_id, role_id) VALUES ($1, $2)`
+  _, err = db.Exec(query, userId, roleName)
+
+  if err != nil {
+    return err
+  }
+
+  log.Println("Role assigned to user")
+  return nil
 }
 
 func (s *AuthService) AssignPermissionToRole(roleID, permissionID uint) error {
-	var role models.Role
-	var permission models.Permission
-	if err := s.app.DB.First(&role, roleID).Error; err != nil {
-		return err
-	}
-	if err := s.app.DB.First(&permission, permissionID).Error; err != nil {
-		return err
-	}
+  db := s.app.DB
 
-	return s.app.DB.Model(&role).Association("Permissions").Append(&permission)
+  query := `INSERT INTO role_permissions (role_id, permission_id) VALUES ($1, $2)`
+  if _, err := db.Exec(query, roleID, permissionID); err != nil {
+    return err
+  }
+
+  return nil
+
+	// if err := s.app.DB.First(&role, roleID).Error; err != nil {
+	// 	return err
+	// }
+	// if err := s.app.DB.First(&permission, permissionID).Error; err != nil {
+	// 	return err
+	// }
+	//
+	// return s.app.DB.Model(&role).Association("Permissions").Append(&permission)
 }
 
-func (s *AuthService) AssignPermissionToUser(userID, permissionID string) error {
-	db := s.app.DB
-	var user models.User
-	var role models.Permission
+func (s *AuthService) GetAllPermissions() ([]models.Permission, error) {
+  db := s.app.DB
+  var permissions []models.Permission
 
-	if err := db.Where(models.User{ID: userID}).First(&user).Error; err != nil {
-		return err
-	}
+  query := `SELECT * FROM permissions`
+  err := db.Select(&permissions, query)
 
-	if err := db.First(&role, permissionID).Error; err != nil {
-		return err
-	}
+  if err != nil {
+    return nil, err
+  }
 
-	return db.Model(&user).Association("Permissions").Append(&role)
+  return permissions, nil
+}
+
+func (s *AuthService) CreatePermission(name string) (*models.Permission, error) {
+  db := s.app.DB 
 }
 
 func (s *AuthService) GetAllUserPermissions(userID string) ([]string, error) {
+  db := s.app.DB
 	var permissionNames []string
-	err := s.app.DB.Table("permissions").
-		Select("DISTINCT permissions.name").
-		Joins("JOIN role_permissions ON role_permissions.permission_id = permissions.id").
-		Joins("JOIN user_roles ON user_roles.role_id = role_permissions.role_id").
-		Where("user_roles.user_id = ?", userID).
-		Pluck("name", &permissionNames).Error
+	// err := s.app.DB.Table("permissions").
+	// 	Select("DISTINCT permissions.name").
+	// 	Joins("JOIN role_permissions ON role_permissions.permission_id = permissions.id").
+	// 	Joins("JOIN user_roles ON user_roles.role_id = role_permissions.role_id").
+	// 	Where("user_roles.user_id = ?", userID).
+	// 	Pluck("name", &permissionNames).Error
+  
+  query := `
+    SELECT DISTINCT permissions.name
+    FROM permissions
+    JOIN role_permissions ON role_permissions.permission_id = permissions.id
+    JOIN user_roles ON user_roles.role_id = role_permissions.role_id
+    WHERE user_roles.user_id = $1
+  `
+
+  err := db.Select(&permissionNames, query, userID)
 
 	if err != nil {
 		return nil, err
 	}
+
 	return permissionNames, nil
 }
 
-func (s AuthService) HasPermissions(userPermissions, requiredPermissions []string) bool {
+func (s *AuthService) HasPermissions(userPermissions, requiredPermissions []string) bool {
 	hasPermission := true
 	if len(requiredPermissions) > 0 {
 		hasPermission = false

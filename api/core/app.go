@@ -1,11 +1,9 @@
 package core
 
-import (
-	"gorm.io/gorm"
-)
+import "github.com/jmoiron/sqlx"
 
 type App struct {
-	DB     *gorm.DB
+	DB     *sqlx.DB
 	Config Config
 }
 

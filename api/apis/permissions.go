@@ -33,10 +33,9 @@ type permissionsApi struct {
 }
 
 func (api *permissionsApi) list(c echo.Context) error {
-	db := api.app.DB
-	var permissions []models.Permission
+	permissions, err := api.authService.GetAllPermissions()
 
-	if err := db.Scopes(utils.Paginate(&c)).Find(&permissions).Error; err != nil {
+	if err != nil {
 		return echo.NewHTTPError(http.StatusInternalServerError, "permissions not found")
 	}
 
