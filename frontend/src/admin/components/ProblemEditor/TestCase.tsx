@@ -1,9 +1,9 @@
 import React from "react";
-import { ITestCase } from "../../lib/types";
-import { Input } from "../../components/shadcn/input";
-import { Label } from "../../components/shadcn/label";
-import { Button } from "../../components/shadcn/button";
-import { Checkbox } from "../../components/shadcn/checkbox";
+import { ITestCase } from "../../../lib/types";
+import { Input } from "../../../components/shadcn/input";
+import { Label } from "../../../components/shadcn/label";
+import { Button } from "../../../components/shadcn/button";
+import { Checkbox } from "../../../components/shadcn/checkbox";
 import { getTypeLabel } from "@/lib/utils";
 
 interface Props {
@@ -33,7 +33,7 @@ export const TestCase: React.FC<Props> = ({
         {Object.entries(inputs).map(([key, val]) => (
           <div>
             <Label htmlFor={key + "value"}>
-              {key} <span className="text-gray-500">({val.type})</span>
+              {key} <span className="text-gray-500">{getTypeLabel(val.type)}</span>
             </Label>
             <Input
               id={key + "value"}

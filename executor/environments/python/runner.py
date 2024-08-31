@@ -56,7 +56,7 @@ def parse_value(input: Value) -> Any:
         return int(input.value)
     elif input.type == "boolean": 
         return input.value.lower() == "true"
-    elif input.type.startswith("array")
+    elif input.type.startswith("array"):
         return json.loads(input.value)
     else:
         raise ValueError("Unknown type")
@@ -70,7 +70,7 @@ def compare_values(expected: Value, received: Any) -> bool:
     elif expected.type == "boolean":
         return received == (expected.value.lower() == "true")
     elif expected.type.startswith("array"):
-        return json.dumps(received) == expected.value
+        return json.dumps(received, separators=(',', ':')) == expected.value
     else:
         raise ValueError("Unknown type")
 
@@ -122,7 +122,7 @@ def run():
                     {
                         "expected": expected,
                         "received": (
-                            json.dumps(result) if result is not None else "null"
+                            json.dumps(result, separators=(',', ':')) if result is not None else "null"
                         ),
                     }
                 ],

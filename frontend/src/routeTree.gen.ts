@@ -24,7 +24,9 @@ const AdminIndexLazyImport = createFileRoute('/admin/')()
 const ProblemsProblemSlugLazyImport = createFileRoute(
   '/problems/$problemSlug',
 )()
-const AdminProblemsIndexLazyImport = createFileRoute('/admin/problems/')()
+const AdminProblemsCreateLazyImport = createFileRoute(
+  '/admin/problems/create',
+)()
 const AdminProblemsIdLazyImport = createFileRoute('/admin/problems/$id')()
 
 // Create/Update Routes
@@ -61,11 +63,11 @@ const ProblemsProblemSlugLazyRoute = ProblemsProblemSlugLazyImport.update({
   import('./routes/problems/$problemSlug.lazy').then((d) => d.Route),
 )
 
-const AdminProblemsIndexLazyRoute = AdminProblemsIndexLazyImport.update({
-  path: '/problems/',
+const AdminProblemsCreateLazyRoute = AdminProblemsCreateLazyImport.update({
+  path: '/problems/create',
   getParentRoute: () => AdminRoute,
 } as any).lazy(() =>
-  import('./routes/admin/problems/index.lazy').then((d) => d.Route),
+  import('./routes/admin/problems/create.lazy').then((d) => d.Route),
 )
 
 const AdminProblemsIdLazyRoute = AdminProblemsIdLazyImport.update({
@@ -128,11 +130,11 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof AdminProblemsIdLazyImport
       parentRoute: typeof AdminImport
     }
-    '/admin/problems/': {
-      id: '/admin/problems/'
-      path: '/problems'
-      fullPath: '/admin/problems'
-      preLoaderRoute: typeof AdminProblemsIndexLazyImport
+    '/admin/problems/create': {
+      id: '/admin/problems/create'
+      path: '/problems/create'
+      fullPath: '/admin/problems/create'
+      preLoaderRoute: typeof AdminProblemsCreateLazyImport
       parentRoute: typeof AdminImport
     }
   }
@@ -145,7 +147,7 @@ export const routeTree = rootRoute.addChildren({
   AdminRoute: AdminRoute.addChildren({
     AdminIndexLazyRoute,
     AdminProblemsIdLazyRoute,
-    AdminProblemsIndexLazyRoute,
+    AdminProblemsCreateLazyRoute,
   }),
   LoginLazyRoute,
   SignupLazyRoute,
@@ -175,7 +177,7 @@ export const routeTree = rootRoute.addChildren({
       "children": [
         "/admin/",
         "/admin/problems/$id",
-        "/admin/problems/"
+        "/admin/problems/create"
       ]
     },
     "/login": {
@@ -195,8 +197,8 @@ export const routeTree = rootRoute.addChildren({
       "filePath": "admin/problems/$id.lazy.tsx",
       "parent": "/admin"
     },
-    "/admin/problems/": {
-      "filePath": "admin/problems/index.lazy.tsx",
+    "/admin/problems/create": {
+      "filePath": "admin/problems/create.lazy.tsx",
       "parent": "/admin"
     }
   }

@@ -80,7 +80,7 @@ function compareValues(expected: Value, received: any): boolean {
     return JSON.stringify(received) === value;
   }
 
-  throw new Error(`Unknown type ${input.type}`);
+  throw new Error(`Unknown type ${expected.type}`);
 }
 
 function measureTimeMs(cb: Function, ...args: any[]) {

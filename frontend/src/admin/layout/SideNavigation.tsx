@@ -25,11 +25,11 @@ export const SideNavigationItems = () => {
         Dashboard
       </NavigationItem>
       <NavigationItem
-        to="/admin/problems"
+        to="/admin/problems/create"
         isActive={isOnPath("/admin/problems")}
       >
         <ShoppingCart className="h-4 w-4" />
-        Problems
+        Create Problem 
       </NavigationItem>
     </nav>
   );

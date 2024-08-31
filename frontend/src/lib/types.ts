@@ -47,7 +47,7 @@ export interface ITestCase {
   expected: IValue;
 }
 
-interface IValue {
+export interface IValue {
   type: string;
   value: string;
 }
