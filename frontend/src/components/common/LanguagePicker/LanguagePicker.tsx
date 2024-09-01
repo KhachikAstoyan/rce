@@ -3,7 +3,7 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@
 interface LanguagePickerProps {
   value: string;
   onChange: (lang: string) => void;
-  supportedLanguages: string[]
+  supportedLanguages?: string[]
 }
 
 export const LanguagePicker: React.FC<LanguagePickerProps> = ({
@@ -21,7 +21,7 @@ export const LanguagePicker: React.FC<LanguagePickerProps> = ({
           <SelectValue placeholder="Language" />
         </SelectTrigger>
         <SelectContent>
-          {supportedLanguages.map((lang) => (
+          {supportedLanguages?.map((lang) => (
             <SelectItem key={lang} value={lang}>
               {lang}
             </SelectItem>

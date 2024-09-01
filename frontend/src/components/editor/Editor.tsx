@@ -28,7 +28,7 @@ interface Props {
 
 export const Editor: React.FC<Props> = ({ problem }) => {
   const [language, setLanguage] = useState<string>(
-    problem.supportedLanguages[0] || "",
+    problem?.supportedLanguages?.[0] || "",
   );
   const codeEditorRef = useRef<editor.IStandaloneCodeEditor>();
   const handleCodeEditorMount: OnMount = (editor) => {

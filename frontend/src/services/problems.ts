@@ -109,22 +109,52 @@ const getProblemTemplates = async (problemId: string) => {
 };
 
 const deleteSkeleton = async (problemId: string, language: string) => {
-  const response = await api.delete<{}>(`/problems/${problemId}/skeletons/${language}`)
+  const response = await api.delete<{}>(
+    `/problems/${problemId}/skeletons/${language}`,
+  );
 
   return response.data;
-} 
+};
+
+const updateSkeleton = async (
+  problemId: string,
+  language: string,
+  skeleton: string,
+) => {
+  const response = await api.put<{}>(
+    `/problems/${problemId}/skeletons/${language}`,
+    { skeleton },
+  );
+
+  return response.data;
+};
+
+const updateTemplate = async (
+  problemId: string,
+  language: string,
+  template: string,
+) => {
+  const response = await api.put<{}>(
+    `/problems/${problemId}/templates/${language}`,
+    {template}
+  );
+
+  return response.data;
+};
 
 const deleteSolutionTemplate = async (problemId: string, language: string) => {
-  const response = await api.delete<{}>(`/problems/${problemId}/templates/${language}`)
+  const response = await api.delete<{}>(
+    `/problems/${problemId}/templates/${language}`,
+  );
 
   return response.data;
-}
+};
 
 const deleteProblem = async (problemId: string) => {
-  const response = await api.delete<{}>(`/problems/${problemId}`)
+  const response = await api.delete<{}>(`/problems/${problemId}`);
 
   return response;
-}
+};
 
 interface ICreateTemplatePayload {
   template: string;
@@ -139,8 +169,6 @@ const createTemplate = async (
     `/problems/${problemId}/templates`,
     payload,
   );
-
-
 
   return response.data;
 };
@@ -161,5 +189,7 @@ export const problemService = {
   getProblemTemplates,
   deleteSkeleton,
   deleteSolutionTemplate,
-  deleteProblem
+  deleteProblem,
+  updateSkeleton,
+  updateTemplate
 };

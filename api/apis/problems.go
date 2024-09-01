@@ -29,16 +29,19 @@ func bindProblemsApi(app *core.App, group *echo.Group) {
 
 	subGroup.GET("/:id/tests/public", api.getTests, authorize("read:test"))
 	subGroup.POST("/:id/tests", api.addTest, authorize("write:test"))
+
 	subGroup.GET("/:id/skeletons", api.getSkeletons, authorize("write:test"))
 	subGroup.POST("/:id/skeletons", api.addSkeleton, authorize("write:test"))
-  subGroup.DELETE("/:id/skeletons/:lang", api.deleteSeleton, authorize("write:test"))
+  subGroup.PUT("/:id/skeletons/:lang", api.updateSkeleton, authorize("write:test"))
+	subGroup.DELETE("/:id/skeletons/:lang", api.deleteSeleton, authorize("write:test"))
 
 	subGroup.DELETE("/tests/:id", api.deleteTest, authorize("write:test"))
 
 	subGroup.GET("/:id/templates", api.getAllSolutionTemplates)
 	subGroup.GET("/:id/templates/:lang", api.getSolutionTemplate)
+  subGroup.POST("/:id/templates", api.createSolutionTemplate, authorize("write:template"))
+  subGroup.PUT("/:id/templates/:lang", api.updateSolutionTemplate, authorize("write:template"))
 	subGroup.DELETE("/:id/templates/:lang", api.deleteSolutionTemplate)
-	subGroup.POST("/:id/templates", api.createSolutionTemplate)
 }
 
 type problemsApi struct {
@@ -164,17 +167,35 @@ func (api *problemsApi) getSkeletons(c echo.Context) error {
 }
 
 func (api *problemsApi) deleteSeleton(c echo.Context) error {
-  problemId := c.Param("id")
-  language := c.Param("lang")
+	problemId := c.Param("id")
+	language := c.Param("lang")
 
-  fmt.Println(problemId)
-  fmt.Println(language)
+	fmt.Println(problemId)
+	fmt.Println(language)
 
-  if err := api.service.DeleteSkeleton(problemId, language); err != nil {
-    return err
+	if err := api.service.DeleteSkeleton(problemId, language); err != nil {
+		return err
+	}
+
+	return c.NoContent(http.StatusOK)
+}
+
+func (api *problemsApi) updateSkeleton(c echo.Context) error {
+	problemId := c.Param("id")
+	language := c.Param("lang")
+  dto := new(dtos.UpdateSkeletonDto)
+
+  if err := c.Bind(&dto); err != nil {
+    return echo.NewHTTPError(http.StatusBadRequest, err.Error())
   }
 
-  return c.NoContent(http.StatusOK) 
+  skeleton, err := api.service.UpdateSkeleton(problemId, language, dto)
+  
+  if err != nil {
+    return echo.NewHTTPError(http.StatusInternalServerError, err.Error())
+  }
+
+  return c.JSON(http.StatusOK, skeleton)
 }
 
 func (api *problemsApi) delete(c echo.Context) error {
@@ -252,6 +273,24 @@ func (api *problemsApi) createSolutionTemplate(c echo.Context) error {
 	}
 
 	return c.JSON(http.StatusOK, template)
+}
+
+func (api *problemsApi) updateSolutionTemplate(c echo.Context) error {
+  id := c.Param("id")
+  lang := c.Param("lang")
+  dto := new(dtos.UpdateSolutionTemplateDTO)
+
+  if err := c.Bind(dto); err != nil {
+		return echo.NewHTTPError(http.StatusBadRequest, "Couldn't process the request body")
+  }
+
+  template, err := api.service.UpdateSolutionTemplate(id, lang, dto)
+
+  if err != nil {
+    return echo.NewHTTPError(http.StatusInternalServerError, err.Error())
+  }
+
+  return c.JSON(http.StatusOK, template)
 }
 
 func (api *problemsApi) deleteSolutionTemplate(c echo.Context) error {

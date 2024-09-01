@@ -14,7 +14,7 @@ export const Dashboard = () => {
   const [deleteProblemId, setDeleteProblemId] = useState<string | null>(null);
   const [isDeleteDialogOpen, setIsDeleteDialogOpen] = useState(false);
 
-  const { data, isLoading } = useQuery({
+  const { data, isLoading, refetch} = useQuery({
     queryKey: ["problems"],
     queryFn: problemService.getProblems,
   });
@@ -31,6 +31,7 @@ export const Dashboard = () => {
         isOpen={isDeleteDialogOpen}
         setIsOpen={setIsDeleteDialogOpen}
         problemId={deleteProblemId!}
+        onSuccess={refetch}
       />
       <h1>Problems</h1>
       <DataGrid

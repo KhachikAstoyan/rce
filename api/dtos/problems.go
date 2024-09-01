@@ -26,3 +26,7 @@ type CreateSkeletonDto struct {
 	Skeleton string `json:"skeleton" validate:"required"`
 	Language string `json:"language" validate:"required"`
 }
+
+type UpdateSkeletonDto struct {
+  Skeleton string `json:"skeleton" validate:"required"`
+}

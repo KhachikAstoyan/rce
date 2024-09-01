@@ -11,8 +11,9 @@ import Markdown from "react-markdown";
 import { useState } from "react";
 import { CodeEditor } from "../../components/editor/CodeEditor";
 import { Button } from "../../components/shadcn/button";
-import { AddLanguageDialog } from "../components/AddLanguageDialog";
+import { AddLanguageDialog } from "../components/AddLanguageDialog/AddLanguageDialog";
 import { toast } from "sonner";
+import { EditLanguageDialog } from "../components/EditLanguageDialog/EditLanguageDialog";
 
 export const ProblemDetails = () => {
   const { id } = useParams({ strict: false });
@@ -28,6 +29,12 @@ export const ProblemDetails = () => {
   });
 
   const [isAddDialogOpen, setIsAddDialogOpen] = useState(false);
+  const [isEditDialogOpen, setIsEditDialogOpen] = useState(false);
+  const [editingLanguage, setEditingLanguage] = useState<{
+    language: string;
+    skeleton: string;
+    template: string;
+  } | null>(null);
 
   const {
     data: problem,
@@ -40,18 +47,21 @@ export const ProblemDetails = () => {
 
   const handleDeleteLanguageSupport = async (language: string) => {
     try {
-      if(!id) throw new Error("");
+      if (!id) throw new Error("");
 
       const deleteSkeleton = problemService.deleteSkeleton(id, language);
-      const deleteTemplate = problemService.deleteSolutionTemplate(id, language);
+      const deleteTemplate = problemService.deleteSolutionTemplate(
+        id,
+        language,
+      );
 
-      await Promise.all([deleteSkeleton, deleteTemplate])
+      await Promise.all([deleteSkeleton, deleteTemplate]);
 
-      toast.success(`${language} support delete for this problem`)
+      toast.success(`${language} support delete for this problem`);
     } catch (_e) {
-      toast.error(`Couldn't delete support for ${language}`) 
+      toast.error(`Couldn't delete support for ${language}`);
     }
-  }
+  };
 
   if (isLoading) {
     return "Loading...";
@@ -67,6 +77,15 @@ export const ProblemDetails = () => {
         open={isAddDialogOpen}
         problemId={id!}
         onOpenChange={setIsAddDialogOpen}
+      />
+
+      <EditLanguageDialog
+        open={isEditDialogOpen}
+        onOpenChange={setIsEditDialogOpen}
+        problemId={id!}
+        language={editingLanguage?.language!}
+        skeleton={editingLanguage?.skeleton!}
+        template={editingLanguage?.template!}
       />
 
       <h1 className="text-3xl font-bold border-b pb-3 mb-10">
@@ -89,7 +108,28 @@ export const ProblemDetails = () => {
             <AccordionTrigger>{language}</AccordionTrigger>
             <AccordionContent>
               <div className="flex flex-col gap-10">
-                <Button className="self-start" onClick={() => handleDeleteLanguageSupport(language)}>Delete support</Button>
+                <div className="flex gap-2">
+                  <Button
+                    className="self-start"
+                    onClick={() => handleDeleteLanguageSupport(language)}
+                  >
+                    Delete support
+                  </Button>
+                  <Button
+                    variant="outline"
+                    className="self-start"
+                    onClick={() => {
+                      setEditingLanguage({
+                        language,
+                        skeleton: skeletons[language],
+                        template: templates[language],
+                      });
+                      setIsEditDialogOpen(true);
+                    }}
+                  >
+                    Edit
+                  </Button>
+                </div>
                 <div className="h-64">
                   <h2>Skeleton code</h2>
                   <CodeEditor

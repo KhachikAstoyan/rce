@@ -75,7 +75,7 @@ export const TestView: React.FC<Props> = ({ tests, results }) => {
       )}
 
       <div className="flex flex-col gap-4 mt-3">
-        {Object.entries(testSuite.tests[currentTest].inputs).map(
+        {Object.entries(testSuite.tests[currentTest]?.inputs || {}).map(
           ([key, value]) => (
             <ValueDisplay label={key} value={value.value} key={key+value} />
           ),

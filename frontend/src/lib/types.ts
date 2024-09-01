@@ -24,7 +24,7 @@ export interface Problem {
   slug: string;
   description: string;
   difficulty: "easy" | "medium" | "hard";
-  supportedLanguages: string[];
+  supportedLanguages?: string[];
   solved: boolean;
 }
 

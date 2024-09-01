@@ -153,7 +153,9 @@ func (s *ProblemService) GetSolutionTemplate(problemId, language string) (*model
 	return template, nil
 }
 
-func (s *ProblemService) CreateSolutionTemplate(dto *dtos.CreateSolutionTemplateDTO) (*models.SolutionTemplate, error) {
+func (s *ProblemService) CreateSolutionTemplate(
+  dto *dtos.CreateSolutionTemplateDTO,
+) (*models.SolutionTemplate, error) {
 	db := s.app.DB
 
 	if err := utils.ValidateStruct(dto); err != nil {
@@ -185,6 +187,26 @@ func (s *ProblemService) CreateSolutionTemplate(dto *dtos.CreateSolutionTemplate
 	}
 
 	return &template, nil
+}
+
+func (s *ProblemService) UpdateSolutionTemplate(
+  problemId, 
+  language string, 
+  dto *dtos.UpdateSolutionTemplateDTO,
+) (*models.SolutionTemplate, error) {
+  db := s.app.DB
+
+  templateRecord := models.SolutionTemplate{
+    ProblemID: problemId,
+    Language: language,
+    Template: dto.Template,
+  }
+
+  if err := db.Save(&templateRecord).Error; err != nil {
+    return nil, err
+  }
+
+  return &templateRecord, nil
 }
 
 func (s *ProblemService) DeleteSolutionTemplate(problemId, language string) error {
@@ -271,13 +293,37 @@ func (s *ProblemService) UpdateProblem(id string, p *dtos.CreateProblemDto) (*mo
 func (s *ProblemService) GetSkeleton(problemId, lang string) (*models.Skeleton, error) {
 	db := s.app.DB
 	var skeleton models.Skeleton
-	err := db.Where("language = ?", lang).Where("problem_id = ?", problemId).First(&skeleton).Error
+	err := db.Where("language = ?", lang).
+		Where("problem_id = ?", problemId).
+		First(&skeleton).Error
 
 	if err != nil {
 		return nil, echo.NewHTTPError(http.StatusInternalServerError, "error finding the skeleton for the language")
 	}
 
 	return &skeleton, err
+}
+
+func (s *ProblemService) UpdateSkeleton(problemId, lang string, dto *dtos.UpdateSkeletonDto) (*models.Skeleton, error) {
+	db := s.app.DB
+	err := utils.ValidateStruct(dto)
+
+	if err != nil {
+		return nil, err
+	}
+
+	skeletonRecord := models.Skeleton{
+		ProblemID: problemId,
+		Language:  lang,
+		Skeleton:  dto.Skeleton,
+	}
+
+	err = db.Save(&skeletonRecord).Error
+	if err != nil {
+		return nil, err
+	}
+
+	return &skeletonRecord, nil
 }
 
 func (s *ProblemService) AddSkeletonToProblem(id string, t *dtos.CreateSkeletonDto) error {
@@ -383,13 +429,11 @@ func (s *ProblemService) AddTestToProblem(id string, t *dtos.CreateTestDto) (*mo
 func (s *ProblemService) DeleteProblem(id string) error {
 	db := s.app.DB
 
-	// TODO: make this a transaction!!
 	tx := db.Begin()
 	defer func() {
 		if r := recover(); r != nil {
 			tx.Rollback()
 			// You might want to handle the panic or log it
-			panic(r) // Re-throw the panic after rolling back
 		} else if tx.Error != nil {
 			tx.Rollback() // Rollback on error
 		} else {

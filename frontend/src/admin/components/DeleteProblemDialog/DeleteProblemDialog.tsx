@@ -15,12 +15,14 @@ interface DeleteProblemDialogProps {
   isOpen: boolean;
   setIsOpen: (v: boolean) => void;
   problemId: string;
+  onSuccess?: () => void
 }
 
 export const DeleteProblemDialog: React.FC<DeleteProblemDialogProps> = ({
   isOpen,
   setIsOpen,
   problemId,
+  onSuccess
 }) => {
   const handleDelete = useCallback(async () => {
     if (!problemId) return;
@@ -29,6 +31,7 @@ export const DeleteProblemDialog: React.FC<DeleteProblemDialogProps> = ({
       await problemService.deleteProblem(problemId);
 
       toast.success("Problem deleted");
+      onSuccess && onSuccess();
     } catch (error) {
       toast.error("Couldn't delete the problem :(");
     } finally {

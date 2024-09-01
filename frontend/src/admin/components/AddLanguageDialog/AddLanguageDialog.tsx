@@ -9,14 +9,14 @@ import {
 } from "@/components/shadcn/dialog";
 import { Label } from "@/components/shadcn/label";
 import { Button } from "@/components/shadcn/button";
-import { CodeEditor } from "../../components/editor/CodeEditor";
+import { CodeEditor } from "../../../components/editor/CodeEditor";
 import {
   getLanguageData,
   Language,
   SUPPORTED_LANGUAGES,
-} from "../../lib/constants/languages";
+} from "../../../lib/constants/languages";
 import { toast } from "sonner";
-import { problemService } from "../../services/problems";
+import { problemService } from "../../../services/problems";
 import { LanguagePicker } from "@/components/common/LanguagePicker/LanguagePicker";
 
 interface AddLanguageDialogProps extends React.ComponentProps<typeof Dialog> {
@@ -101,7 +101,7 @@ export const AddLanguageDialog: React.FC<AddLanguageDialogProps> = ({
                 <h2>Skeleton code</h2>
                 <CodeEditor
                   value={skeleton}
-                  language={"python"}
+                  language={language}
                   onChange={setSkeleton}
                 />
               </div>

@@ -2,7 +2,6 @@ package apis
 
 import (
 	"errors"
-	"fmt"
 	"net/http"
 	"time"
 
@@ -96,14 +95,12 @@ func (api *authApi) refreshTokenhandler(c echo.Context) error {
 	if err != nil {
 		return echo.NewHTTPError(http.StatusUnauthorized, "no refresh token")
 	}
-	fmt.Printf("cookie: %v\n", cookie)
 	refreshTokenString := cookie.Value
 
 	_, vErr := api.authService.ParseRefreshTokenClaims(refreshTokenString)
 	storedToken, dbErr := api.authService.FindRefreshToken(refreshTokenString)
 
 	if err := errors.Join(vErr, dbErr); err != nil {
-		fmt.Printf("err: %v\n", err)
 		return err
 	}
 
