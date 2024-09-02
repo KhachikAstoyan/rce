@@ -8,12 +8,13 @@ import {
 } from "../../components/shadcn/accordion";
 import { AccordionContent } from "@radix-ui/react-accordion";
 import Markdown from "react-markdown";
-import { useState } from "react";
+import { useCallback, useRef, useState } from "react";
 import { CodeEditor } from "../../components/editor/CodeEditor";
 import { Button } from "../../components/shadcn/button";
 import { AddLanguageDialog } from "../components/AddLanguageDialog/AddLanguageDialog";
 import { toast } from "sonner";
 import { EditLanguageDialog } from "../components/EditLanguageDialog/EditLanguageDialog";
+import { TestEditor, TestEditorRef } from "../components/TestEditor/TestEditor";
 
 export const ProblemDetails = () => {
   const { id } = useParams({ strict: false });
@@ -28,8 +29,16 @@ export const ProblemDetails = () => {
     queryFn: async () => problemService.getProblemTemplates(id!),
   });
 
-  const [isAddDialogOpen, setIsAddDialogOpen] = useState(false);
-  const [isEditDialogOpen, setIsEditDialogOpen] = useState(false);
+  const { data: tests } = useQuery({
+    queryKey: ["allTests", id],
+    queryFn: async () => problemService.getAllTests(id!),
+  });
+
+  const [addLanguageDialogOpen, setAddLanguageDialogOpen] = useState(false);
+  const [editLanguageDialogOpen, setEditLanguageDialogOpen] = useState(false);
+  const [isTestEditMode, setIsTestEditMode] = useState(false);
+  const testEditRef = useRef<TestEditorRef | null>(null);
+
   const [editingLanguage, setEditingLanguage] = useState<{
     language: string;
     skeleton: string;
@@ -63,6 +72,27 @@ export const ProblemDetails = () => {
     }
   };
 
+  const cancelTestEdits = useCallback(() => {
+    testEditRef.current?.resetState();
+    setIsTestEditMode(false);
+  }, [testEditRef, setIsTestEditMode]);
+
+  const saveTestEdits = useCallback(async () => {
+    const testSuite = testEditRef.current?.getTestSuite();
+    if(!testSuite) {
+      toast.error("Error! Please create test suite");
+      return;
+    }
+
+    try {
+      await problemService.updateTestSuite(id!, testSuite)
+
+      toast.success("Test cases successfully updated")
+    } catch (error) {
+      toast.error("Error occured! Please try again later.")
+    }
+  }, [testEditRef])
+
   if (isLoading) {
     return "Loading...";
   }
@@ -74,14 +104,14 @@ export const ProblemDetails = () => {
   return (
     <div>
       <AddLanguageDialog
-        open={isAddDialogOpen}
+        open={addLanguageDialogOpen}
         problemId={id!}
-        onOpenChange={setIsAddDialogOpen}
+        onOpenChange={setAddLanguageDialogOpen}
       />
 
       <EditLanguageDialog
-        open={isEditDialogOpen}
-        onOpenChange={setIsEditDialogOpen}
+        open={editLanguageDialogOpen}
+        onOpenChange={setEditLanguageDialogOpen}
         problemId={id!}
         language={editingLanguage?.language!}
         skeleton={editingLanguage?.skeleton!}
@@ -124,7 +154,7 @@ export const ProblemDetails = () => {
                         skeleton: skeletons[language],
                         template: templates[language],
                       });
-                      setIsEditDialogOpen(true);
+                      setEditLanguageDialogOpen(true);
                     }}
                   >
                     Edit
@@ -155,7 +185,31 @@ export const ProblemDetails = () => {
         ))}
       </Accordion>
 
-      <Button onClick={() => setIsAddDialogOpen(true)}>Add new language</Button>
+      <Button onClick={() => setAddLanguageDialogOpen(true)}>
+        Add new language
+      </Button>
+
+      {tests && (
+        <TestEditor
+          problemId={id!}
+          currentTestSuite={tests.testSuite}
+          allowEdits={isTestEditMode}
+          ref={testEditRef}
+        />
+      )}
+
+      <div className="mt-3">
+        {isTestEditMode ? (
+          <div className="flex gap-2">
+            <Button onClick={saveTestEdits}>Save</Button>
+            <Button variant="outline" onClick={cancelTestEdits}>
+              Cancel
+            </Button>
+          </div>
+        ) : (
+          <Button onClick={() => setIsTestEditMode(true)}>Edit tests</Button>
+        )}
+      </div>
     </div>
   );
 };

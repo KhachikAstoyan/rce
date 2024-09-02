@@ -76,6 +76,11 @@ const getPublicTests = async (problemId: string) => {
   return response.data;
 };
 
+const getAllTests = async (problemId: string) => {
+  const response = await api.get<ITest>(`/problems/${problemId}/tests`);
+  return response.data;
+}
+
 interface IGetTemplateResponse {
   template: string;
   language: string;
@@ -142,6 +147,18 @@ const updateTemplate = async (
   return response.data;
 };
 
+const updateTestSuite = async (
+  problemId: string,
+  testSuite: ITestSuite
+) => {
+  const response = await api.put<{}>(
+    `/problems/${problemId}/tests`,
+    {tests: testSuite}
+  )
+
+  return response.data;
+}
+
 const deleteSolutionTemplate = async (problemId: string, language: string) => {
   const response = await api.delete<{}>(
     `/problems/${problemId}/templates/${language}`,
@@ -182,6 +199,7 @@ export const problemService = {
   createSubmission,
   createTestSuite,
   getPublicTests,
+  getAllTests,
   createSkeleton,
   createTemplate,
   getTemplate,
@@ -191,5 +209,6 @@ export const problemService = {
   deleteSolutionTemplate,
   deleteProblem,
   updateSkeleton,
-  updateTemplate
+  updateTemplate,
+  updateTestSuite
 };

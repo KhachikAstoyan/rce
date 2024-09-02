@@ -27,15 +27,17 @@ func bindProblemsApi(app *core.App, group *echo.Group) {
 	subGroup.DELETE("/:id", api.delete, authorize("write:problem"))
 	subGroup.GET("/:id/submissions", api.listSubmissions, authorize())
 
+  subGroup.GET("/:id/tests", api.getAllTests, authorize("read:allTests"))
 	subGroup.GET("/:id/tests/public", api.getTests, authorize("read:test"))
 	subGroup.POST("/:id/tests", api.addTest, authorize("write:test"))
+  subGroup.PUT("/:id/tests", api.updateTest, authorize("write:test"))
+  subGroup.DELETE("/tests/:id", api.deleteTest, authorize("write:test"))
 
 	subGroup.GET("/:id/skeletons", api.getSkeletons, authorize("write:test"))
 	subGroup.POST("/:id/skeletons", api.addSkeleton, authorize("write:test"))
   subGroup.PUT("/:id/skeletons/:lang", api.updateSkeleton, authorize("write:test"))
 	subGroup.DELETE("/:id/skeletons/:lang", api.deleteSeleton, authorize("write:test"))
 
-	subGroup.DELETE("/tests/:id", api.deleteTest, authorize("write:test"))
 
 	subGroup.GET("/:id/templates", api.getAllSolutionTemplates)
 	subGroup.GET("/:id/templates/:lang", api.getSolutionTemplate)
@@ -83,6 +85,17 @@ func (api *problemsApi) getTests(c echo.Context) error {
 	}
 
 	return c.JSON(http.StatusOK, tests)
+}
+
+func (api *problemsApi) getAllTests(c echo.Context) error {
+  id := c.Param("id")
+  tests, err := api.service.GetAllTests(id)
+
+  if err != nil {
+    return err
+  }
+
+  return c.JSON(http.StatusOK, tests)
 }
 
 func (api *problemsApi) create(c echo.Context) error {
@@ -136,6 +149,22 @@ func (api *problemsApi) addTest(c echo.Context) error {
 	}
 
 	return c.JSON(http.StatusOK, test)
+}
+
+func (api *problemsApi) updateTest(c echo.Context) error {
+  id := c.Param("id")
+  dto := new(dtos.CreateTestDto)
+
+  if err := c.Bind(dto); err != nil {
+    return echo.NewHTTPError(http.StatusBadRequest, err.Error())
+  }
+
+  test, err := api.service.UpdateTest(id, dto)
+  if err != nil {
+    return echo.NewHTTPError(http.StatusInternalServerError, err.Error())
+  }
+
+  return c.JSON(http.StatusOK, test)
 }
 
 func (api *problemsApi) addSkeleton(c echo.Context) error {

@@ -19,7 +19,7 @@ export const dataTypes: IOption[] = [
   },
   {
     value: "array-bool",
-    label: "bool[]",
+    label: "boolean[]",
   },
   {
     value: "array-string",

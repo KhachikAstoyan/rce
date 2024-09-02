@@ -74,7 +74,7 @@ pub async fn test_solution(
         // the stdout/stderr so that the user knows what's up
         Err(_) => {
             let mut message = stdout.to_string();
-            if message.is_empty() {
+            if !message.is_empty() {
                 message.push_str("\n");
             }
             message.push_str(stderr);

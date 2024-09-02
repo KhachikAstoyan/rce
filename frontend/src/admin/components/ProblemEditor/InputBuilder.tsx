@@ -8,9 +8,14 @@ import { IInput } from "./types";
 interface Props {
   setInputs: React.Dispatch<React.SetStateAction<IInput[]>>;
   inputs: IInput[];
+  disabled?: boolean;
 }
 
-export const InputBuilder: React.FC<Props> = ({ inputs, setInputs }) => {
+export const InputBuilder: React.FC<Props> = ({
+  inputs,
+  setInputs,
+  disabled,
+}) => {
   const renameInput = (index: number, newName: string) => {
     setInputs((prev) => {
       const newInputs = structuredClone(prev);
@@ -33,7 +38,7 @@ export const InputBuilder: React.FC<Props> = ({ inputs, setInputs }) => {
     setInputs((prev) => {
       const copy = structuredClone(prev);
 
-      copy.splice(index, 1)
+      copy.splice(index, 1);
 
       return copy;
     });
@@ -52,13 +57,14 @@ export const InputBuilder: React.FC<Props> = ({ inputs, setInputs }) => {
   return (
     <div>
       {inputs.map((input, index) => (
-        <div className="flex gap-3 items-center">
+        <div key={input.name + input.type} className="flex gap-3 items-center">
           <div>
             <Label htmlFor={input.name + "name"}>Input Name</Label>
             <Input
               id={input.name + "name"}
               placeholder={"Name"}
               value={input.name}
+              disabled={disabled}
               onChange={(e) => renameInput(index, e.target.value)}
             />
           </div>
@@ -67,23 +73,28 @@ export const InputBuilder: React.FC<Props> = ({ inputs, setInputs }) => {
               <Label htmlFor={input.name + "type"}>Type</Label>
               <TypeSelector
                 value={input.type}
+                disabled={disabled}
                 onChange={(newType) => onInputTypeChange(index, newType)}
               />
             </div>
           </div>
-          <Button
-            variant="destructive"
-            className="mt-4"
-            onClick={() => deleteInput(index)}
-          >
-            Delete
-          </Button>
+          {!disabled && (
+            <Button
+              variant="destructive"
+              className="mt-4"
+              onClick={() => deleteInput(index)}
+            >
+              Delete
+            </Button>
+          )}
         </div>
       ))}
 
-      <Button className="mt-4" onClick={addInput}>
-        Add input
-      </Button>
+      {!disabled && (
+        <Button className="mt-4" onClick={addInput}>
+          Add input
+        </Button>
+      )}
     </div>
   );
 };

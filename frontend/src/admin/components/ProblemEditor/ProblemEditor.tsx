@@ -1,4 +1,4 @@
-import { useEffect, useMemo, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import { Button } from "@/components/shadcn/button";
 import { Input } from "@/components/shadcn/input";
 import {
@@ -35,8 +35,6 @@ import { problemDifficultyOptions } from "@/lib/constants/problems";
 import { problemService } from "@/services/problems";
 import { toast } from "sonner";
 import { CodeEditor } from "@/components/editor/CodeEditor";
-import { ITestSuite, IValue } from "@/lib/types";
-import { TestCase } from "@/admin/components/ProblemEditor/TestCase";
 import { type Language, SUPPORTED_LANGUAGES } from "@/lib/constants/languages";
 import {
   Accordion,
@@ -44,10 +42,7 @@ import {
   AccordionItem,
   AccordionTrigger,
 } from "@/components/shadcn/accordion";
-import { TypeSelector } from "@/admin/components/TypeSelector/TypeSelector";
-import { InputBuilder } from "@/admin/components/ProblemEditor/InputBuilder";
-import { type IInput } from "./types";
-import { convertInputsToTestInput } from "./helpers";
+import { TestEditor, TestEditorRef } from "../TestEditor/TestEditor";
 
 const simpleSandpackConfig: SandpackConfig = {
   defaultPreset: "react",
@@ -71,52 +66,10 @@ export const PropblemEditor = () => {
   const [description, setDescription] = useState("");
   const [difficulty, setDifficulty] = useState("");
   const [name, setName] = useState("");
-  const [inputs, setInputs] = useState<IInput[]>([]);
-  const [expectedType, setExpectedType] = useState<string>("");
-  const [testSuite, setTestSuite] = useState<ITestSuite>({
-    problemId: "",
-    tests: [],
-  });
   const [problemId, setProblemId] = useState("");
   const [skeletons, setSkeletons] = useState<LanguageToStringMap>({});
   const [templates, setTemplates] = useState<LanguageToStringMap>({});
-  const convertedInputs: Record<string, IValue> = useMemo(
-    () => convertInputsToTestInput(inputs),
-    [inputs],
-  );
-
-  const addTestCase = () => {
-    setTestSuite({
-      ...testSuite,
-      tests: [
-        ...testSuite.tests,
-        {
-          inputs: convertedInputs,
-          isPublic: true,
-          expected: { type: expectedType, value: "" },
-        },
-      ],
-    });
-  };
-
-  useEffect(() => {
-    const newTestSuite = { ...testSuite };
-
-    newTestSuite.tests.forEach((test) => {
-      inputs.forEach((input) => {
-        if (!test.inputs[input.name]) {
-          test.inputs[input.name] = {
-            type: input.type,
-            value: "",
-          };
-        } else {
-          test.inputs[input.name].type = input.type;
-        }
-      });
-    });
-
-    setTestSuite(newTestSuite);
-  }, [inputs]);
+  const testEditorRef = useRef<TestEditorRef | null>(null);
 
   const handleSubmit = async () => {
     try {
@@ -134,6 +87,12 @@ export const PropblemEditor = () => {
   };
 
   const handleCreateTestSuite = async () => {
+    const testSuite = testEditorRef.current?.getTestSuite();
+    if(!testSuite) {
+      toast.error("Please create a test suite")
+      return;
+    };
+
     try {
       await problemService.createTestSuite(problemId, testSuite);
 
@@ -300,37 +259,7 @@ export const PropblemEditor = () => {
         ))}
       </Accordion>
 
-      <h2 className="text-3xl my-3">Inputs</h2>
-      {!testSuite.tests.length && <p>No tests</p>}
-
-      <InputBuilder inputs={inputs} setInputs={setInputs} />
-
-      <h2 className="text-3xl my-3">Expected type</h2>
-      <div className="w-[300px]">
-        <TypeSelector value={expectedType} onChange={setExpectedType} />
-      </div>
-
-      <h2 className="text-3xl my-3">Tests</h2>
-      {testSuite.tests.map((test, index) => (
-        <TestCase
-          index={index}
-          testCase={test}
-          inputs={convertedInputs}
-          expectedType={expectedType}
-          onChange={(newTest) => {
-            const newTests = [...testSuite.tests];
-            newTests[index] = newTest;
-            setTestSuite({ ...testSuite, tests: newTests });
-          }}
-          onDelete={() => {
-            const newTests = testSuite.tests.filter((_, i) => i !== index);
-            setTestSuite({ ...testSuite, tests: newTests });
-          }}
-        />
-      ))}
-      <Button className="w-min" onClick={addTestCase}>
-        Add test case
-      </Button>
+      <TestEditor problemId={problemId} ref={testEditorRef} />
 
       <Button onClick={handleSubmit} className="w-min">
         Create

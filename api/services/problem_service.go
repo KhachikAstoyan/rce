@@ -407,14 +407,14 @@ func (s *ProblemService) AddTestToProblem(id string, t *dtos.CreateTestDto) (*mo
 	db := s.app.DB
 
 	var problem models.Problem
-	err := db.Where("id = ?", id).First(&problem).Error
-
-	if err != nil {
-		return nil, echo.NewHTTPError(http.StatusNotFound, "problem not found")
-	}
 
 	if err := utils.ValidateStruct(t); err != nil {
 		return nil, echo.NewHTTPError(http.StatusUnprocessableEntity, err.Error())
+	}
+
+  err := db.Where("id = ?", id).First(&problem).Error
+	if err != nil {
+		return nil, echo.NewHTTPError(http.StatusNotFound, "problem not found")
 	}
 
 	test := models.Test{TestSuite: &t.Tests, ProblemID: id}
@@ -424,6 +424,26 @@ func (s *ProblemService) AddTestToProblem(id string, t *dtos.CreateTestDto) (*mo
 	}
 
 	return &test, nil
+}
+
+func (s *ProblemService) UpdateTest(problemId string, dto *dtos.CreateTestDto) (*models.Test, error) {
+  db := s.app.DB
+  
+  if err := utils.ValidateStruct(dto); err != nil {
+    return nil, err
+  }
+
+  var test models.Test
+  err := db.Model(&models.Test{}).
+    Where("problem_id = ?", problemId).
+    Update("test_suite", dto.Tests).
+    Error
+
+  if err != nil {
+    return nil, err
+  }
+
+  return &test, nil
 }
 
 func (s *ProblemService) DeleteProblem(id string) error {
