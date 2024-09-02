@@ -40,32 +40,32 @@ interface TestSuiteResult {
 }
 
 function parseValue(input: Value): any {
-  const {value, type} = input;
+  const { value, type } = input;
 
-  if(type === "string") {
+  if (type === "string") {
     return value;
   }
 
-  if(type === "int") {
-    return parseInt(value)
+  if (type === "int") {
+    return parseInt(value);
   }
 
-  if(type === "boolean") {
-    return value === "true"
+  if (type === "boolean") {
+    return value === "true";
   }
 
-  if(type.startsWith("array")) {
+  if (type.startsWith("array")) {
     return JSON.parse(value);
   }
 
-  throw new Error(`Unknown type ${input.type}`)
+  throw new Error(`Unknown type ${input.type}`);
 }
 
 function compareValues(expected: Value, received: any): boolean {
   const { value, type } = expected;
 
   if (type === "string") {
-    return received === expected;
+    return received === value;
   }
 
   if (type === "int") {
@@ -80,7 +80,7 @@ function compareValues(expected: Value, received: any): boolean {
     return JSON.stringify(received) === value;
   }
 
-  throw new Error(`Unknown type ${input.type}`);
+  throw new Error(`Unknown type ${expected.type}`);
 }
 
 function measureTimeMs(cb: Function, ...args: any[]) {
@@ -106,7 +106,7 @@ function run() {
     const args = process.argv.slice(2);
     const testsPath = args[0];
     const testSuite = JSON.parse(
-      fs.readFileSync(testsPath, "utf8")
+      fs.readFileSync(testsPath, "utf8"),
     ) as TestSuite;
 
     testSuite.tests.forEach((test) => {
@@ -147,11 +147,6 @@ function run() {
 
       const { result, timeMs } = measureTimeMs(solution, test.inputs);
 
-      process.stdout.write = originalStdoutWrite;
-      process.stderr.write = originalStderrWrite;
-      console.log = originalConsoleLog;
-      console.error = originalConsoleError;
-
       const testResult: TestCaseResult = {
         success: compareValues(test.expected, result),
         stdout: testStdout,
@@ -172,6 +167,11 @@ function run() {
       }
 
       testSuiteResult.testResults.push(testResult);
+
+      process.stdout.write = originalStdoutWrite;
+      process.stderr.write = originalStderrWrite;
+      console.log = originalConsoleLog;
+      console.error = originalConsoleError;
     });
 
     testSuiteResult.success = testSuiteResult.failed === 0;

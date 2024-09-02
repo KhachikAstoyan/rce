@@ -40,7 +40,7 @@ class JsonConverter {
     } else if (obj instanceof Number || obj instanceof Boolean) {
       return obj.toString();
     } else {
-      return JSONObject.quote(obj.toString());
+      return obj.toString();
     }
   }
 }

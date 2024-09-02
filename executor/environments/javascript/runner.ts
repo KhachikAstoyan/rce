@@ -65,7 +65,7 @@ function compareValues(expected: Value, received: any): boolean {
   const { value, type } = expected;
 
   if (type === "string") {
-    return received === expected;
+    return received === value;
   }
 
   if (type === "int") {
@@ -147,11 +147,6 @@ function run() {
 
       const { result, timeMs } = measureTimeMs(solution, test.inputs);
 
-      process.stdout.write = originalStdoutWrite;
-      process.stderr.write = originalStderrWrite;
-      console.log = originalConsoleLog;
-      console.error = originalConsoleError;
-
       const testResult: TestCaseResult = {
         success: compareValues(test.expected, result),
         stdout: testStdout,
@@ -172,6 +167,11 @@ function run() {
       }
 
       testSuiteResult.testResults.push(testResult);
+
+      process.stdout.write = originalStdoutWrite;
+      process.stderr.write = originalStderrWrite;
+      console.log = originalConsoleLog;
+      console.error = originalConsoleError;
     });
 
     testSuiteResult.success = testSuiteResult.failed === 0;

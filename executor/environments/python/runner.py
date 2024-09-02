@@ -122,7 +122,7 @@ def run():
                     {
                         "expected": expected,
                         "received": (
-                            json.dumps(result, separators=(',', ':')) if result is not None else "null"
+                            json.dumps(result, separators=(',', ':')).strip('"') if result is not None else "null"
                         ),
                     }
                 ],

@@ -8,47 +8,54 @@ public class ValueParser {
     String type = input.type;
     String value = input.value;
 
-    if(type == "string") { 
-      return input.value;
+    if (type.equals("string")) {
+        return input.value;
     }
 
-    if(type === "int") {
-      return Integer.parseInt(input.value);
+    if (type.equals("int")) {
+        return Integer.parseInt(input.value);
     }
 
-    if(type === "float") {
-      return Float.parseFloat(value);
+    if (type.equals("float")) {
+        return Float.parseFloat(value);
     }
 
-    if(type === "boolean") {
-      return Boolean.parseBoolean(value);
+    if (type.equals("boolean")) {
+        return Boolean.parseBoolean(value);
     }
 
-    if(type.startsWith("array")) {
-      return parseArray(input.value);
+    if (type.startsWith("array")) {
+        return parseArray(input.value);
     }
 
-    throw new IllegalArgumentException("Unknown type");
-    
+    throw new IllegalArgumentException("Unknown type " + type);
   }
 
   public static boolean compareValues(Value expected, Object received) throws JSONException {
-    switch (expected.type) {
-      case "string":
+    String type = expected.type;
+
+    if (type.equals("string")) {
         return received.equals(expected.value);
-      case "number":
-      case "int":
-        return Integer.parseInt(expected.value) == (Integer) received;
-      case "double":
-        return Double.parseDouble(expected.value) == (double) received;
-      case "boolean":
-        return Boolean.parseBoolean(expected.value) == (boolean) received;
-      case "array":
-        return expected.value.equals(JsonConverter.toJson(received));
-      default:
-        throw new IllegalArgumentException("Unknown type");
     }
-  }
+
+    if (type.equals("int")) {
+        return Integer.parseInt(expected.value) == (Integer) received;
+    }
+
+    if (type.equals("double")) {
+        return Double.parseDouble(expected.value) == (Double) received;
+    }
+
+    if (type.equals("boolean")) {
+        return Boolean.parseBoolean(expected.value) == (Boolean) received;
+    }
+
+    if (type.startsWith("array")) {
+        return expected.value.equals(JsonConverter.toJson(received));
+    }
+
+    throw new IllegalArgumentException("Unknown type " + expected.type);
+  } 
 
   private static Object parseArray(String arrayString) throws JSONException {
     JSONArray jsonArray = new JSONArray(arrayString);
