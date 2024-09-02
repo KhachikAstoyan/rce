@@ -34,12 +34,12 @@ static LANGUAGE_EXTENSIONS: Lazy<HashMap<Language, &'static str>> = Lazy::new(||
     HashMap::from([
         (Language::Javascript, "js"),
         (Language::Python, "py"),
+        (Language::Java, "java"),
+        (Language::Typescript, "ts"),
         // (Language::Rust, "rs"),
-        // (Language::Typescript, "ts"),
         // (Language::Go, "go"),
         // (Language::C, "c"),
         // (Language::Cpp, "cpp"),
-        // (Language::Java, "java"),
         // (Language::Bash, "sh"),
     ])
 });

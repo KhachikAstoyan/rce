@@ -9,4 +9,4 @@ RUN chmod +x run.sh
 RUN ls -la /app  # Add this line to list files in /app
 RUN cat /app/run.sh  # Add this line to display contents of run.sh
 
-ENTRYPOINT ["sh", "/app/run.sh", "runner.js"]
+ENTRYPOINT ["timeout", "60", "sh", "/app/run.sh", "runner.js"]

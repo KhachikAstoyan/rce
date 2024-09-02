@@ -132,7 +132,10 @@ async fn run_docker_container(
         .arg(paths.input_container_path.to_str().unwrap())
         .arg(submission_id);
 
-    timeout(Duration::from_secs(20), com.output()).await?
+    // Let's have a max of one minute per submission.
+    // If the code runs for more than a minute, it's likely to have
+    // an infinite loop or something like that
+    timeout(Duration::from_secs(60), com.output()).await?
 }
 
 #[derive(Debug)]
