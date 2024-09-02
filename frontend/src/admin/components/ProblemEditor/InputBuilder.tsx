@@ -57,7 +57,7 @@ export const InputBuilder: React.FC<Props> = ({
   return (
     <div>
       {inputs.map((input, index) => (
-        <div key={input.name + input.type} className="flex gap-3 items-center">
+        <div className="flex gap-3 items-center">
           <div>
             <Label htmlFor={input.name + "name"}>Input Name</Label>
             <Input

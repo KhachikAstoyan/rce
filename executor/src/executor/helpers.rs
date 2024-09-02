@@ -36,7 +36,25 @@ pub async fn test_solution(
     info!("Formed paths for host and container");
     info!(target: "paths", "{:?}", paths);
 
-    let container_output = run_docker_container(&paths, &lang, &payload.submission_id).await?;
+    // Let's have a max of one minute per submission.
+    // If the code runs for more than a minute, it's likely to have
+    // an infinite loop or something like that
+
+    let container_future = run_docker_container(&paths, &lang, &payload.submission_id);
+    let container_output = timeout(Duration::from_secs(60), container_future).await;
+
+    if let Err(_) = container_output {
+        return Ok(SubmissionResult {
+            submission_id: Some(payload.submission_id),
+            passed: 0,
+            failed: 0,
+            success: false,
+            message: "Request timed out. Nice try :)".to_string(),
+            test_results: vec![],
+        });
+    }
+
+    let container_output = container_output??;
     let stdout = str::from_utf8(&container_output.stdout).unwrap_or_default();
     let stderr: &str = str::from_utf8(&container_output.stderr).unwrap_or_default();
 
@@ -103,7 +121,7 @@ async fn run_docker_container(
     let mut com = Command::new("docker");
 
     com.arg("run")
-        // .arg("--rm")
+        .arg("--rm")
         .arg("--network")
         .arg("none")
         .arg("-v")
@@ -132,10 +150,8 @@ async fn run_docker_container(
         .arg(paths.input_container_path.to_str().unwrap())
         .arg(submission_id);
 
-    // Let's have a max of one minute per submission.
-    // If the code runs for more than a minute, it's likely to have
-    // an infinite loop or something like that
-    timeout(Duration::from_secs(60), com.output()).await?
+    com.output().await
+    // timeout(Duration::from_secs(60), com.output()).await?
 }
 
 #[derive(Debug)]

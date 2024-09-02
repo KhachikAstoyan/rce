@@ -154,7 +154,7 @@ func (s *ProblemService) GetSolutionTemplate(problemId, language string) (*model
 }
 
 func (s *ProblemService) CreateSolutionTemplate(
-  dto *dtos.CreateSolutionTemplateDTO,
+	dto *dtos.CreateSolutionTemplateDTO,
 ) (*models.SolutionTemplate, error) {
 	db := s.app.DB
 
@@ -190,23 +190,34 @@ func (s *ProblemService) CreateSolutionTemplate(
 }
 
 func (s *ProblemService) UpdateSolutionTemplate(
-  problemId, 
-  language string, 
-  dto *dtos.UpdateSolutionTemplateDTO,
+	problemId,
+	language string,
+	dto *dtos.UpdateSolutionTemplateDTO,
 ) (*models.SolutionTemplate, error) {
-  db := s.app.DB
+	db := s.app.DB
 
-  templateRecord := models.SolutionTemplate{
-    ProblemID: problemId,
-    Language: language,
-    Template: dto.Template,
-  }
+	// templateRecord := models.SolutionTemplate{
+	//   ProblemID: problemId,
+	//   Language: language,
+	//   Template: dto.Template,
+	// }
 
-  if err := db.Save(&templateRecord).Error; err != nil {
-    return nil, err
-  }
+	var templateRecord models.SolutionTemplate
 
-  return &templateRecord, nil
+	if err := db.
+		Where("problem_id = ?", problemId).
+		Where("language = ?", language).
+		First(&templateRecord).Error; err != nil {
+		return nil, err
+	}
+
+  templateRecord.Template = dto.Template
+
+	if err := db.Save(&templateRecord).Error; err != nil {
+		return nil, err
+	}
+
+	return &templateRecord, nil
 }
 
 func (s *ProblemService) DeleteSolutionTemplate(problemId, language string) error {
@@ -312,11 +323,21 @@ func (s *ProblemService) UpdateSkeleton(problemId, lang string, dto *dtos.Update
 		return nil, err
 	}
 
-	skeletonRecord := models.Skeleton{
-		ProblemID: problemId,
-		Language:  lang,
-		Skeleton:  dto.Skeleton,
+	// skeletonRecord := models.Skeleton{
+	// 	ProblemID: problemId,
+	// 	Language:  lang,
+	// 	Skeleton:  dto.Skeleton,
+	// }
+	var skeletonRecord models.Skeleton
+
+	if err := db.
+		Where("problem_id = ?", problemId).
+		Where("language = ?", lang).
+		First(&skeletonRecord).Error; err != nil {
+		return nil, err
 	}
+
+	skeletonRecord.Skeleton = dto.Skeleton
 
 	err = db.Save(&skeletonRecord).Error
 	if err != nil {
@@ -412,7 +433,7 @@ func (s *ProblemService) AddTestToProblem(id string, t *dtos.CreateTestDto) (*mo
 		return nil, echo.NewHTTPError(http.StatusUnprocessableEntity, err.Error())
 	}
 
-  err := db.Where("id = ?", id).First(&problem).Error
+	err := db.Where("id = ?", id).First(&problem).Error
 	if err != nil {
 		return nil, echo.NewHTTPError(http.StatusNotFound, "problem not found")
 	}
@@ -427,23 +448,23 @@ func (s *ProblemService) AddTestToProblem(id string, t *dtos.CreateTestDto) (*mo
 }
 
 func (s *ProblemService) UpdateTest(problemId string, dto *dtos.CreateTestDto) (*models.Test, error) {
-  db := s.app.DB
-  
-  if err := utils.ValidateStruct(dto); err != nil {
-    return nil, err
-  }
+	db := s.app.DB
 
-  var test models.Test
-  err := db.Model(&models.Test{}).
-    Where("problem_id = ?", problemId).
-    Update("test_suite", dto.Tests).
-    Error
+	if err := utils.ValidateStruct(dto); err != nil {
+		return nil, err
+	}
 
-  if err != nil {
-    return nil, err
-  }
+	var test models.Test
+	err := db.Model(&models.Test{}).
+		Where("problem_id = ?", problemId).
+		Update("test_suite", dto.Tests).
+		Error
 
-  return &test, nil
+	if err != nil {
+		return nil, err
+	}
+
+	return &test, nil
 }
 
 func (s *ProblemService) DeleteProblem(id string) error {

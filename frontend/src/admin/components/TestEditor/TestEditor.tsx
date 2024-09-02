@@ -153,7 +153,7 @@ export const TestEditor = forwardRef<TestEditorRef, TestEditorProps>(
           />
         ))}
         {allowEdits && (
-          <Button className="w-min" onClick={addTestCase}>
+          <Button className="w-min mt-3" onClick={addTestCase}>
             Add test case
           </Button>
         )}

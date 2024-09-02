@@ -13,9 +13,6 @@ pub enum Language {
     Java,
     #[serde(rename = "typescript")]
     Typescript,
-
-    // #[serde(rename = "rust")]
-    // Rust,
 }
 
 impl Language {

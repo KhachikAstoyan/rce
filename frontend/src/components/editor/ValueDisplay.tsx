@@ -22,7 +22,7 @@ export const ValueDisplay: React.FC<Props> = ({
           className,
         )}
       >
-        {value}
+        {value.trim().replace(/^"|"$/g, '')}
       </pre>
     </div>
   );
