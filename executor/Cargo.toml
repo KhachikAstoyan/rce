@@ -22,6 +22,7 @@ uuid = {version = "1.6.1", features=["v4"]}
 log = "0.4"
 pretty_env_logger = "0.4"
 amiquip = "0.4.2"
+amqprs = "1.7.0"
 
 [dev-dependencies]
 mockall = "0.12.1"
