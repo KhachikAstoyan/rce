@@ -2,7 +2,8 @@ use std::sync::Arc;
 
 use amqprs::{
     channel::{
-        BasicCancelArguments, BasicConsumeArguments, BasicNackArguments, BasicPublishArguments, Channel, ConsumerMessage, QueueDeclareArguments
+        BasicCancelArguments, BasicConsumeArguments, BasicNackArguments, BasicPublishArguments,
+        Channel, ConsumerMessage, QueueDeclareArguments,
     },
     connection::{Connection, OpenConnectionArguments},
     BasicProperties,
@@ -101,7 +102,11 @@ async fn handle_message(delivery: &ConsumerMessage, channel: Arc<Mutex<Channel>>
         Ok(str) => str,
         Err(_) => SubmissionResult::error_json(submission_id),
     };
-    let args = BasicNackArguments::new(delivery.deliver.as_ref().unwrap().delivery_tag(), false, false);
+    let args = BasicNackArguments::new(
+        delivery.deliver.as_ref().unwrap().delivery_tag(),
+        false,
+        false,
+    );
     let _ = channel.lock().await.basic_nack(args).await;
 
     println!("we have the json, publishing to submission_results");

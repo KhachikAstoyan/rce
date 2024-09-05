@@ -61,7 +61,7 @@ func (api *authApi) handleGoogleCallback(c echo.Context) error {
 	token, err := api.googleOauthConfig.Exchange(c.Request().Context(), code)
 
 	if err != nil {
-		return echo.NewHTTPError(http.StatusInternalServerError, "Code exchange failed")
+    return c.Redirect(http.StatusPermanentRedirect, api.app.Config.ClientURL)
 	}
 
 	client := api.googleOauthConfig.Client(c.Request().Context(), token)
