@@ -7,10 +7,12 @@ import { format } from "date-fns";
 import { ProblemDifficulty } from "@/components/problem/ProblemDifficulty";
 import { ProblemStatus } from "@/components/problem/ProblemStatus";
 import { DefaultLayout } from "@/layouts/DefaultLayout";
+import { useAuth } from "@/hooks/useAuth";
 
 export const Home = () => {
+  const { isLoggedIn } = useAuth(); 
   const { data, isLoading } = useQuery({
-    queryKey: ["problems"],
+    queryKey: ["problems", { isLoggedIn }],
     queryFn: problemService.getProblems,
   });
 

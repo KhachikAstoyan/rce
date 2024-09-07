@@ -39,7 +39,6 @@ pub async fn test_solution(
     // Let's have a max of one minute per submission.
     // If the code runs for more than a minute, it's likely to have
     // an infinite loop or something like that
-
     let container_future = run_docker_container(&paths, &lang, &payload.submission_id);
     let container_output = timeout(Duration::from_secs(60), container_future).await;
 
