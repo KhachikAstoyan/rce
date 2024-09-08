@@ -3,10 +3,6 @@ import { Button } from "@/components/shadcn/button";
 
 import {
   DropdownMenu,
-  DropdownMenuContent,
-  DropdownMenuItem,
-  DropdownMenuLabel,
-  DropdownMenuSeparator,
   DropdownMenuTrigger,
 } from "@/components/shadcn/dropdown-menu";
 import { useAuth } from "@/hooks/useAuth";
@@ -16,9 +12,10 @@ import {
   AvatarImage,
 } from "@/components/shadcn/avatar";
 import { Logo } from "../../components/common/Logo";
+import { UserMenu } from "../../components/common/UserMenu";
 
 export const EditorHeader = () => {
-  const { auth, isLoggedIn, logOut } = useAuth();
+  const { auth, isLoggedIn } = useAuth();
   const user = auth.user;
 
   return (
@@ -42,14 +39,7 @@ export const EditorHeader = () => {
                 <span className="sr-only">Toggle user menu</span>
               </Button>
             </DropdownMenuTrigger>
-            <DropdownMenuContent align="end">
-              <DropdownMenuLabel>My Account</DropdownMenuLabel>
-              <DropdownMenuSeparator />
-              <DropdownMenuItem>Settings</DropdownMenuItem>
-              <DropdownMenuItem>Support</DropdownMenuItem>
-              <DropdownMenuSeparator />
-              <DropdownMenuItem onClick={logOut}>Logout</DropdownMenuItem>
-            </DropdownMenuContent>
+            <UserMenu />
           </DropdownMenu>
         ) : (
           <Link to="/login" className="text-foreground">

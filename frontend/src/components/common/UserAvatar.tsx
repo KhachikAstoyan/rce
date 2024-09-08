@@ -1,9 +1,5 @@
 import {
   DropdownMenu,
-  DropdownMenuContent,
-  DropdownMenuItem,
-  DropdownMenuLabel,
-  DropdownMenuSeparator,
   DropdownMenuTrigger,
 } from "@/components/shadcn/dropdown-menu";
 import { Link } from "@tanstack/react-router";
@@ -14,12 +10,10 @@ import {
 } from "@/components/shadcn/avatar";
 import { useAuth } from "@/hooks/useAuth";
 import { Button } from "@/components/shadcn/button";
-import { Sun } from "lucide-react";
-import { useTheme } from "../../hooks/useTheme";
+import { UserMenu } from "./UserMenu";
 
 export const UserAvatar = () => {
-  const { auth, isLoggedIn, logOut } = useAuth();
-  const { toggle } = useTheme();
+  const { auth, isLoggedIn } = useAuth();
   const user = auth.user;
 
   return (
@@ -35,18 +29,7 @@ export const UserAvatar = () => {
               <span className="sr-only">Toggle user menu</span>
             </Button>
           </DropdownMenuTrigger>
-          <DropdownMenuContent align="end">
-            <DropdownMenuLabel>My Account</DropdownMenuLabel>
-            <DropdownMenuSeparator />
-            <DropdownMenuItem>Settings</DropdownMenuItem>
-            <DropdownMenuItem onClick={toggle}>
-              <Sun />
-              Theme
-            </DropdownMenuItem>
-            <DropdownMenuItem>Support</DropdownMenuItem>
-            <DropdownMenuSeparator />
-            <DropdownMenuItem onClick={logOut}>Logout</DropdownMenuItem>
-          </DropdownMenuContent>
+          <UserMenu />
         </DropdownMenu>
       ) : (
         <Link to="/login" className="text-foreground">
