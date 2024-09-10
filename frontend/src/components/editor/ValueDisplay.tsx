@@ -18,11 +18,11 @@ export const ValueDisplay: React.FC<Props> = ({
       <pre
         {...props}
         className={cn(
-          "bg-neutral-100 dark:bg-slate-800 text-wrap p-3 rounded",
+          "bg-neutral-100 dark:bg-zinc-900 text-wrap p-3 rounded",
           className,
         )}
       >
-        {value.trim().replace(/^"|"$/g, '')}
+        {value.trim().replace(/^"|"$/g, "")}
       </pre>
     </div>
   );

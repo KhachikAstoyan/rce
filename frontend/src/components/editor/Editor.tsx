@@ -186,7 +186,11 @@ export const Editor: React.FC<Props> = ({ problem }) => {
           )}
           <div className="absolute bottom-3 px-3 w-full flex  justify-between">
             <div>
-              <LanguagePicker value={language} onChange={setLanguage} supportedLanguages={problem.supportedLanguages}/>
+              <LanguagePicker
+                value={language}
+                onChange={setLanguage}
+                supportedLanguages={problem.supportedLanguages}
+              />
             </div>
             <div className="flex gap-3">
               <Button onClick={runCode}>Run</Button>
