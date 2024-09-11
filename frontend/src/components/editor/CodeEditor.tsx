@@ -9,7 +9,7 @@ loader.init().then((monaco) => {
     inherit: true,
     rules: [],
     colors: {
-      "editor.background": "#0f0f11",
+      "editor.background": "#141414",
     },
   });
 });
