@@ -95,6 +95,7 @@ func (s *SubmissionService) CreateSubmission(p *dtos.CreateSubmissionDto, userId
 	err = executor.TestSubmission(&submission, test, skeleton)
 
 	if err != nil {
+    fmt.Println(err)
 		return nil, echo.NewHTTPError(http.StatusServiceUnavailable, "code execution failed")
 	}
 

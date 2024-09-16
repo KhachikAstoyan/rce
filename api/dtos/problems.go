@@ -23,7 +23,7 @@ type CreateTestDto struct {
 }
 
 type CreateSkeletonDto struct {
-	Skeleton string `json:"skeleton" validate:"required"`
+  Skeleton string `json:"skeleton" validate:"required"`
 	Language string `json:"language" validate:"required"`
 }
 

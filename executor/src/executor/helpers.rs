@@ -36,6 +36,7 @@ pub async fn test_solution(
     info!("Formed paths for host and container");
     info!(target: "paths", "{:?}", paths);
 
+
     // Let's have a max of one minute per submission.
     // If the code runs for more than a minute, it's likely to have
     // an infinite loop or something like that
