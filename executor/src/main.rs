@@ -51,26 +51,24 @@ async fn main() {
         .await
         .expect("Failed to create consumer");
 
-    loop {
-        while let Some(delivery) = consumer.recv().await {
-            println!("RECEIVED MESSAGE");
+    while let Some(delivery) = consumer.recv().await {
+        println!("RECEIVED MESSAGE");
 
-            let channel = channel.clone();
-            let _ = tokio::spawn(async move {
-                handle_message(&delivery, channel).await;
-            });
-        }
-
-        // this is what to do when we get a nerror
-        if let Err(e) = channel
-            .lock()
-            .await
-            .basic_cancel(BasicCancelArguments::new(&ctag))
-            .await
-        {
-            println!("error {}", e.to_string());
-        };
+        let channel = channel.clone();
+        let _ = tokio::spawn(async move {
+            handle_message(&delivery, channel).await;
+        });
     }
+
+    // this is what to do when we get a nerror
+    if let Err(e) = channel
+        .lock()
+        .await
+        .basic_cancel(BasicCancelArguments::new(&ctag))
+        .await
+    {
+        println!("error {}", e.to_string());
+    };
     // println!("Finished?");
 }
 
