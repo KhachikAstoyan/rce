@@ -4,14 +4,7 @@ import {
   getCoreRowModel,
   useReactTable,
 } from "@tanstack/react-table";
-import {
-  Table,
-  TableBody,
-  TableCell,
-  TableHead,
-  TableHeader,
-  TableRow,
-} from "@/components/shadcn/table";
+import { Table } from "@radix-ui/themes";
 
 interface DataGridProps<TData, TValue> {
   columns: ColumnDef<TData, TValue>[];
@@ -29,49 +22,49 @@ export function DataGrid<TData, TValue>({
   });
 
   return (
-    <div className="rounded-md border">
-      <Table>
-        <TableHeader>
+    <div className="rounded-md">
+      <Table.Root variant="surface">
+        <Table.Header>
           {table.getHeaderGroups().map((headerGroup) => (
-            <TableRow key={headerGroup.id}>
+            <Table.Row key={headerGroup.id}>
               {headerGroup.headers.map((header) => {
                 return (
-                  <TableHead key={header.id}>
+                  <Table.ColumnHeaderCell key={header.id}>
                     {header.isPlaceholder
                       ? null
                       : flexRender(
                           header.column.columnDef.header,
                           header.getContext(),
                         )}
-                  </TableHead>
+                  </Table.ColumnHeaderCell>
                 );
               })}
-            </TableRow>
+            </Table.Row>
           ))}
-        </TableHeader>
-        <TableBody>
+        </Table.Header>
+        <Table.Body>
           {table.getRowModel().rows?.length ? (
             table.getRowModel().rows.map((row) => (
-              <TableRow
+              <Table.Row
                 key={row.id}
                 data-state={row.getIsSelected() && "selected"}
               >
                 {row.getVisibleCells().map((cell) => (
-                  <TableCell key={cell.id}>
+                  <Table.Cell key={cell.id}>
                     {flexRender(cell.column.columnDef.cell, cell.getContext())}
-                  </TableCell>
+                  </Table.Cell>
                 ))}
-              </TableRow>
+              </Table.Row>
             ))
           ) : (
-            <TableRow>
-              <TableCell colSpan={columns.length} className="h-24 text-center">
+            <Table.Row>
+              <Table.Cell colSpan={columns.length} className="h-24 text-center">
                 No results.
-              </TableCell>
-            </TableRow>
+              </Table.Cell>
+            </Table.Row>
           )}
-        </TableBody>
-      </Table>
+        </Table.Body>
+      </Table.Root>
     </div>
   );
 }

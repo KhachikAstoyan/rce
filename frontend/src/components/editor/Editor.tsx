@@ -7,11 +7,9 @@ import { useEffect, useRef, useState } from "react";
 import { CodeEditor } from "./CodeEditor";
 import { ResizeHandle } from "./ResizeHandle";
 import { toast } from "sonner";
-import { Button } from "@/components/shadcn/button";
 import { problemService } from "../../services/problems";
 import { useQuery } from "@tanstack/react-query";
 import { LoadingOverlay } from "../common/LoadingOverlay";
-import { Tabs, TabsContent, TabsList, TabsTrigger } from "../shadcn/tabs";
 import { ProblemDescription } from "./ProblemDescription";
 import { TestView } from "./TestView";
 
@@ -21,6 +19,7 @@ import Confetti from "react-confetti-boom";
 import { SubmissionStatus } from "./SubmissionStatus";
 import { createPortal } from "react-dom";
 import { LanguagePicker } from "../common/LanguagePicker/LanguagePicker";
+import { Box, Button, Flex, Tabs } from "@radix-ui/themes";
 
 interface Props {
   problem: Problem;
@@ -155,22 +154,28 @@ export const Editor: React.FC<Props> = ({ problem }) => {
         drag and drop once other core features are done. TODO:
       */}
       {createPortal(
-        <Tabs
-          value={leftTab}
-          onValueChange={(v) => setLeftTab(v as any)}
-          className="w-full h-full"
-        >
-          <TabsList>
-            <TabsTrigger value="description">Description</TabsTrigger>
-            <TabsTrigger value="submission">Submission</TabsTrigger>
-          </TabsList>
-          <TabsContent className="h-full" value="description">
-            <ProblemDescription problem={problem} />
-          </TabsContent>
-          <TabsContent className="h-full" value="submission">
-            <SubmissionStatus submission={submission} />
-          </TabsContent>
-        </Tabs>,
+        <>
+          <Tabs.Root
+            value={leftTab}
+            onValueChange={setLeftTab as any}
+            defaultValue="description"
+          >
+            <Tabs.List>
+              <Tabs.Trigger value="description">Description</Tabs.Trigger>
+              <Tabs.Trigger value="submission">Submission</Tabs.Trigger>
+            </Tabs.List>
+
+            <Box className="h-full">
+              <Tabs.Content value="description">
+                <ProblemDescription problem={problem} />
+              </Tabs.Content>
+
+              <Tabs.Content value="submission">
+                <SubmissionStatus submission={submission} />
+              </Tabs.Content>
+            </Box>
+          </Tabs.Root>
+        </>,
         leftPanelRef.current!,
       )}
 
@@ -192,12 +197,12 @@ export const Editor: React.FC<Props> = ({ problem }) => {
                 supportedLanguages={problem.supportedLanguages}
               />
             </div>
-            <div className="flex gap-3">
-              <Button onClick={runCode}>Run</Button>
-              <Button onClick={submitCode} variant="secondary">
-                Submit
+            <Flex gap="2">
+              <Button onClick={runCode} variant="soft">
+                Run
               </Button>
-            </div>
+              <Button onClick={submitCode}>Submit</Button>
+            </Flex>
           </div>
         </>,
         topRightPanelRef.current!,
@@ -206,18 +211,26 @@ export const Editor: React.FC<Props> = ({ problem }) => {
       {createPortal(
         <>
           {testsLoading && <LoadingOverlay />}
-          <Tabs value={bottomTab} onValueChange={(v) => setBottomTab(v as any)}>
-            <TabsList>
-              <TabsTrigger value="tests">Tests</TabsTrigger>
-              <TabsTrigger value="results">Results</TabsTrigger>
-            </TabsList>
-            <TabsContent value="tests" className="h-full">
-              <TestView tests={tests!} />
-            </TabsContent>
-            <TabsContent value="results" className="h-full">
-              <TestView tests={tests!} results={runResults?.results} />
-            </TabsContent>
-          </Tabs>
+          <Tabs.Root
+            value={bottomTab}
+            onValueChange={setBottomTab as any}
+            defaultValue="tests"
+          >
+            <Tabs.List>
+              <Tabs.Trigger value="tests">Tests</Tabs.Trigger>
+              <Tabs.Trigger value="results">Results</Tabs.Trigger>
+            </Tabs.List>
+
+            <Box className="h-full">
+              <Tabs.Content value="tests">
+                <TestView tests={tests!} />
+              </Tabs.Content>
+
+              <Tabs.Content value="results">
+                <TestView tests={tests!} results={runResults?.results} />
+              </Tabs.Content>
+            </Box>
+          </Tabs.Root>
         </>,
         bottomRightPanelRef.current,
       )}

@@ -9,7 +9,7 @@ import {
 import { InputBuilder } from "../ProblemEditor/InputBuilder";
 import { TypeSelector } from "../TypeSelector/TypeSelector";
 import { TestCase } from "../ProblemEditor/TestCase";
-import { Button } from "@/components/shadcn/button";
+import { Button } from "@radix-ui/themes";
 import { IInput } from "../ProblemEditor/types";
 import { ITestSuite, IValue } from "@/lib/types";
 import {
@@ -153,7 +153,7 @@ export const TestEditor = forwardRef<TestEditorRef, TestEditorProps>(
           />
         ))}
         {allowEdits && (
-          <Button className="w-min mt-3" onClick={addTestCase}>
+          <Button className="mt-3" onClick={addTestCase}>
             Add test case
           </Button>
         )}

@@ -1,4 +1,4 @@
-import { Button } from "@/components/shadcn/button";
+import { Button } from "@radix-ui/themes";
 import {
   Dialog,
   DialogContent,
@@ -15,14 +15,14 @@ interface DeleteProblemDialogProps {
   isOpen: boolean;
   setIsOpen: (v: boolean) => void;
   problemId: string;
-  onSuccess?: () => void
+  onSuccess?: () => void;
 }
 
 export const DeleteProblemDialog: React.FC<DeleteProblemDialogProps> = ({
   isOpen,
   setIsOpen,
   problemId,
-  onSuccess
+  onSuccess,
 }) => {
   const handleDelete = useCallback(async () => {
     if (!problemId) return;
@@ -49,7 +49,7 @@ export const DeleteProblemDialog: React.FC<DeleteProblemDialogProps> = ({
           </DialogDescription>
         </DialogHeader>
         <DialogFooter>
-          <Button onClick={handleDelete} variant="destructive">
+          <Button onClick={handleDelete} color="red">
             Delete
           </Button>
         </DialogFooter>

@@ -1,7 +1,7 @@
 import React from "react";
 import { Label } from "../../../components/shadcn/label";
 import { Input } from "../../../components/shadcn/input";
-import { Button } from "../../../components/shadcn/button";
+import { Button } from "@radix-ui/themes";
 import { TypeSelector } from "../TypeSelector/TypeSelector";
 import { IInput } from "./types";
 
@@ -80,7 +80,7 @@ export const InputBuilder: React.FC<Props> = ({
           </div>
           {!disabled && (
             <Button
-              variant="destructive"
+              color="red"
               className="mt-4"
               onClick={() => deleteInput(index)}
             >

@@ -1,9 +1,9 @@
 import React from "react";
 import { ISubmissionResult, ITest, ITestResult } from "../../lib/types";
-import { Button } from "../shadcn/button";
 import { ValueDisplay } from "./ValueDisplay";
 import { Badge } from "../shadcn/badge";
 import { formatMillisecondsString } from "../../lib/utils";
+import { Button } from "@radix-ui/themes";
 
 interface Props {
   tests?: ITest;
@@ -56,10 +56,10 @@ export const TestView: React.FC<Props> = ({ tests, results }) => {
       <div className="flex gap-2">
         {testSuite.tests.map((_, index) => (
           <Button
-            // we should be fine, since the tests array won't change at all 
+            // we should be fine, since the tests array won't change at all
             key={index}
             onClick={() => setCurrentTest(index)}
-            variant={index === currentTest ? "default" : "outline"}
+            variant={index === currentTest ? "solid" : "soft"}
           >
             Case {index + 1}
           </Button>
@@ -77,7 +77,7 @@ export const TestView: React.FC<Props> = ({ tests, results }) => {
       <div className="flex flex-col gap-4 mt-3">
         {Object.entries(testSuite.tests[currentTest]?.inputs || {}).map(
           ([key, value]) => (
-            <ValueDisplay label={key} value={value.value} key={key+value} />
+            <ValueDisplay label={key} value={value.value} key={key + value} />
           ),
         )}
 

@@ -1,16 +1,11 @@
-import {
-  DropdownMenu,
-  DropdownMenuTrigger,
-} from "@/components/shadcn/dropdown-menu";
+// import {
+//   DropdownMenu,
+//   DropdownMenuTrigger,
+// } from "@/components/shadcn/dropdown-menu";
 import { Link } from "@tanstack/react-router";
-import {
-  Avatar,
-  AvatarFallback,
-  AvatarImage,
-} from "@/components/shadcn/avatar";
 import { useAuth } from "@/hooks/useAuth";
-import { Button } from "@/components/shadcn/button";
 import { UserMenu } from "./UserMenu";
+import { Avatar, DropdownMenu, IconButton } from "@radix-ui/themes";
 
 export const UserAvatar = () => {
   const { auth, isLoggedIn } = useAuth();
@@ -19,18 +14,15 @@ export const UserAvatar = () => {
   return (
     <>
       {isLoggedIn ? (
-        <DropdownMenu>
-          <DropdownMenuTrigger asChild>
-            <Button variant="secondary" size="icon" className="rounded-full">
-              <Avatar>
-                <AvatarImage src={user?.picture} alt={user?.name} />
-                <AvatarFallback>{user?.name[0]}</AvatarFallback>
-              </Avatar>
+        <DropdownMenu.Root>
+          <DropdownMenu.Trigger>
+            <IconButton radius="full">
+              <Avatar src={user?.picture} fallback={user?.name[0]!} />
               <span className="sr-only">Toggle user menu</span>
-            </Button>
-          </DropdownMenuTrigger>
+            </IconButton>
+          </DropdownMenu.Trigger>
           <UserMenu />
-        </DropdownMenu>
+        </DropdownMenu.Root>
       ) : (
         <Link to="/login" className="text-foreground">
           Login

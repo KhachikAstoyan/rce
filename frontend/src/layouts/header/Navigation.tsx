@@ -1,9 +1,9 @@
 import { Sheet, SheetContent, SheetTrigger } from "@/components/shadcn/sheet";
 import { Menu } from "lucide-react";
 import { Link } from "@tanstack/react-router";
-import { Button } from "@/components/shadcn/button";
 import { Logo } from "@/components/common/Logo";
 import { ProtectedComponent } from "../../components/security/ProtectedComponent";
+import { IconButton } from "@radix-ui/themes";
 
 export const Navigation = () => {
   return (
@@ -51,10 +51,9 @@ export const Navigation = () => {
       </nav>
       <Sheet>
         <SheetTrigger asChild>
-          <Button variant="outline" size="icon" className="shrink-0 md:hidden">
+          <IconButton variant="soft" className="shrink-0 md:hidden">
             <Menu className="h-5 w-5" />
-            <span className="sr-only">Toggle navigation menu</span>
-          </Button>
+          </IconButton>
         </SheetTrigger>
         <SheetContent side="left">
           <nav className="grid gap-6 text-lg font-medium">

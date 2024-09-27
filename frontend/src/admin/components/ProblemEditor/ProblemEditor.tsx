@@ -1,5 +1,5 @@
 import { useEffect, useRef, useState } from "react";
-import { Button } from "@/components/shadcn/button";
+import { Button } from "@radix-ui/themes";
 import { Input } from "@/components/shadcn/input";
 import {
   BlockTypeSelect,
@@ -88,10 +88,10 @@ export const PropblemEditor = () => {
 
   const handleCreateTestSuite = async () => {
     const testSuite = testEditorRef.current?.getTestSuite();
-    if(!testSuite) {
-      toast.error("Please create a test suite")
+    if (!testSuite) {
+      toast.error("Please create a test suite");
       return;
-    };
+    }
 
     try {
       await problemService.createTestSuite(problemId, testSuite);

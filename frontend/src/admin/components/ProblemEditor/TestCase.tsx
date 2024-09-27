@@ -2,7 +2,7 @@ import React from "react";
 import { ITestCase } from "../../../lib/types";
 import { Input } from "../../../components/shadcn/input";
 import { Label } from "../../../components/shadcn/label";
-import { Button } from "../../../components/shadcn/button";
+import { Button } from "@radix-ui/themes";
 import { Checkbox } from "../../../components/shadcn/checkbox";
 import { getTypeLabel } from "@/lib/utils";
 
@@ -87,7 +87,7 @@ export const TestCase: React.FC<Props> = ({
           <Label htmlFor={"isPublic" + index}>Public</Label>
         </div>
         {allowEdits && (
-          <Button variant="destructive" onClick={onDelete}>
+          <Button color="red" onClick={onDelete}>
             Delete test case
           </Button>
         )}

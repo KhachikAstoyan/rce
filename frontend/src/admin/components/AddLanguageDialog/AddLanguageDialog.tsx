@@ -8,7 +8,6 @@ import {
   DialogTitle,
 } from "@/components/shadcn/dialog";
 import { Label } from "@/components/shadcn/label";
-import { Button } from "@/components/shadcn/button";
 import { CodeEditor } from "../../../components/editor/CodeEditor";
 import {
   getLanguageData,
@@ -18,6 +17,7 @@ import {
 import { toast } from "sonner";
 import { problemService } from "../../../services/problems";
 import { LanguagePicker } from "@/components/common/LanguagePicker/LanguagePicker";
+import { Button } from "@radix-ui/themes";
 
 interface AddLanguageDialogProps extends React.ComponentProps<typeof Dialog> {
   problemId: string;

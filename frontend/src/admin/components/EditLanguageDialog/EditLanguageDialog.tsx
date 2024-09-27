@@ -1,5 +1,5 @@
 import { CodeEditor } from "@/components/editor/CodeEditor";
-import { Button } from "@/components/shadcn/button";
+import { Button } from "@radix-ui/themes";
 import {
   Dialog,
   DialogContent,

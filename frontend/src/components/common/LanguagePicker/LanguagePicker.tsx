@@ -1,9 +1,9 @@
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/shadcn/select";
+import { Select } from "@radix-ui/themes";
 
 interface LanguagePickerProps {
   value: string;
   onChange: (lang: string) => void;
-  supportedLanguages?: string[]
+  supportedLanguages?: string[];
 }
 
 export const LanguagePicker: React.FC<LanguagePickerProps> = ({
@@ -13,21 +13,16 @@ export const LanguagePicker: React.FC<LanguagePickerProps> = ({
 }) => {
   return (
     <>
-      <Select
-        value={value}
-        onValueChange={onChange}
-      >
-        <SelectTrigger> 
-          <SelectValue placeholder="Language" />
-        </SelectTrigger>
-        <SelectContent>
+      <Select.Root value={value} onValueChange={onChange}>
+        <Select.Trigger />
+        <Select.Content>
           {supportedLanguages?.map((lang) => (
-            <SelectItem key={lang} value={lang}>
+            <Select.Item key={lang} value={lang}>
               {lang}
-            </SelectItem>
+            </Select.Item>
           ))}
-        </SelectContent>
-      </Select>
+        </Select.Content>
+      </Select.Root>
     </>
   );
 };
