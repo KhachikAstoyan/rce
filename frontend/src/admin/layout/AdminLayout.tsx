@@ -1,5 +1,5 @@
 import { Menu } from "lucide-react";
-import { Button, IconButton } from "@radix-ui/themes";
+import { IconButton } from "@radix-ui/themes";
 import { Sheet, SheetContent, SheetTrigger } from "@/components/shadcn/sheet";
 import { SideNavigation, SideNavigationItems } from "./SideNavigation";
 import { UserAvatar } from "../../components/common/UserAvatar";

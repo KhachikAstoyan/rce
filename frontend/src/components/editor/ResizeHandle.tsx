@@ -4,7 +4,7 @@ import { PanelResizeHandle } from "react-resizable-panels";
 export const ResizeHandle: React.FC<{
   direction?: "horizontal" | "vertical";
 }> = ({ direction = "horizontal" }) => {
-  const size = direction === "horizontal" ? "w-[3px]" : "h-[3px]";
+  const size = direction === "horizontal" ? "w-[1px]" : "h-[1px]";
   return (
     <PanelResizeHandle
       hitAreaMargins={{
