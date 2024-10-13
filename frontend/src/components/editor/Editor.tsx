@@ -19,14 +19,14 @@ import Confetti from "react-confetti-boom";
 import { SubmissionStatus } from "./SubmissionStatus";
 import { createPortal } from "react-dom";
 import { LanguagePicker } from "../common/LanguagePicker/LanguagePicker";
-import { Box, Button, Flex, Tabs } from "@radix-ui/themes";
+import { Box, Button, Flex, Tabs } from "@mantine/core";
 
 interface Props {
   problem: Problem;
 }
 
 export const Editor: React.FC<Props> = ({ problem }) => {
-  const [language, setLanguage] = useState<string>(
+  const [language, setLanguage] = useState<string | null>(
     problem?.supportedLanguages?.[0] || "",
   );
   const codeEditorRef = useRef<editor.IStandaloneCodeEditor>();
@@ -155,26 +155,26 @@ export const Editor: React.FC<Props> = ({ problem }) => {
       */}
       {createPortal(
         <>
-          <Tabs.Root
+          <Tabs
             value={leftTab}
-            onValueChange={setLeftTab as any}
+            onChange={setLeftTab as any}
             defaultValue="description"
           >
             <Tabs.List>
-              <Tabs.Trigger value="description">Description</Tabs.Trigger>
-              <Tabs.Trigger value="submission">Submission</Tabs.Trigger>
+              <Tabs.Tab value="description">Description</Tabs.Tab>
+              <Tabs.Tab value="submission">Submission</Tabs.Tab>
             </Tabs.List>
 
             <Box className="h-full">
-              <Tabs.Content value="description">
+              <Tabs.Panel value="description">
                 <ProblemDescription problem={problem} />
-              </Tabs.Content>
+              </Tabs.Panel>
 
-              <Tabs.Content value="submission">
+              <Tabs.Panel value="submission">
                 <SubmissionStatus submission={submission} />
-              </Tabs.Content>
+              </Tabs.Panel>
             </Box>
-          </Tabs.Root>
+          </Tabs>
         </>,
         leftPanelRef.current!,
       )}
@@ -185,7 +185,7 @@ export const Editor: React.FC<Props> = ({ problem }) => {
           {solutionTemplate && (
             <CodeEditor
               defaultValue={solutionTemplate?.template ?? ""}
-              language={language}
+              language={language!}
               onMount={handleCodeEditorMount}
             />
           )}
@@ -197,8 +197,8 @@ export const Editor: React.FC<Props> = ({ problem }) => {
                 supportedLanguages={problem.supportedLanguages}
               />
             </div>
-            <Flex gap="2">
-              <Button onClick={runCode} variant="soft">
+            <Flex gap={16}>
+              <Button onClick={runCode} variant="light">
                 Run
               </Button>
               <Button onClick={submitCode}>Submit</Button>
@@ -211,26 +211,26 @@ export const Editor: React.FC<Props> = ({ problem }) => {
       {createPortal(
         <>
           {testsLoading && <LoadingOverlay />}
-          <Tabs.Root
+          <Tabs
             value={bottomTab}
-            onValueChange={setBottomTab as any}
+            onChange={setBottomTab as any}
             defaultValue="tests"
           >
             <Tabs.List>
-              <Tabs.Trigger value="tests">Tests</Tabs.Trigger>
-              <Tabs.Trigger value="results">Results</Tabs.Trigger>
+              <Tabs.Tab value="tests">Tests</Tabs.Tab>
+              <Tabs.Tab value="results">Results</Tabs.Tab>
             </Tabs.List>
 
             <Box className="h-full">
-              <Tabs.Content value="tests">
+              <Tabs.Panel value="tests">
                 <TestView tests={tests!} />
-              </Tabs.Content>
+              </Tabs.Panel>
 
-              <Tabs.Content value="results">
+              <Tabs.Panel value="results">
                 <TestView tests={tests!} results={runResults?.results} />
-              </Tabs.Content>
+              </Tabs.Panel>
             </Box>
-          </Tabs.Root>
+          </Tabs>
         </>,
         bottomRightPanelRef.current,
       )}

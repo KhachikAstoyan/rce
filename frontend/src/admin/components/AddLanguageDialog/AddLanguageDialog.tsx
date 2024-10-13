@@ -17,7 +17,7 @@ import {
 import { toast } from "sonner";
 import { problemService } from "../../../services/problems";
 import { LanguagePicker } from "@/components/common/LanguagePicker/LanguagePicker";
-import { Button } from "@radix-ui/themes";
+import { Button } from "@mantine/core";
 
 interface AddLanguageDialogProps extends React.ComponentProps<typeof Dialog> {
   problemId: string;
@@ -119,9 +119,13 @@ export const AddLanguageDialog: React.FC<AddLanguageDialogProps> = ({
         </div>
         <DialogFooter>
           {isNextStep ? (
-            <Button disabled={!isValidLanguageSupport} onClick={handleSubmit}>Save</Button>
+            <Button disabled={!isValidLanguageSupport} onClick={handleSubmit}>
+              Save
+            </Button>
           ) : (
-            <Button disabled={!language} onClick={() => setIsNextStep(true)}>Next</Button>
+            <Button disabled={!language} onClick={() => setIsNextStep(true)}>
+              Next
+            </Button>
           )}
         </DialogFooter>
       </DialogContent>

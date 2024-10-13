@@ -4,7 +4,7 @@ import { FaGoogle } from "react-icons/fa";
 import { useCallback } from "react";
 import { getGoogleAuthUrl } from "@/lib/api";
 import { DefaultLayout } from "@/layouts/DefaultLayout";
-import { Button, Card, Heading, Text } from "@radix-ui/themes";
+import { Button, Card, Text, Title } from "@mantine/core";
 
 export function LoginForm() {
   const handleGoogleLogin = useCallback(() => {
@@ -13,11 +13,21 @@ export function LoginForm() {
 
   return (
     <DefaultLayout>
-      <Card className="mx-auto max-w-sm p-5">
-        <Heading>Login</Heading>
+      <Card
+        padding="lg"
+        radius="md"
+        withBorder
+        className="mx-auto max-w-sm p-5"
+      >
+        <Title order={2}>Login</Title>
         <Text>Enter your email below to login to your account</Text>
         <div className="grid gap-4 mt-5">
-          <Button type="submit" className="w-full">
+          <Button
+            variant="filled"
+            color="blue"
+            type="submit"
+            className="w-full"
+          >
             Login
           </Button>
           <Button

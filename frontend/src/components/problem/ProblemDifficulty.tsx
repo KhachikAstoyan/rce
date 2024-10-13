@@ -1,14 +1,12 @@
 import { Problem } from "@/lib/types";
 import { capitalize } from "@/lib/utils";
-import { Badge } from "@radix-ui/themes";
+import { Badge, BadgeProps } from "@mantine/core";
 
 interface Props {
   difficulty: Problem["difficulty"];
 }
 
-const getVariant = (
-  difficulty: Problem["difficulty"],
-): React.ComponentProps<typeof Badge>["color"] => {
+const getVariant = (difficulty: Problem["difficulty"]): BadgeProps["color"] => {
   switch (difficulty) {
     case "easy":
       return "green";
@@ -20,5 +18,9 @@ const getVariant = (
 };
 
 export const ProblemDifficulty: React.FC<Props> = ({ difficulty }) => {
-  return <Badge color={getVariant(difficulty)}>{capitalize(difficulty)}</Badge>;
+  return (
+    <Badge variant="light" color={getVariant(difficulty)}>
+      {capitalize(difficulty)}
+    </Badge>
+  );
 };

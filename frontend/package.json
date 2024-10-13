@@ -10,6 +10,8 @@
     "preview": "vite preview"
   },
   "dependencies": {
+    "@mantine/core": "^7.13.2",
+    "@mantine/hooks": "^7.13.2",
     "@mdxeditor/editor": "^3.10.1",
     "@monaco-editor/react": "^4.6.0",
     "@radix-ui/react-accordion": "^1.2.0",

@@ -4,7 +4,7 @@ import {
   getCoreRowModel,
   useReactTable,
 } from "@tanstack/react-table";
-import { Table } from "@radix-ui/themes";
+import { Table } from "@mantine/core";
 
 interface DataGridProps<TData, TValue> {
   columns: ColumnDef<TData, TValue>[];
@@ -23,48 +23,48 @@ export function DataGrid<TData, TValue>({
 
   return (
     <div className="rounded-md">
-      <Table.Root variant="surface">
-        <Table.Header>
+      <Table highlightOnHover withTableBorder>
+        <Table.Thead>
           {table.getHeaderGroups().map((headerGroup) => (
-            <Table.Row key={headerGroup.id}>
+            <Table.Tr key={headerGroup.id}>
               {headerGroup.headers.map((header) => {
                 return (
-                  <Table.ColumnHeaderCell key={header.id}>
+                  <Table.Th key={header.id}>
                     {header.isPlaceholder
                       ? null
                       : flexRender(
                           header.column.columnDef.header,
                           header.getContext(),
                         )}
-                  </Table.ColumnHeaderCell>
+                  </Table.Th>
                 );
               })}
-            </Table.Row>
+            </Table.Tr>
           ))}
-        </Table.Header>
-        <Table.Body>
+        </Table.Thead>
+        <Table.Tbody>
           {table.getRowModel().rows?.length ? (
             table.getRowModel().rows.map((row) => (
-              <Table.Row
+              <Table.Tr
                 key={row.id}
                 data-state={row.getIsSelected() && "selected"}
               >
                 {row.getVisibleCells().map((cell) => (
-                  <Table.Cell key={cell.id}>
+                  <Table.Td key={cell.id}>
                     {flexRender(cell.column.columnDef.cell, cell.getContext())}
-                  </Table.Cell>
+                  </Table.Td>
                 ))}
-              </Table.Row>
+              </Table.Tr>
             ))
           ) : (
-            <Table.Row>
-              <Table.Cell colSpan={columns.length} className="h-24 text-center">
+            <Table.Tr>
+              <Table.Td colSpan={columns.length} className="h-24 text-center">
                 No results.
-              </Table.Cell>
-            </Table.Row>
+              </Table.Td>
+            </Table.Tr>
           )}
-        </Table.Body>
-      </Table.Root>
+        </Table.Tbody>
+      </Table>
     </div>
   );
 }

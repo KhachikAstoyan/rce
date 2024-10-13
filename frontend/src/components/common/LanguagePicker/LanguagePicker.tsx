@@ -1,8 +1,8 @@
-import { Select } from "@radix-ui/themes";
+import { Select } from "@mantine/core";
 
 interface LanguagePickerProps {
-  value: string;
-  onChange: (lang: string) => void;
+  value: string | null;
+  onChange: (lang: string | null) => void;
   supportedLanguages?: string[];
 }
 
@@ -13,16 +13,13 @@ export const LanguagePicker: React.FC<LanguagePickerProps> = ({
 }) => {
   return (
     <>
-      <Select.Root value={value} onValueChange={onChange}>
-        <Select.Trigger />
-        <Select.Content>
-          {supportedLanguages?.map((lang) => (
-            <Select.Item key={lang} value={lang}>
-              {lang}
-            </Select.Item>
-          ))}
-        </Select.Content>
-      </Select.Root>
+      <Select
+        allowDeselect={false}
+        searchable
+        data={supportedLanguages}
+        value={value}
+        onChange={onChange}
+      />
     </>
   );
 };
