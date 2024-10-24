@@ -1,5 +1,5 @@
 import { CodeEditor } from "@/components/editor/CodeEditor";
-import { Button } from "@radix-ui/themes";
+import { Button } from "@mantine/core";
 import {
   Dialog,
   DialogContent,

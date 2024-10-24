@@ -3,7 +3,7 @@ import { Menu } from "lucide-react";
 import { Link } from "@tanstack/react-router";
 import { Logo } from "@/components/common/Logo";
 import { ProtectedComponent } from "../../components/security/ProtectedComponent";
-import { IconButton } from "@radix-ui/themes";
+import { ActionIcon } from "@mantine/core";
 
 export const Navigation = () => {
   return (
@@ -51,9 +51,13 @@ export const Navigation = () => {
       </nav>
       <Sheet>
         <SheetTrigger asChild>
-          <IconButton variant="soft" className="shrink-0 md:hidden">
+          <ActionIcon
+            variant="light"
+            color="gray"
+            className="shrink-0 md:hidden"
+          >
             <Menu className="h-5 w-5" />
-          </IconButton>
+          </ActionIcon>
         </SheetTrigger>
         <SheetContent side="left">
           <nav className="grid gap-6 text-lg font-medium">

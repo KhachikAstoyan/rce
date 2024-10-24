@@ -1,5 +1,5 @@
 import { useEffect, useRef, useState } from "react";
-import { Button } from "@radix-ui/themes";
+import { Button } from "@mantine/core";
 import { Input } from "@/components/shadcn/input";
 import {
   BlockTypeSelect,

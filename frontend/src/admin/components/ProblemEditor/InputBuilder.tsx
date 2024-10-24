@@ -1,7 +1,7 @@
 import React from "react";
 import { Label } from "../../../components/shadcn/label";
 import { Input } from "../../../components/shadcn/input";
-import { Button } from "@radix-ui/themes";
+import { Button } from "@mantine/core";
 import { TypeSelector } from "../TypeSelector/TypeSelector";
 import { IInput } from "./types";
 

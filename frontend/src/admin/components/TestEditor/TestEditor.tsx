@@ -9,7 +9,7 @@ import {
 import { InputBuilder } from "../ProblemEditor/InputBuilder";
 import { TypeSelector } from "../TypeSelector/TypeSelector";
 import { TestCase } from "../ProblemEditor/TestCase";
-import { Button } from "@radix-ui/themes";
+import { Button } from "@mantine/core";
 import { IInput } from "../ProblemEditor/types";
 import { ITestSuite, IValue } from "@/lib/types";
 import {

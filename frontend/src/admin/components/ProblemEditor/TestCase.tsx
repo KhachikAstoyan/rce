@@ -2,7 +2,7 @@ import React from "react";
 import { ITestCase } from "../../../lib/types";
 import { Input } from "../../../components/shadcn/input";
 import { Label } from "../../../components/shadcn/label";
-import { Button } from "@radix-ui/themes";
+import { Button } from "@mantine/core";
 import { Checkbox } from "../../../components/shadcn/checkbox";
 import { getTypeLabel } from "@/lib/utils";
 

@@ -3,7 +3,7 @@ import { ISubmissionResult, ITest, ITestResult } from "../../lib/types";
 import { ValueDisplay } from "./ValueDisplay";
 import { Badge } from "../shadcn/badge";
 import { formatMillisecondsString } from "../../lib/utils";
-import { Button } from "@radix-ui/themes";
+import { Button } from "@mantine/core";
 
 interface Props {
   tests?: ITest;

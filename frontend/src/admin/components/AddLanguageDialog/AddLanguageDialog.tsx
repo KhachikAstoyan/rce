@@ -1,13 +1,4 @@
 import React, { useCallback, useEffect, useState } from "react";
-import {
-  Dialog,
-  DialogContent,
-  DialogDescription,
-  DialogFooter,
-  DialogHeader,
-  DialogTitle,
-} from "@/components/shadcn/dialog";
-import { Label } from "@/components/shadcn/label";
 import { CodeEditor } from "../../../components/editor/CodeEditor";
 import {
   getLanguageData,
@@ -17,9 +8,16 @@ import {
 import { toast } from "sonner";
 import { problemService } from "../../../services/problems";
 import { LanguagePicker } from "@/components/common/LanguagePicker/LanguagePicker";
-import { Button } from "@mantine/core";
+import {
+  Button,
+  Flex,
+  InputLabel,
+  Modal,
+  ModalProps,
+  Text,
+} from "@mantine/core";
 
-interface AddLanguageDialogProps extends React.ComponentProps<typeof Dialog> {
+interface AddLanguageDialogProps extends ModalProps {
   problemId: string;
 }
 
@@ -27,7 +25,7 @@ export const AddLanguageDialog: React.FC<AddLanguageDialogProps> = ({
   problemId,
   ...props
 }) => {
-  const [language, setLanguage] = useState<string>("");
+  const [language, setLanguage] = useState<string | null>(null);
   const [skeleton, setSkeleton] = useState<string | undefined>("");
   const [template, setTemplate] = useState<string | undefined>("");
   const [isNextStep, setIsNextStep] = useState(false);
@@ -49,7 +47,7 @@ export const AddLanguageDialog: React.FC<AddLanguageDialogProps> = ({
     setSkeleton("");
     setTemplate("");
     setIsNextStep(false);
-  }, [props.open]);
+  }, [props.opened]);
 
   const handleSubmit = useCallback(async () => {
     if (!isValidLanguageSupport) return;
@@ -62,30 +60,29 @@ export const AddLanguageDialog: React.FC<AddLanguageDialogProps> = ({
       );
       await problemService.createTemplate(problemId!, { language, template });
       toast.success("Language support added");
-      props.onOpenChange && props.onOpenChange(false);
+      props.onClose && props.onClose();
     } catch (error) {
       toast.error("Failed to add language support");
     }
   }, [language, skeleton, template]);
 
   return (
-    <Dialog {...props}>
-      <DialogContent className={`${isNextStep ? "md:max-w-[1200px]" : ""}`}>
-        <DialogHeader>
-          <DialogTitle>
-            {isNextStep ? language : "Add language support"}
-          </DialogTitle>
-          <DialogDescription>
-            Add support for a new language by providing a name and some skeleton
-            code to glue it all together :)
-          </DialogDescription>
-        </DialogHeader>
+    <Modal
+      title={isNextStep ? language : "Add language support"}
+      size="auto"
+      {...props}
+    >
+      <div className={`${isNextStep ? "md:max-w-[1200px]" : ""}`}>
+        <Text>
+          Add support for a new language by providing a name and some skeleton
+          code to glue it all together :)
+        </Text>
         <div className="py-3 flex gap-4 flex-col items-start">
           {!isNextStep && (
             <div className="flex flex-col gap-3 items-start w-full">
-              <Label htmlFor="name" className="text-left">
+              <InputLabel htmlFor="name" className="text-left">
                 Name
-              </Label>
+              </InputLabel>
               <LanguagePicker
                 value={language}
                 onChange={setLanguage}
@@ -101,7 +98,7 @@ export const AddLanguageDialog: React.FC<AddLanguageDialogProps> = ({
                 <h2>Skeleton code</h2>
                 <CodeEditor
                   value={skeleton}
-                  language={language}
+                  language={language!}
                   onChange={setSkeleton}
                 />
               </div>
@@ -110,14 +107,14 @@ export const AddLanguageDialog: React.FC<AddLanguageDialogProps> = ({
                 <h2>Template code</h2>
                 <CodeEditor
                   value={template}
-                  language={language}
+                  language={language!}
                   onChange={setTemplate}
                 />
               </div>
             </div>
           )}
         </div>
-        <DialogFooter>
+        <Flex justify="end">
           {isNextStep ? (
             <Button disabled={!isValidLanguageSupport} onClick={handleSubmit}>
               Save
@@ -127,8 +124,8 @@ export const AddLanguageDialog: React.FC<AddLanguageDialogProps> = ({
               Next
             </Button>
           )}
-        </DialogFooter>
-      </DialogContent>
-    </Dialog>
+        </Flex>
+      </div>
+    </Modal>
   );
 };

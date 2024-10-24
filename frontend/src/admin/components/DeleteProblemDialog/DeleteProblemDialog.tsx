@@ -1,15 +1,7 @@
-import { Button } from "@radix-ui/themes";
-import {
-  Dialog,
-  DialogContent,
-  DialogDescription,
-  DialogFooter,
-  DialogHeader,
-  DialogTitle,
-} from "@/components/shadcn/dialog";
 import { problemService } from "@/services/problems";
 import { useCallback } from "react";
 import { toast } from "sonner";
+import { Button, Modal, Text } from "@mantine/core";
 
 interface DeleteProblemDialogProps {
   isOpen: boolean;
@@ -39,21 +31,21 @@ export const DeleteProblemDialog: React.FC<DeleteProblemDialogProps> = ({
     }
   }, [problemId]);
   return (
-    <Dialog open={isOpen} onOpenChange={setIsOpen}>
-      <DialogContent>
-        <DialogHeader>
-          <DialogTitle>Are you absolutely sure?</DialogTitle>
-          <DialogDescription>
-            This action cannot be undone. This will permanently delete your
-            account and remove your data from our servers.
-          </DialogDescription>
-        </DialogHeader>
-        <DialogFooter>
-          <Button onClick={handleDelete} color="red">
-            Delete
-          </Button>
-        </DialogFooter>
-      </DialogContent>
-    </Dialog>
+    <Modal
+      title="Are you absolutely sure?"
+      opened={isOpen}
+      onClose={() => setIsOpen(false)}
+    >
+      <Modal.Body>
+        <Text>
+          This action cannot be undone. This will permanently delete your
+          account and remove your data from our servers
+        </Text>
+      </Modal.Body>
+
+      <Button onClick={handleDelete} color="red">
+        Delete
+      </Button>
+    </Modal>
   );
 };

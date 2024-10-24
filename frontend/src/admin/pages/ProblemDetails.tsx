@@ -79,19 +79,19 @@ export const ProblemDetails = () => {
 
   const saveTestEdits = useCallback(async () => {
     const testSuite = testEditRef.current?.getTestSuite();
-    if(!testSuite) {
+    if (!testSuite) {
       toast.error("Error! Please create test suite");
       return;
     }
 
     try {
-      await problemService.updateTestSuite(id!, testSuite)
+      await problemService.updateTestSuite(id!, testSuite);
 
-      toast.success("Test cases successfully updated")
+      toast.success("Test cases successfully updated");
     } catch (error) {
-      toast.error("Error occured! Please try again later.")
+      toast.error("Error occured! Please try again later.");
     }
-  }, [testEditRef])
+  }, [testEditRef]);
 
   if (isLoading) {
     return "Loading...";
@@ -104,9 +104,9 @@ export const ProblemDetails = () => {
   return (
     <div>
       <AddLanguageDialog
-        open={addLanguageDialogOpen}
+        opened={addLanguageDialogOpen}
         problemId={id!}
-        onOpenChange={setAddLanguageDialogOpen}
+        onClose={() => setAddLanguageDialogOpen(false)}
       />
 
       <EditLanguageDialog
