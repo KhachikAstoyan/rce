@@ -1,15 +1,9 @@
 import { Link } from "@tanstack/react-router";
-import { Button } from "@/components/shadcn/button";
 
 import { useAuth } from "@/hooks/useAuth";
-import {
-  Avatar,
-  AvatarFallback,
-  AvatarImage,
-} from "@/components/shadcn/avatar";
 import { Logo } from "../../components/common/Logo";
 import { UserMenu } from "../../components/common/UserMenu";
-import { Menu } from "@mantine/core";
+import { Menu, Avatar, ActionIcon } from "@mantine/core";
 
 export const EditorHeader = () => {
   const { auth, isLoggedIn } = useAuth();
@@ -24,17 +18,15 @@ export const EditorHeader = () => {
         {isLoggedIn ? (
           <Menu>
             <Menu.Target>
-              <Button variant="secondary" className="rounded-full h-8 w-8">
-                <Avatar className="h-8 w-8">
-                  <AvatarImage src={user?.picture} alt={user?.name} />
-                  <AvatarFallback>{user?.name[0]}</AvatarFallback>
+              <ActionIcon variant="transparent" size="md" radius="lg">
+                <Avatar src={user?.picture}>
+                  {!user?.picture && user?.name[0]!}
                 </Avatar>
-                <span className="sr-only">Toggle user menu</span>
-              </Button>
-              <Menu.Dropdown>
-                <UserMenu />
-              </Menu.Dropdown>
+              </ActionIcon>
             </Menu.Target>
+            <Menu.Dropdown>
+              <UserMenu />
+            </Menu.Dropdown>
           </Menu>
         ) : (
           <Link to="/login" className="text-foreground">
